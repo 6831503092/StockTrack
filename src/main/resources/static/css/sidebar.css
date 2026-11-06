@@ -1,0 +1,438 @@
+/* ==========================================
+   StockTrack - Shared Sidebar Styles
+   (Zero-Shift Expandable Sidebar Architecture)
+   ========================================== */
+
+/* Layout Container */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #fafbfc;
+  position: relative;
+}
+
+/* ==========================================
+   Desktop Sidebar Layout & Expansion
+   (>= 769px)
+   ========================================== */
+@media (min-width: 769px) {
+  /* Layout placeholder reserving exactly 80px so main content NEVER shifts */
+  #sidebar-container {
+    width: 80px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1000;
+  }
+
+  /* Fixed Sidebar overlaying on hover */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 80px;
+    height: 100vh;
+    background-color: #ffffff;
+    border-right: 1px solid #eef2f6;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0 20px 0;
+    box-sizing: border-box;
+    z-index: 1000;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    scrollbar-width: thin;
+    scrollbar-color: #e2e8f0 transparent;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background-color: #e2e8f0;
+    border-radius: 4px;
+  }
+
+  /* Hover Expansion: Width increases smoothly to 250px without shifting any icon positions */
+  .sidebar:hover {
+    width: 250px;
+    box-shadow: 10px 0 35px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Suppress tooltips during expanded state */
+  .sidebar:hover .nav-item::after,
+  .sidebar:hover .nav-logout::after {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+}
+
+/* ==========================================
+   Shared Element Geometry (Locked X and Y)
+   Sidebar Collapsed: 80px wide
+   Margin Left: 18px | Icon Box: 44px (Center = 40px) | Margin Right: 18px
+   ========================================== */
+
+.sidebar-icon-box {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* 1. Brand Logo */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  margin: 0 18px;
+  width: calc(100% - 36px);
+  text-decoration: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.sidebar-logo .logo-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-logo:hover .logo-icon {
+  transform: scale(1.06);
+}
+
+.sidebar-logo .logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color, #27c690);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  padding-left: 10px;
+  box-sizing: border-box;
+  transition: opacity 0.22s ease, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar:hover .sidebar-logo .logo-text {
+  opacity: 1;
+  max-width: 170px;
+}
+
+/* Horizontal Dividers */
+.sidebar-divider {
+  width: calc(100% - 36px);
+  height: 1px;
+  background-color: #eef2f6;
+  margin: 16px 18px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* 2. Role Title & User Profile Section */
+.sidebar-user {
+  display: flex;
+  flex-direction: column;
+  margin: 0 18px;
+  width: calc(100% - 36px);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+/* Role Title directly above Avatar in both collapsed & expanded states */
+.sidebar-user .role-title {
+  width: 44px;
+  height: 16px;
+  line-height: 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+  color: #64748b;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.sidebar-user .role-title.role-admin { color: #27c690; }
+.sidebar-user .role-title.role-manager { color: #3b82f6; }
+.sidebar-user .role-title.role-owner { color: #8b5cf6; }
+.sidebar-user .role-title.role-staff { color: #10b981; }
+
+.sidebar-user-row {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  width: 100%;
+}
+
+.sidebar-user .avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+  flex-shrink: 0;
+  transition: border-color 0.2s ease;
+}
+
+.sidebar-user:hover .avatar {
+  border-color: var(--primary-color, #27c690);
+}
+
+.sidebar-user-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0;
+  max-width: 0;
+  padding-left: 10px;
+  box-sizing: border-box;
+  transition: opacity 0.22s ease, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar:hover .sidebar-user-details {
+  opacity: 1;
+  max-width: 170px;
+}
+
+.sidebar-user-details .user-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.sidebar-user-details .detail-label {
+  color: #8a99ad;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.sidebar-user-details .detail-val {
+  color: #1e293b;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 3. Section Header (Menu) */
+.sidebar-menu-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8a99ad;
+  text-align: center;
+  width: 44px;
+  height: 20px;
+  line-height: 20px;
+  margin: 0 18px 8px 18px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* 4. Navigation Menu Items */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  margin: 0 18px;
+  width: calc(100% - 36px);
+  border-radius: 10px;
+  color: #64748b;
+  text-decoration: none;
+  position: relative;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease,
+              color 0.2s ease,
+              transform 0.15s ease;
+}
+
+/* Navigation Icon Tone: Gray Palette */
+.nav-item .sidebar-icon-box {
+  color: #64748b; /* Soft gray in default state */
+  transition: color 0.2s ease;
+}
+
+.nav-item:hover .sidebar-icon-box {
+  color: #334155; /* Slate gray on hover */
+}
+
+.nav-item.active .sidebar-icon-box {
+  color: #475569; /* Elegant slate-gray in active state */
+}
+
+.nav-item:hover {
+  background-color: #f1f5f9;
+}
+
+.nav-item.active {
+  background-color: #e8f8f2;
+}
+
+.nav-title {
+  font-size: 0.92rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  padding-left: 10px;
+  box-sizing: border-box;
+  color: #64748b;
+  transition: color 0.2s ease, opacity 0.22s ease, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-item:hover .nav-title {
+  color: #1e293b;
+}
+
+.nav-item.active .nav-title {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.sidebar:hover .nav-title {
+  opacity: 1;
+  max-width: 170px;
+}
+
+/* Tooltip on hover (collapsed state) */
+.nav-item::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 56px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #1e293b;
+  color: #ffffff;
+  font-size: 0.75rem;
+  padding: 5px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.nav-item:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(4px);
+}
+
+/* 5. Bottom Logout Area */
+.sidebar-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.nav-logout {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  margin: 0 18px;
+  width: calc(100% - 36px);
+  border-radius: 10px;
+  color: #64748b;
+  text-decoration: none;
+  position: relative;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease,
+              color 0.2s ease;
+}
+
+.nav-logout:hover {
+  color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.nav-logout::after {
+  content: "Logout";
+  position: absolute;
+  left: 56px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #1e293b;
+  color: #ffffff;
+  font-size: 0.75rem;
+  padding: 5px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 100;
+}
+
+.nav-logout:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ==========================================
+   Main Content Area
+   ========================================== */
+.main-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.content-header {
+  margin-bottom: 24px;
+}
+
+.content-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.content-header p {
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.placeholder-card {
+  background-color: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}

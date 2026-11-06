@@ -1,0 +1,76 @@
+<!-- ==========================================
+     StockTrack - Reusable Sidebar Component
+     ========================================== -->
+<aside class="sidebar" id="app-sidebar">
+    <!-- 1. Brand Logo -->
+    <a href="#" class="sidebar-logo" id="sidebar-logo" title="StockTrack">
+        <div class="sidebar-icon-box">
+            <svg class="logo-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#27c690" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+        </div>
+        <span class="logo-text">StockTrack</span>
+    </a>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- 2. Role Title & User Profile -->
+    <div class="sidebar-user" id="sidebar-user-container">
+        <!-- Role Name displayed on top of avatar in both collapsed & expanded states -->
+        <div class="role-title" id="sidebar-role-title">Role</div>
+
+        <!-- Avatar & Details Row -->
+        <div class="sidebar-user-row">
+            <div class="sidebar-icon-box">
+                <img id="sidebar-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80" alt="User Profile" class="avatar">
+            </div>
+            <div class="sidebar-user-details">
+                <div class="user-detail-row">
+                    <span class="detail-label">User ID:</span>
+                    <span class="detail-val" id="sidebar-user-id">--</span>
+                </div>
+                <div class="user-detail-row">
+                    <span class="detail-label">Full Name:</span>
+                    <span class="detail-val" id="sidebar-user-fullname">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- 3. Navigation Menu Label -->
+    <div class="sidebar-menu-label">Menu</div>
+
+    <!-- 4. Navigation Menu Items Container -->
+    <nav class="sidebar-nav" id="sidebar-nav-list">
+        <!-- Dynamic Nav Items injected by sidebar.js -->
+        <a href="#dashboard" class="nav-item active" data-nav-id="dashboard" data-tooltip="Dashboard">
+            <div class="sidebar-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="3" y="3" width="8" height="8" rx="2.5"></rect>
+                    <rect x="13" y="3" width="8" height="8" rx="2.5"></rect>
+                    <rect x="3" y="13" width="8" height="8" rx="2.5"></rect>
+                    <rect x="13" y="13" width="8" height="8" rx="2.5"></rect>
+                </svg>
+            </div>
+            <span class="nav-title">Dashboard</span>
+        </a>
+    </nav>
+
+    <!-- 5. Bottom Logout -->
+    <div class="sidebar-bottom">
+        <a href="../index.html" class="nav-logout" id="sidebar-logout-btn" title="Logout" onclick="handleSidebarLogout(event)">
+            <div class="sidebar-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </div>
+            <span class="nav-title">Logout</span>
+        </a>
+    </div>
+</aside>

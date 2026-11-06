@@ -1,0 +1,152 @@
+/* ==========================================
+   StockTrack - Staff Stylesheet
+   Specific styles for Staff role & views
+   (Includes Mobile-First & 360px Responsive Support for Warehouse Floor)
+   ========================================== */
+
+/* Staff Specific Accent & Variables */
+:root {
+  --staff-accent: #10b981;
+  --staff-accent-light: #ecfdf5;
+  --staff-accent-border: #a7f3d0;
+}
+
+/* Staff Role Badge */
+.sidebar-user .role-title.role-staff {
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* Staff Task & Inventory Grid */
+.staff-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.staff-stat-card {
+  background-color: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.staff-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.staff-stat-card .stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #64748b);
+  font-weight: 500;
+}
+
+.staff-stat-card .stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+}
+
+/* Responsive Table Wrapper for Staff Views */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ==========================================
+   Staff Mobile & Tablet Responsive (<= 768px down to 360px)
+   Scoped strictly to Staff pages (#sidebar-container[data-role="STAFF"])
+   ========================================== */
+@media (max-width: 768px) {
+  /* Stack layout vertically & reserve space for bottom nav bar */
+  .app-layout:has(#sidebar-container[data-role="STAFF"]) {
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 72px;
+    overflow-x: hidden;
+  }
+
+  /* Transform Sidebar into Fixed Bottom Navigation Bar on Staff mobile screens */
+  #sidebar-container[data-role="STAFF"] .sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100%;
+    height: 64px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    border-right: none;
+    border-top: 1px solid #eef2f6;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+    z-index: 1000;
+  }
+
+  /* Hide desktop-only sidebar elements on mobile */
+  #sidebar-container[data-role="STAFF"] .sidebar-logo,
+  #sidebar-container[data-role="STAFF"] .sidebar-divider,
+  #sidebar-container[data-role="STAFF"] .sidebar-user,
+  #sidebar-container[data-role="STAFF"] .sidebar-menu-label,
+  #sidebar-container[data-role="STAFF"] .nav-title {
+    display: none;
+  }
+
+  /* Arrange navigation icons horizontally */
+  #sidebar-container[data-role="STAFF"] .sidebar-nav {
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    flex: 1;
+    gap: 4px;
+    width: auto;
+  }
+
+  #sidebar-container[data-role="STAFF"] .sidebar-bottom {
+    margin-top: 0;
+    width: auto;
+    padding-left: 8px;
+    border-left: 1px solid #eef2f6;
+  }
+
+  /* Disable side tooltips on mobile touch screens */
+  #sidebar-container[data-role="STAFF"] .nav-item::after,
+  #sidebar-container[data-role="STAFF"] .nav-logout::after {
+    display: none;
+  }
+
+  /* Adjust Staff main content area for small screens (360px+) */
+  .app-layout:has(#sidebar-container[data-role="STAFF"]) .main-content {
+    padding: 20px 16px;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .app-layout:has(#sidebar-container[data-role="STAFF"]) .content-header h1 {
+    font-size: 1.35rem;
+  }
+
+  .app-layout:has(#sidebar-container[data-role="STAFF"]) .content-header p {
+    font-size: 0.875rem;
+  }
+
+  .app-layout:has(#sidebar-container[data-role="STAFF"]) .placeholder-card {
+    padding: 20px 16px;
+  }
+
+  .staff-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}

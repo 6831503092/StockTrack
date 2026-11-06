@@ -1,0 +1,128 @@
+/* ==========================================
+   StockTrack - Manager Stylesheet
+   Specific styles for Manager role & views
+   ========================================== */
+
+/* Manager Specific Accent & Variables */
+:root {
+  --manager-accent: #f59e0b;
+  --manager-accent-light: #fffbeb;
+  --manager-accent-border: #fde68a;
+}
+
+/* Manager Role Badge */
+.sidebar-user .role-title.role-manager {
+  color: #d97706;
+  font-weight: 600;
+}
+
+/* Manager Approval Requests List */
+.approval-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.approval-card {
+  background-color: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.approval-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.approval-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.approval-info .request-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+}
+
+.approval-info .request-meta {
+  font-size: 0.825rem;
+  color: var(--text-secondary, #64748b);
+  display: flex;
+  gap: 12px;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge.approved {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.status-badge.rejected {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Approval Action Buttons */
+.approval-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-approve {
+  background-color: var(--primary-color, #27c690);
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-approve:hover {
+  background-color: var(--primary-hover, #20b582);
+}
+
+.btn-reject {
+  background-color: #ffffff;
+  color: #ef4444;
+  border: 1.5px solid #fca5a5;
+  padding: 7px 15px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reject:hover {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+}
+

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrack</title>
+    <meta name="description" content="StockTrack - Smart Inventory and Purchase Order Management System">
+    <meta name="theme-color" content="#27c690">
+    <link rel="icon" type="image/png" href="picture/favicon/favicon.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <main class="page-wrapper">
+        <!-- Left Panel: Graphic / Illustration Area -->
+        <section class="left-panel" aria-label="Illustration area">
+            <!-- Ambient Decorative Background Elements -->
+            <div class="decor-grid-pattern" aria-hidden="true"></div>
+            <div class="decor-blob decor-blob-1" aria-hidden="true"></div>
+            <div class="decor-blob decor-blob-2" aria-hidden="true"></div>
+            <div class="decor-ring decor-ring-outer" aria-hidden="true"></div>
+            <div class="decor-ring decor-ring-inner" aria-hidden="true"></div>
+
+            <!-- Floating Geometric Accents (No Text) -->
+            <div class="decor-sparkle sparkle-top" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="#27c690" />
+                </svg>
+            </div>
+            <div class="decor-sparkle sparkle-bottom" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="#27c690" />
+                </svg>
+            </div>
+            <div class="decor-plus-cross cross-left" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27c690" stroke-width="3" stroke-linecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </div>
+            <div class="decor-plus-cross cross-right" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27c690" stroke-width="3" stroke-linecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </div>
+
+            <!-- Illustration & Floating Graphic Cards Container -->
+            <div class="illustration-placeholder">
+                <!-- Ground Stage Glow -->
+                <div class="decor-ground-stage" aria-hidden="true"></div>
+
+                <!-- Floating Graphic Badge 1: Analytics Bar Card (Top-Left) -->
+                <div class="floating-badge badge-chart" aria-hidden="true">
+                    <div class="badge-icon-wrap icon-mint">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27c690" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                            <polyline points="16 7 22 7 22 13"></polyline>
+                        </svg>
+                    </div>
+                    <div class="badge-chart-bars">
+                        <span class="bar bar-1"></span>
+                        <span class="bar bar-2"></span>
+                        <span class="bar bar-3"></span>
+                        <span class="bar bar-4"></span>
+                    </div>
+                </div>
+
+                <!-- Floating Graphic Badge 2: Package Stock Card (Top-Right) -->
+                <div class="floating-badge badge-box" aria-hidden="true">
+                    <div class="badge-icon-wrap icon-soft">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27c690" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div class="badge-status-cluster">
+                        <span class="pulse-indicator"></span>
+                        <div class="mini-line-track"></div>
+                    </div>
+                </div>
+
+                <!-- Floating Graphic Badge 3: Scan / Inventory Pill (Bottom-Left) -->
+                <div class="floating-badge badge-scan" aria-hidden="true">
+                    <div class="badge-icon-wrap icon-mint">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27c690" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                            <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                            <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                            <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                            <line x1="7" y1="12" x2="17" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div class="barcode-lines">
+                        <span class="b-line b-1"></span>
+                        <span class="b-line b-2"></span>
+                        <span class="b-line b-3"></span>
+                        <span class="b-line b-4"></span>
+                        <span class="b-line b-5"></span>
+                    </div>
+                </div>
+
+                <!-- Floating Graphic Badge 4: Verified Check Pill (Bottom-Right) -->
+                <div class="floating-badge badge-check" aria-hidden="true">
+                    <div class="badge-icon-wrap icon-green-solid">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <div class="badge-progress-pill">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Main Warehouse Image -->
+                <img src="picture/login-picture.png" alt="StockTrack Login Illustration" class="login-illustration">
+            </div>
+        </section>
+
+        <!-- Right Panel: Login / Get Started Form -->
+        <section class="right-panel">
+            <div class="form-container">
+                <header class="form-header">
+                    <h1>Welcome to StockTrack</h1>
+                    <p>Manage your inventory smarter</p>
+                </header>
+
+                <form class="login-form" action="#" method="POST">
+                    <div class="form-group">
+                        <label for="userId">User ID</label>
+                        <input type="text" id="userId" name="userId" placeholder="Your ID or Username" required
+                            autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Password" required
+                            autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" class="btn-submit">Get started</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.querySelector('.login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const userId = document.getElementById('userId').value.trim();
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ userId, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    localStorage.setItem('stocktrack_user', JSON.stringify(data.user));
+                    const role = (data.user.role || '').toUpperCase();
+                    if (role === 'ADMIN') {
+                        window.location.href = 'admin/dashboard.html';
+                    } else if (role === 'MANAGER') {
+                        window.location.href = 'manager/dashboard.html';
+                    } else if (role === 'OWNER') {
+                        window.location.href = 'owner/dashboard.html';
+                    } else if (role === 'STAFF') {
+                        window.location.href = 'staff/dashboard.html';
+                    } else {
+                        window.location.href = 'admin/dashboard.html';
+                    }
+                } else {
+                    alert(data.message || 'Invalid ID or password');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบว่าเปิดรัน Spring Boot แล้ว');
+            }
+        });
+    </script>
+</body>
+
+</html>
