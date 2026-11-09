@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrack - Sales Order</title>
+    <link rel="icon" type="image/png" href="../picture/favicon/favicon.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation (Modular Component) -->
+        <div id="sidebar-container" data-role="ADMIN" data-active-menu="sales-order"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-content dashboard-main-layout">
+            <!-- 1. Top Header Row (Title on Left, Action & Filters on Right) -->
+            <header class="requests-header-row">
+                <div class="requests-header-left">
+                    <h1>Sales Order</h1>
+                    <p>view and create sales orders</p>
+                </div>
+
+                <div class="requests-header-right">
+                    <!-- Top Row: Create Sales Order Button -->
+                    <div class="po-create-btn-row">
+                        <button class="btn-create-po" id="btn-open-create-so-modal">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Create Sales Order
+                        </button>
+                    </div>
+
+                    <!-- Bottom Row: Search Box & All status Filter -->
+                    <div class="po-header-filters-row">
+                        <!-- Search Box -->
+                        <div class="po-search-box">
+                            <input type="text" id="so-search-input" placeholder="search...">
+                            <span class="search-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Status Filter Dropdown -->
+                        <select id="so-status-filter" class="po-status-select">
+                            <option value="ALL">All status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 2. KPI / Summary Cards (เริ่มจาก 0 รอ Backend) -->
+            <section class="po-stats-grid" style="margin-bottom: 20px;">
+                <div class="po-stat-card">
+                    <div class="po-stat-icon mint">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Total Sales Orders</span>
+                        <span class="stat-value" id="kpi-total-so">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-icon amber">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Pending Approval</span>
+                        <span class="stat-value" id="kpi-pending-so" style="color: #d97706;">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-icon blue">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Approved Orders</span>
+                        <span class="stat-value" id="kpi-approved-so" style="color: #0284c7;">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-icon purple">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Total Sales Value</span>
+                        <span class="stat-value" id="kpi-total-sales">฿0.00</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Main Data Card: Table Container -->
+            <section class="po-card">
+                <!-- Table View -->
+                <div class="po-table-wrapper">
+                    <table class="po-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>SO ID</th>
+                                <th>Customer</th>
+                                <th>Total Qty</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="so-table-body">
+                            <!-- แสดง Empty State รอข้อมูลจาก Backend API -->
+                            <tr>
+                                <td colspan="7" class="table-empty-state">
+                                    <div class="empty-state-wrap">
+                                        <div class="empty-state-icon-circle">
+                                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                                <path d="M16 10a4 4 0 0 1-8 0"></path>
+                                            </svg>
+                                        </div>
+                                        <p>ยังไม่มีข้อมูลใบสั่งขายในขณะนี้</p>
+                                        <span class="empty-subtitle">ตารางนี้พร้อมสำหรับดึงข้อมูล Sales Orders จาก Backend API มาแสดงผล</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table Footer / Pagination -->
+                <div class="po-pagination">
+                    <span id="so-pagination-info">Showing 0 of 0 entries</span>
+                    <div class="pagination-controls">
+                        <button class="btn-page" id="btn-prev-page" disabled>&lt;</button>
+                        <button class="btn-page active">1</button>
+                        <button class="btn-page" id="btn-next-page" disabled>&gt;</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ==========================================
+         MODAL 1: Create Sales Order Modal
+         ========================================== -->
+    <div class="modal-overlay" id="modal-create-so">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Create Sales Order</h3>
+                <button class="btn-close-modal" onclick="closeCreateSOModal()">&times;</button>
+            </div>
+            <form id="form-create-so" onsubmit="handleCreateSOSubmit(event)">
+                <div class="modal-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Customer Name</label>
+                            <input type="text" id="so-customer-input" placeholder="e.g. RWTcomp." required
+                                style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Order Date</label>
+                            <input type="date" id="so-date-input" required
+                                style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Product / Item Description</label>
+                        <input type="text" id="so-product-input" placeholder="Enter product name or SKU" required
+                            style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; box-sizing: border-box;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Quantity</label>
+                            <input type="number" id="so-qty-input" min="1" value="1" required
+                                style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Unit Price (฿)</label>
+                            <input type="number" id="so-price-input" min="0" step="0.01" placeholder="0.00" required
+                                style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Note / Delivery Remarks</label>
+                        <textarea id="so-note-input" rows="2" placeholder="Optional notes regarding delivery or payment terms"
+                            style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; font-size: 0.9rem; resize: vertical; box-sizing: border-box; font-family: inherit;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeCreateSOModal()">Cancel</button>
+                    <button type="submit" class="btn-submit" id="btn-submit-so">Create Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/sidebar.js"></script>
+    <script>
+        // Modal functions
+        const modalCreateSO = document.getElementById('modal-create-so');
+        const btnOpenCreateSO = document.getElementById('btn-open-create-so-modal');
+
+        if (btnOpenCreateSO) {
+            btnOpenCreateSO.addEventListener('click', () => {
+                // Set default date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('so-date-input').value = today;
+                modalCreateSO.classList.add('active');
+            });
+        }
+
+        function closeCreateSOModal() {
+            modalCreateSO.classList.remove('active');
+            document.getElementById('form-create-so').reset();
+        }
+
+        modalCreateSO.addEventListener('click', (e) => {
+            if (e.target === modalCreateSO) closeCreateSOModal();
+        });
+
+        function handleCreateSOSubmit(e) {
+            e.preventDefault();
+            alert('Sales Order submission endpoint is ready for Backend API integration.');
+            closeCreateSOModal();
+        }
+
+        // Close on Escape key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeCreateSOModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

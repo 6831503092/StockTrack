@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrack - Role Management</title>
+    <link rel="icon" type="image/png" href="../picture/favicon/favicon.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation (Modular Component) -->
+        <div id="sidebar-container" data-role="ADMIN" data-active-menu="role-management"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-content dashboard-main-layout">
+            <!-- 1. Top Header Row (Title on Left, Search & Actions on Right) -->
+            <header class="requests-header-row">
+                <div class="requests-header-left">
+                    <h1>Role Management</h1>
+                    <p>View user roles and request role changes between Staff and Admin</p>
+                </div>
+
+                <div class="requests-header-right">
+                    <!-- Top Row: Request Role Change Action Button -->
+                    <div class="po-create-btn-row">
+                        <button class="btn-create-po" id="btn-open-request-role-modal">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                            </svg>
+                            Request Role Change
+                        </button>
+                    </div>
+
+                    <!-- Bottom Row: Search Box & Role Filter Dropdown -->
+                    <div class="po-header-filters-row">
+                        <!-- Search Box -->
+                        <div class="po-search-box">
+                            <input type="text" id="role-search-input" placeholder="Search by user name or ID...">
+                            <span class="search-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Role Filter Dropdown -->
+                        <select id="role-filter-select" class="po-status-select">
+                            <option value="ALL">All Roles</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Staff">Staff</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 2. KPI / Summary Cards (Aligned with Dashboard & PO) -->
+            <section class="po-stats-grid" style="margin-bottom: 20px;">
+                <div class="po-stat-card">
+                    <div class="po-stat-icon mint">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Total Users</span>
+                        <span class="stat-value" id="kpi-total-users">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-icon blue">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Admin Users</span>
+                        <span class="stat-value" id="kpi-admin-users" style="color: #0284c7;">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-icon amber">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Staff Users</span>
+                        <span class="stat-value" id="kpi-staff-users" style="color: #d97706;">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-icon purple">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Manager Users</span>
+                        <span class="stat-value" id="kpi-manager-users">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Main Data Card: User Role Table Container -->
+            <section class="po-card">
+                <!-- Table View -->
+                <div class="po-table-wrapper">
+                    <table class="po-table">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>User Name</th>
+                                <th>Current Role</th>
+                                <th>Created At</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="role-table-body">
+                            <!-- แสดง Empty State รอข้อมูลจาก Backend API -->
+                            <tr>
+                                <td colspan="5" class="table-empty-state">
+                                    <div class="empty-state-wrap">
+                                        <div class="empty-state-icon-circle">
+                                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="9" cy="7" r="4"></circle>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                            </svg>
+                                        </div>
+                                        <p>ยังไม่มีข้อมูลผู้ใช้งานในขณะนี้</p>
+                                        <span class="empty-subtitle">ตารางนี้พร้อมสำหรับดึงข้อมูล User Roles จาก Backend API มาแสดงผล</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table Footer / Pagination -->
+                <div class="po-pagination">
+                    <span id="role-pagination-info">Showing 0 of 0 entries</span>
+                    <div class="pagination-controls">
+                        <button class="btn-page" id="btn-prev-page" disabled>&lt;</button>
+                        <button class="btn-page active">1</button>
+                        <button class="btn-page" id="btn-next-page" disabled>&gt;</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ==========================================
+         MODAL: Change / Request Role Modal
+         ========================================== -->
+    <div class="modal-overlay" id="modal-change-role">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modal-role-title">Change User Role</h3>
+                <button class="btn-close-modal" onclick="closeChangeRoleModal()">&times;</button>
+            </div>
+            <form id="form-change-role" onsubmit="handleChangeRoleSubmit(event)">
+                <div class="modal-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">User ID</label>
+                            <input type="text" id="modal-user-id" readonly
+                                style="width: 100%; height: 38px; border: 1.5px solid #e2e8f0; background: #f8fafc; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; color: #64748b; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Current Role</label>
+                            <input type="text" id="modal-current-role" readonly
+                                style="width: 100%; height: 38px; border: 1.5px solid #e2e8f0; background: #f8fafc; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; color: #64748b; box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">User Full Name</label>
+                        <input type="text" id="modal-user-name" readonly
+                            style="width: 100%; height: 38px; border: 1.5px solid #e2e8f0; background: #f8fafc; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; color: #64748b; box-sizing: border-box;">
+                    </div>
+
+                    <div style="margin-top: 16px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Requested New Role</label>
+                        <select id="modal-new-role" required
+                            style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; box-sizing: border-box; background: #ffffff;">
+                            <option value="Admin">Admin</option>
+                            <option value="Staff">Staff</option>
+                            <option value="Manager">Manager</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-top: 16px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Reason for Role Change</label>
+                        <textarea id="modal-role-reason" rows="2" placeholder="e.g. Assigned to warehouse inventory management" required
+                            style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; font-size: 0.9rem; resize: vertical; box-sizing: border-box; font-family: inherit;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeChangeRoleModal()">Cancel</button>
+                    <button type="submit" class="btn-submit">Submit Change</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/sidebar.js"></script>
+    <script>
+        const modalChangeRole = document.getElementById('modal-change-role');
+        const searchInput = document.getElementById('role-search-input');
+        const roleFilterSelect = document.getElementById('role-filter-select');
+        const roleRows = document.querySelectorAll('.role-row');
+        const paginationInfo = document.getElementById('role-pagination-info');
+
+        // Open modal with user info
+        function openChangeRoleModal(userId, userName, currentRole) {
+            document.getElementById('modal-role-title').textContent = 'Change User Role';
+            document.getElementById('modal-user-id').value = userId;
+            document.getElementById('modal-user-name').value = userName;
+            document.getElementById('modal-current-role').value = currentRole;
+            
+            // Default select new role
+            const newRoleSelect = document.getElementById('modal-new-role');
+            if (currentRole === 'Staff') newRoleSelect.value = 'Admin';
+            else if (currentRole === 'Admin') newRoleSelect.value = 'Staff';
+            else newRoleSelect.value = 'Admin';
+
+            modalChangeRole.classList.add('active');
+        }
+
+        // Top button action
+        document.getElementById('btn-open-request-role-modal').addEventListener('click', () => {
+            document.getElementById('modal-role-title').textContent = 'Request Role Change';
+            document.getElementById('modal-user-id').value = '';
+            document.getElementById('modal-user-name').value = '';
+            document.getElementById('modal-current-role').value = '';
+            modalChangeRole.classList.add('active');
+        });
+
+        function closeChangeRoleModal() {
+            modalChangeRole.classList.remove('active');
+            document.getElementById('form-change-role').reset();
+        }
+
+        modalChangeRole.addEventListener('click', (e) => {
+            if (e.target === modalChangeRole) closeChangeRoleModal();
+        });
+
+        function handleChangeRoleSubmit(e) {
+            e.preventDefault();
+            const userName = document.getElementById('modal-user-name').value || 'User';
+            const newRole = document.getElementById('modal-new-role').value;
+            alert(`Role change request for ${userName} to ${newRole} submitted successfully.`);
+            closeChangeRoleModal();
+        }
+
+        // Live Search & Filter
+        function filterRoles() {
+            const rows = document.querySelectorAll('.role-row');
+            if (!rows || rows.length === 0) {
+                paginationInfo.textContent = 'Showing 0 of 0 entries';
+                return;
+            }
+
+            const query = searchInput.value.toLowerCase().trim();
+            const selectedRole = roleFilterSelect.value;
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const uid = (row.getAttribute('data-user-id') || '').toLowerCase();
+                const uname = (row.getAttribute('data-user-name') || '').toLowerCase();
+                const urole = row.getAttribute('data-role');
+
+                const matchesSearch = !query || uid.includes(query) || uname.includes(query);
+                const matchesRole = selectedRole === 'ALL' || urole === selectedRole;
+
+                if (matchesSearch && matchesRole) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            paginationInfo.textContent = `Showing ${visibleCount} of ${rows.length} entries`;
+        }
+
+        searchInput.addEventListener('input', filterRoles);
+        roleFilterSelect.addEventListener('change', filterRoles);
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeChangeRoleModal();
+        });
+    </script>
+</body>
+
+</html>

@@ -57,15 +57,18 @@
     border-radius: 4px;
   }
 
-  /* Hover Expansion: Width increases smoothly to 250px without shifting any icon positions */
-  .sidebar:hover {
+  /* Hover Expansion & Persistent Expanded State */
+  .sidebar:hover,
+  .sidebar.is-expanded {
     width: 250px;
     box-shadow: 10px 0 35px rgba(0, 0, 0, 0.08);
   }
 
   /* Suppress tooltips during expanded state */
   .sidebar:hover .nav-item::after,
-  .sidebar:hover .nav-logout::after {
+  .sidebar:hover .nav-logout::after,
+  .sidebar.is-expanded .nav-item::after,
+  .sidebar.is-expanded .nav-logout::after {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
@@ -122,7 +125,8 @@
   transition: opacity 0.22s ease, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar:hover .sidebar-logo .logo-text {
+.sidebar:hover .sidebar-logo .logo-text,
+.sidebar.is-expanded .sidebar-logo .logo-text {
   opacity: 1;
   max-width: 170px;
 }
@@ -206,7 +210,8 @@
   transition: opacity 0.22s ease, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar:hover .sidebar-user-details {
+.sidebar:hover .sidebar-user-details,
+.sidebar.is-expanded .sidebar-user-details {
   opacity: 1;
   max-width: 170px;
 }
@@ -317,9 +322,18 @@
   font-weight: 600;
 }
 
-.sidebar:hover .nav-title {
+.sidebar:hover .nav-title,
+.sidebar.is-expanded .nav-title {
   opacity: 1;
   max-width: 170px;
+}
+
+/* Disable transitions during initial mount if pre-expanded to prevent visual flicker */
+.sidebar.no-transition,
+.sidebar.no-transition *,
+.sidebar.no-transition *::before,
+.sidebar.no-transition *::after {
+  transition: none !important;
 }
 
 /* Tooltip on hover (collapsed state) */

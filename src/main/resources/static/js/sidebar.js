@@ -16,8 +16,32 @@
                 {
                     id: 'dashboard',
                     title: 'Dashboard',
-                    url: '#dashboard',
+                    url: 'dashboard.html',
                     icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2.5"></rect><rect x="13" y="3" width="8" height="8" rx="2.5"></rect><rect x="3" y="13" width="8" height="8" rx="2.5"></rect><rect x="13" y="13" width="8" height="8" rx="2.5"></rect></svg>`
+                },
+                {
+                    id: 'purchase-order',
+                    title: 'Purchase Order',
+                    url: 'purchase-order.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`
+                },
+                {
+                    id: 'sales-order',
+                    title: 'Sales Order',
+                    url: 'sales-order.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`
+                },
+                {
+                    id: 'zone-product',
+                    title: 'Zone & Product',
+                    url: 'zone-product.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`
+                },
+                {
+                    id: 'role-management',
+                    title: 'Role Management',
+                    url: 'role-management.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`
                 }
             ]
         },
@@ -71,9 +95,15 @@
         }
     };
 
+    // State persistence key for seamless navigation expansion
+    const SIDEBAR_STORAGE_KEY = 'stocktrack_sidebar_expanded';
+
     // Unified Logout Handler
     window.handleSidebarLogout = function (e) {
         if (e) e.preventDefault();
+        try {
+            sessionStorage.removeItem(SIDEBAR_STORAGE_KEY);
+        } catch (err) {}
         fetch('/api/logout', {
             method: 'POST',
             credentials: 'include'
@@ -88,6 +118,12 @@
     // Load Sidebar into Container
     async function loadSidebar(container) {
         if (!container) return;
+
+        // Check if sidebar should be pre-expanded from previous page navigation
+        let isPreExpanded = false;
+        try {
+            isPreExpanded = sessionStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
+        } catch (e) {}
 
         // Determine current role & active menu
         let userRole = container.getAttribute('data-role');
@@ -132,10 +168,16 @@
             }
         }
 
+        // Apply pre-expanded state to fetched HTML before mounting
+        if (sidebarHtml && isPreExpanded) {
+            sidebarHtml = sidebarHtml.replace(/class=["']sidebar["']/, 'class="sidebar is-expanded no-transition"');
+        }
+
         // Fallback HTML template if fetch fails or running directly via file://
         if (!sidebarHtml) {
+            const initialSidebarClass = isPreExpanded ? 'sidebar is-expanded no-transition' : 'sidebar';
             sidebarHtml = `
-            <aside class="sidebar" id="app-sidebar">
+            <aside class="${initialSidebarClass}" id="app-sidebar">
                 <a href="#" class="sidebar-logo" id="sidebar-logo" title="StockTrack">
                     <div class="sidebar-icon-box">
                         <svg class="logo-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#27c690" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -184,6 +226,79 @@
         }
 
         container.innerHTML = sidebarHtml;
+
+        const sidebarEl = container.querySelector('.sidebar');
+
+        // Manage pre-expanded state transition release and mouse tracking
+        if (sidebarEl) {
+            if (isPreExpanded) {
+                // Remove no-transition on next frame so subsequent user actions animate smoothly
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        sidebarEl.classList.remove('no-transition');
+                    });
+                });
+
+                // Safety: if mouse is not over sidebar on load (e.g. reload), collapse cleanly
+                const checkInitialMouse = (e) => {
+                    const rect = sidebarEl.getBoundingClientRect();
+                    const isInside = (
+                        e.clientX >= rect.left &&
+                        e.clientX <= rect.right &&
+                        e.clientY >= rect.top &&
+                        e.clientY <= rect.bottom
+                    );
+                    if (!isInside) {
+                        sidebarEl.classList.remove('is-expanded');
+                        try {
+                            sessionStorage.removeItem(SIDEBAR_STORAGE_KEY);
+                        } catch (err) {}
+                    }
+                    window.removeEventListener('mousemove', checkInitialMouse);
+                };
+                window.addEventListener('mousemove', checkInitialMouse, { passive: true });
+            }
+
+            let isNavigating = false;
+
+            // When hovering sidebar, record state
+            sidebarEl.addEventListener('mouseenter', function () {
+                try {
+                    sessionStorage.setItem(SIDEBAR_STORAGE_KEY, 'true');
+                } catch (err) {}
+            });
+
+            // When leaving sidebar, collapse smoothly unless navigating to another page
+            sidebarEl.addEventListener('mouseleave', function () {
+                if (isNavigating) return;
+                sidebarEl.classList.remove('is-expanded');
+                try {
+                    sessionStorage.removeItem(SIDEBAR_STORAGE_KEY);
+                } catch (err) {}
+            });
+
+            // Intercept clicks on links inside sidebar
+            sidebarEl.addEventListener('click', function (e) {
+                const link = e.target.closest('a');
+                if (!link) return;
+
+                // Logout button cleans up state
+                if (link.id === 'sidebar-logout-btn' || link.classList.contains('nav-logout')) {
+                    try {
+                        sessionStorage.removeItem(SIDEBAR_STORAGE_KEY);
+                    } catch (err) {}
+                    return;
+                }
+
+                const href = link.getAttribute('href');
+                if (href && !href.startsWith('#') && !href.startsWith('javascript:') && link.target !== '_blank') {
+                    isNavigating = true;
+                    try {
+                        sessionStorage.setItem(SIDEBAR_STORAGE_KEY, 'true');
+                    } catch (err) {}
+                }
+            });
+        }
 
         // Populate elements with role configuration
         const roleTitleEl = container.querySelector('#sidebar-role-title');
