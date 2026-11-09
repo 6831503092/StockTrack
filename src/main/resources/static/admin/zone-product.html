@@ -30,10 +30,9 @@
                 </div>
             </header>
 
-            
-            <!-- 3. Featured Showcase Cards (Reference: Image 2) -->
+            <!-- 2. Featured Showcase Cards -->
             <div class="zp-cards-container" id="zp-cards-container">
-                <!-- Card 1: Warehouse Zone (Click to open Warehouse Zones page) -->
+                <!-- Card 1: Warehouse Zone -->
                 <div class="zp-card-wrapper zp-card-warehouse">
                     <div class="zp-feature-card" id="card-warehouse-zone" onclick="window.location.href='warehouse-zones.html'" title="Click to view Warehouse Zones">
                         <div class="zp-card-content">
@@ -55,13 +54,12 @@
                         </div>
                         <div class="zp-card-visual">
                             <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80"
-                                alt="Warehouse Zone Interior"
-                                onerror="this.parentElement.innerHTML='<div class=\'zp-placeholder-box\'><svg width=\'64\' height=\'64\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'#94a3b8\' stroke-width=\'1.5\'><path d=\'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z\'></path></svg></div>'">
+                                alt="Warehouse Zone Interior" data-fallback-icon="warehouse">
                         </div>
                     </div>
                 </div>
 
-                <!-- Card 2: Product Management (Click to open Product Management page) -->
+                <!-- Card 2: Product Management -->
                 <div class="zp-card-wrapper zp-card-product">
                     <div class="zp-feature-card" id="card-product-management" onclick="window.location.href='product-management.html'" title="Click to view Product Management">
                         <div class="zp-card-content">
@@ -83,8 +81,7 @@
                         </div>
                         <div class="zp-card-visual">
                             <img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80"
-                                alt="Product Management Logistics"
-                                onerror="this.parentElement.innerHTML='<div class=\'zp-placeholder-box\'><svg width=\'64\' height=\'64\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'#94a3b8\' stroke-width=\'1.5\'><rect x=\'2\' y=\'7\' width=\'20\' height=\'14\' rx=\'2\' ry=\'2\'></rect><path d=\'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\'></path></svg></div>'">
+                                alt="Product Management Logistics" data-fallback-icon="product">
                         </div>
                     </div>
                 </div>
@@ -92,34 +89,9 @@
         </main>
     </div>
 
-
     <!-- Scripts -->
     <script src="../js/sidebar.js"></script>
-    <script>
-        function openZoneModal() {
-            document.getElementById('modal-zones').classList.add('active');
-        }
-
-        function openProductModal() {
-            document.getElementById('modal-products').classList.add('active');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) {
-                e.target.classList.remove('active');
-            }
-        });
-
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-            }
-        });
-    </script>
+    <script src="../js/admin.js"></script>
 </body>
 
 </html>

@@ -22,7 +22,7 @@
 
         <!-- Main Content Area -->
         <main class="main-content dashboard-main-layout">
-            <!-- 1. Top Header Row (Title on Left, Action & Filters on Right) -->
+            <!-- 1. Top Header Row -->
             <header class="requests-header-row">
                 <div class="requests-header-left">
                     <h1>Purchase Order</h1>
@@ -30,9 +30,8 @@
                 </div>
 
                 <div class="requests-header-right">
-                    <!-- Top Row: Create Purchase Order Button -->
                     <div class="po-create-btn-row">
-                        <button class="btn-create-po" id="btn-open-create-modal">
+                        <button type="button" class="btn-create-po" id="btn-open-create-modal">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                                 stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -42,9 +41,7 @@
                         </button>
                     </div>
 
-                    <!-- Bottom Row: Search Box & All status Filter -->
                     <div class="po-header-filters-row">
-                        <!-- Search Box -->
                         <div class="po-search-box">
                             <input type="text" id="po-search-input" placeholder="search...">
                             <span class="search-icon">
@@ -56,7 +53,6 @@
                             </span>
                         </div>
 
-                        <!-- Status Filter Dropdown -->
                         <select id="po-status-filter" class="po-status-select">
                             <option value="ALL">All status</option>
                             <option value="Pending">Pending</option>
@@ -67,8 +63,8 @@
                 </div>
             </header>
 
-            <!-- 2. KPI / Summary Cards (เริ่มจาก 0 รอ Backend) -->
-            <section class="po-stats-grid" style="margin-bottom: 20px;">
+            <!-- 2. KPI / Summary Cards -->
+            <section class="po-stats-grid">
                 <div class="po-stat-card">
                     <div class="po-stat-icon mint">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -94,7 +90,7 @@
                     </div>
                     <div class="po-stat-info">
                         <span class="stat-label">Pending Approval</span>
-                        <span class="stat-value" id="kpi-pending-orders" style="color: #d97706;">0</span>
+                        <span class="stat-value amber" id="kpi-pending-orders">0</span>
                     </div>
                 </div>
 
@@ -108,7 +104,7 @@
                     </div>
                     <div class="po-stat-info">
                         <span class="stat-label">Approved Orders</span>
-                        <span class="stat-value" id="kpi-approved-orders" style="color: #0284c7;">0</span>
+                        <span class="stat-value blue" id="kpi-approved-orders">0</span>
                     </div>
                 </div>
 
@@ -129,8 +125,6 @@
 
             <!-- 3. Main Data Card: Table Container -->
             <section class="po-card">
-
-                <!-- Table View -->
                 <div class="po-table-wrapper">
                     <table class="po-table">
                         <thead>
@@ -145,7 +139,7 @@
                             </tr>
                         </thead>
                         <tbody id="po-table-body">
-                            <!-- แสดง Empty State รอข้อมูลจาก Backend API -->
+                            <!-- Empty State: Ready for Backend API Data -->
                             <tr>
                                 <td colspan="7" class="table-empty-state">
                                     <div class="empty-state-wrap">
@@ -174,32 +168,28 @@
                 <div class="po-pagination">
                     <span id="po-pagination-info">Showing 0 of 0 entries</span>
                     <div class="pagination-controls">
-                        <button class="btn-page" id="btn-prev-page" disabled>&lt;</button>
-                        <button class="btn-page active">1</button>
-                        <button class="btn-page" id="btn-next-page" disabled>&gt;</button>
+                        <button type="button" class="btn-page" id="btn-prev-page" disabled>&lt;</button>
+                        <button type="button" class="btn-page active">1</button>
+                        <button type="button" class="btn-page" id="btn-next-page" disabled>&gt;</button>
                     </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- ==========================================
-         MODAL 1: Create Purchase Order Modal
-         ========================================== -->
+    <!-- MODAL 1: Create Purchase Order Modal -->
     <div class="modal-overlay" id="modal-create-po">
         <div class="modal-box">
             <div class="modal-header">
                 <h3>Create Purchase Order</h3>
-                <button class="btn-close-modal" onclick="closeCreateModal()">&times;</button>
+                <button type="button" class="btn-close-modal">&times;</button>
             </div>
             <form id="form-create-po" onsubmit="handleCreatePOSubmit(event)">
                 <div class="modal-body">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="modal-grid-2">
                         <div>
-                            <label
-                                style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Supplier</label>
-                            <select id="new-po-supplier" required
-                                style="width: 100%; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; outline: none;">
+                            <label for="new-po-supplier">Supplier</label>
+                            <select id="new-po-supplier" class="po-form-select" required>
                                 <option value="" disabled selected>Select Supplier</option>
                                 <option value="JRScomp.">JRScomp.</option>
                                 <option value="Thai Wood Supply Co.">Thai Wood Supply Co.</option>
@@ -208,135 +198,82 @@
                             </select>
                         </div>
                         <div>
-                            <label
-                                style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Expected
-                                Date</label>
-                            <input type="date" id="new-po-date" required
-                                style="width: 100%; padding: 9px; border: 1.5px solid #e2e8f0; border-radius: 8px; outline: none;">
+                            <label for="new-po-date">Expected Date</label>
+                            <input type="date" id="new-po-date" class="po-form-input" required>
                         </div>
                     </div>
 
-                    <!-- Items Ordering Sub-Section -->
                     <div>
-                        <label
-                            style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Product
-                            Item</label>
-                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                            <select id="new-po-product"
-                                style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; outline: none;">
+                        <label for="new-po-product">Product Item</label>
+                        <div class="modal-po-item-grid">
+                            <select id="new-po-product" class="po-item-select">
                                 <option value="" disabled selected>Select Product</option>
                                 <option value="Executive Chair">Executive Chair</option>
                                 <option value="Wooden Desk">Wooden Desk</option>
                                 <option value="L-Shape Sofa">L-Shape Sofa</option>
                                 <option value="Storage Cabinet">Storage Cabinet</option>
                             </select>
-                            <input type="number" id="new-po-qty" placeholder="Qty" min="1" required
-                                style="padding: 9px; border: 1.5px solid #e2e8f0; border-radius: 8px; outline: none;">
-                            <input type="number" id="new-po-unit-price" placeholder="Cost" min="1" required
-                                style="padding: 9px; border: 1.5px solid #e2e8f0; border-radius: 8px; outline: none;">
+                            <input type="number" id="new-po-qty" class="po-item-input" placeholder="Qty" min="1" required>
+                            <input type="number" id="new-po-unit-price" class="po-item-input" placeholder="Cost" min="1" required>
                         </div>
                     </div>
 
                     <div>
-                        <label
-                            style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Remarks
-                            / Note</label>
-                        <textarea id="new-po-remarks" placeholder="Optional notes for manager approval..." rows="2"
-                            style="width: 100%; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; outline: none; resize: vertical;"></textarea>
+                        <label for="new-po-remarks">Remarks / Note</label>
+                        <textarea id="new-po-remarks" class="po-form-textarea" placeholder="Optional notes for manager approval..." rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary" onclick="closeCreateModal()">Cancel</button>
-                    <button type="submit" class="btn-create-po" style="box-shadow: none;">Submit PO Request</button>
+                    <button type="button" class="btn-secondary" data-close-modal>Cancel</button>
+                    <button type="submit" class="btn-create-po no-shadow">Submit PO Request</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ==========================================
-         MODAL 2: Purchase Order Details Modal
-         ========================================== -->
+    <!-- MODAL 2: Purchase Order Details Modal -->
     <div class="modal-overlay" id="modal-po-detail">
         <div class="modal-box">
             <div class="modal-header">
                 <h3>Purchase Order Details</h3>
-                <button class="btn-close-modal" onclick="closeDetailModal()">&times;</button>
+                <button type="button" class="btn-close-modal">&times;</button>
             </div>
             <div class="modal-body" id="detail-modal-body">
                 <!-- Dynamically filled by JS -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-secondary" onclick="closeDetailModal()">Close</button>
+                <button type="button" class="btn-secondary" data-close-modal>Close</button>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="../js/sidebar.js"></script>
+    <script src="../js/admin.js"></script>
     <script>
-        // Role Access Guard
-        (function checkAccess() {
-            const raw = localStorage.getItem('stocktrack_user');
-            if (!raw) {
-                window.location.replace('../index.html');
-                return;
-            }
-            try {
-                const user = JSON.parse(raw);
-                if (!user || user.role !== 'ADMIN') {
-                    window.location.replace('../index.html');
-                }
-            } catch (err) {
-                localStorage.removeItem('stocktrack_user');
-                window.location.replace('../index.html');
-            }
-        })();
+        AdminApp.checkAdminAccess();
 
-        // Data State (เริ่มต้นเป็น Array ว่าง เพื่อรอรับข้อมูลจริงจาก Backend API)
         let poData = [];
+        const poTbody = document.getElementById('po-table-body');
+        const emptyPOHtml = poTbody.innerHTML;
+        const formatMoney = AdminApp.formatMoney;
 
-        // Format Currency Helper
-        function formatMoney(amount) {
-            return Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        // Render Table Rows
         function renderPOTable(data) {
-            const tbody = document.getElementById('po-table-body');
             const pageInfo = document.getElementById('po-pagination-info');
 
             if (!data || data.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="table-empty-state">
-                            <div class="empty-state-wrap">
-                                <div class="empty-state-icon-circle">
-                                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="9" cy="21" r="1"></circle>
-                                        <circle cx="20" cy="21" r="1"></circle>
-                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                                    </svg>
-                                </div>
-                                <p>ยังไม่มีข้อมูลใบสั่งซื้อในขณะนี้</p>
-                                <span class="empty-subtitle">ตารางนี้พร้อมสำหรับดึงข้อมูล Purchase Orders จาก Backend API มาแสดงผล</span>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                poTbody.innerHTML = emptyPOHtml;
                 pageInfo.textContent = 'Showing 0 of 0 entries';
                 updateKPIs([]);
                 return;
             }
 
-            tbody.innerHTML = data.map(po => {
-                let statusClass = 'badge-pending';
-                if (po.status === 'Approved') statusClass = 'badge-approved';
-                if (po.status === 'Rejected') statusClass = 'badge-rejected';
-
+            poTbody.innerHTML = data.map(po => {
+                const statusClass = AdminApp.getStatusBadgeClass(po.status);
                 return `
                     <tr>
                         <td>${po.date}</td>
-                        <td style="font-weight: 600; color: #0f172a;">${po.id}</td>
+                        <td class="cell-id">${po.id}</td>
                         <td>${po.supplier}</td>
                         <td>${po.totalQty}</td>
                         <td>${formatMoney(po.totalPrice)}</td>
@@ -344,7 +281,7 @@
                             <span class="badge-status ${statusClass}">${po.status}</span>
                         </td>
                         <td>
-                            <button class="btn-action-detail" onclick="viewPODetail('${po.id}')">[Detail]</button>
+                            <button type="button" class="btn-action-detail" onclick="viewPODetail('${po.id}')">[Detail]</button>
                         </td>
                     </tr>
                 `;
@@ -354,20 +291,15 @@
             updateKPIs(data);
         }
 
-        // Update KPI Summary Metrics
         function updateKPIs(data) {
-            const total = data.length;
-            const pending = data.filter(d => d.status === 'Pending').length;
-            const approved = data.filter(d => d.status === 'Approved').length;
             const totalSpend = data.reduce((sum, d) => sum + (Number(d.totalPrice) || 0), 0);
 
-            document.getElementById('kpi-total-orders').textContent = total;
-            document.getElementById('kpi-pending-orders').textContent = pending;
-            document.getElementById('kpi-approved-orders').textContent = approved;
+            document.getElementById('kpi-total-orders').textContent = data.length;
+            document.getElementById('kpi-pending-orders').textContent = data.filter(d => d.status === 'Pending').length;
+            document.getElementById('kpi-approved-orders').textContent = data.filter(d => d.status === 'Approved').length;
             document.getElementById('kpi-total-spend').textContent = '฿' + formatMoney(totalSpend);
         }
 
-        // Filtering Function (Instant Search & Status Dropdown)
         function applyFilters() {
             const searchTerm = document.getElementById('po-search-input').value.toLowerCase().trim();
             const selectedStatus = document.getElementById('po-status-filter').value;
@@ -377,140 +309,116 @@
                     String(po.supplier || '').toLowerCase().includes(searchTerm) ||
                     String(po.date || '').toLowerCase().includes(searchTerm);
                 const matchesStatus = (selectedStatus === 'ALL') || (po.status === selectedStatus);
-
                 return matchesSearch && matchesStatus;
             });
 
             renderPOTable(filtered);
         }
 
-        // Event Listeners for Filter Inputs
         document.getElementById('po-search-input').addEventListener('input', applyFilters);
         document.getElementById('po-status-filter').addEventListener('change', applyFilters);
 
-        // Modal Controls: Create PO
-        const createModal = document.getElementById('modal-create-po');
         document.getElementById('btn-open-create-modal').addEventListener('click', () => {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('new-po-date').value = today;
-            createModal.classList.add('active');
+            document.getElementById('new-po-date').value = AdminApp.getTodayISO();
+            AdminApp.openModal('modal-create-po');
         });
 
         function closeCreateModal() {
-            createModal.classList.remove('active');
-            document.getElementById('form-create-po').reset();
+            AdminApp.closeModal('modal-create-po');
         }
 
-        // Handle Create PO Submission
         function handleCreatePOSubmit(e) {
             e.preventDefault();
 
             const supplier = document.getElementById('new-po-supplier').value;
-            const dateVal = document.getElementById('new-po-date').value;
             const product = document.getElementById('new-po-product').value;
             const qty = parseInt(document.getElementById('new-po-qty').value, 10) || 1;
             const unitPrice = parseFloat(document.getElementById('new-po-unit-price').value) || 0;
             const totalPrice = qty * unitPrice;
 
             const now = new Date();
-            const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const pad = (n) => String(n).padStart(2, '0');
+            const dateStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
             const newId = String(parseInt(poData[0]?.id || '10260', 10) + 1);
 
-            const newPO = {
+            poData.unshift({
                 date: dateStr,
                 id: newId,
-                supplier: supplier,
+                supplier,
                 totalQty: qty,
-                totalPrice: totalPrice,
+                totalPrice,
                 status: 'Pending',
-                items: [
-                    { name: product, qty: qty, unitPrice: unitPrice, subtotal: totalPrice }
-                ]
-            };
+                items: [{ name: product, qty, unitPrice, subtotal: totalPrice }]
+            });
 
-            poData.unshift(newPO);
             applyFilters();
             closeCreateModal();
-
             alert(`Purchase Order #${newId} created successfully and sent for Manager Approval!`);
         }
 
-        // Modal Controls: Detail PO
-        const detailModal = document.getElementById('modal-po-detail');
         function viewPODetail(poId) {
             const po = poData.find(item => item.id === poId);
             if (!po) return;
 
-            let statusClass = 'badge-pending';
-            if (po.status === 'Approved') statusClass = 'badge-approved';
-            if (po.status === 'Rejected') statusClass = 'badge-rejected';
-
-            const modalBody = document.getElementById('detail-modal-body');
-            modalBody.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+            const statusClass = AdminApp.getStatusBadgeClass(po.status);
+            document.getElementById('detail-modal-body').innerHTML = `
+                <div class="detail-header-row">
                     <div>
-                        <span style="font-size: 0.85rem; color: #64748b;">Purchase Order</span>
-                        <h4 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin-top: 2px;">#${po.id}</h4>
+                        <span class="detail-id-label">Purchase Order</span>
+                        <h4 class="detail-id-title">#${po.id}</h4>
                     </div>
-                    <span class="badge-status ${statusClass}" style="font-size: 0.9rem; padding: 6px 16px;">${po.status}</span>
+                    <span class="badge-status badge-lg ${statusClass}">${po.status}</span>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; font-size: 0.9rem;">
+                <div class="detail-meta-grid">
                     <div>
-                        <span style="color: #64748b; font-size: 0.8rem; display: block;">Supplier</span>
-                        <strong style="color: #1e293b;">${po.supplier}</strong>
+                        <span>Supplier</span>
+                        <strong>${po.supplier}</strong>
                     </div>
                     <div>
-                        <span style="color: #64748b; font-size: 0.8rem; display: block;">Order Date</span>
-                        <strong style="color: #1e293b;">${po.date}</strong>
+                        <span>Order Date</span>
+                        <strong>${po.date}</strong>
                     </div>
                 </div>
 
-                <div style="margin-top: 20px;">
-                    <span style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 8px;">Order Items</span>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                <div class="detail-items-section">
+                    <span>Order Items</span>
+                    <table class="detail-items-table">
                         <thead>
-                            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-                                <th style="text-align: left; padding: 8px 12px; color: #475569;">Item</th>
-                                <th style="text-align: center; padding: 8px 12px; color: #475569;">Qty</th>
-                                <th style="text-align: right; padding: 8px 12px; color: #475569;">Unit Cost</th>
-                                <th style="text-align: right; padding: 8px 12px; color: #475569;">Subtotal</th>
+                            <tr>
+                                <th class="align-left">Item</th>
+                                <th class="align-center">Qty</th>
+                                <th class="align-right">Unit Cost</th>
+                                <th class="align-right">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${(po.items || []).map(item => `
-                                <tr style="border-bottom: 1px solid #f1f5f9;">
-                                    <td style="padding: 10px 12px; color: #1e293b;">${item.name}</td>
-                                    <td style="text-align: center; padding: 10px 12px;">${item.qty}</td>
-                                    <td style="text-align: right; padding: 10px 12px;">฿${formatMoney(item.unitPrice)}</td>
-                                    <td style="text-align: right; padding: 10px 12px; font-weight: 600;">฿${formatMoney(item.subtotal)}</td>
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td class="align-center">${item.qty}</td>
+                                    <td class="align-right">฿${formatMoney(item.unitPrice)}</td>
+                                    <td class="cell-subtotal">฿${formatMoney(item.subtotal)}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3" style="text-align: right; padding: 12px; font-weight: 700; color: #0f172a;">Total Amount:</td>
-                                <td style="text-align: right; padding: 12px; font-weight: 700; color: #27c690; font-size: 1.05rem;">฿${formatMoney(po.totalPrice)}</td>
+                                <td colspan="3" class="total-label">Total Amount:</td>
+                                <td class="total-amount">฿${formatMoney(po.totalPrice)}</td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
             `;
 
-            detailModal.classList.add('active');
+            AdminApp.openModal('modal-po-detail');
         }
 
         function closeDetailModal() {
-            detailModal.classList.remove('active');
+            AdminApp.closeModal('modal-po-detail');
         }
 
-        // Close modals on clicking overlay background
-        window.addEventListener('click', (e) => {
-            if (e.target === createModal) closeCreateModal();
-            if (e.target === detailModal) closeDetailModal();
-        });
-
-        // Initial render: empty state by default
         renderPOTable(poData);
     </script>
 </body>

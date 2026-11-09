@@ -22,7 +22,7 @@
 
         <!-- Main Content Area -->
         <main class="main-content dashboard-main-layout">
-            <!-- 1. Top Header Row (Title on Left, Action & Filters on Right) -->
+            <!-- 1. Top Header Row -->
             <header class="requests-header-row">
                 <div class="requests-header-left">
                     <h1>Sales Order</h1>
@@ -30,9 +30,8 @@
                 </div>
 
                 <div class="requests-header-right">
-                    <!-- Top Row: Create Sales Order Button -->
                     <div class="po-create-btn-row">
-                        <button class="btn-create-po" id="btn-open-create-so-modal">
+                        <button type="button" class="btn-create-po" id="btn-open-create-so-modal">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                                 stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -42,9 +41,7 @@
                         </button>
                     </div>
 
-                    <!-- Bottom Row: Search Box & All status Filter -->
                     <div class="po-header-filters-row">
-                        <!-- Search Box -->
                         <div class="po-search-box">
                             <input type="text" id="so-search-input" placeholder="search...">
                             <span class="search-icon">
@@ -56,7 +53,6 @@
                             </span>
                         </div>
 
-                        <!-- Status Filter Dropdown -->
                         <select id="so-status-filter" class="po-status-select">
                             <option value="ALL">All status</option>
                             <option value="Pending">Pending</option>
@@ -67,8 +63,8 @@
                 </div>
             </header>
 
-            <!-- 2. KPI / Summary Cards (เริ่มจาก 0 รอ Backend) -->
-            <section class="po-stats-grid" style="margin-bottom: 20px;">
+            <!-- 2. KPI / Summary Cards -->
+            <section class="po-stats-grid">
                 <div class="po-stat-card">
                     <div class="po-stat-icon mint">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -94,7 +90,7 @@
                     </div>
                     <div class="po-stat-info">
                         <span class="stat-label">Pending Approval</span>
-                        <span class="stat-value" id="kpi-pending-so" style="color: #d97706;">0</span>
+                        <span class="stat-value amber" id="kpi-pending-so">0</span>
                     </div>
                 </div>
 
@@ -108,7 +104,7 @@
                     </div>
                     <div class="po-stat-info">
                         <span class="stat-label">Approved Orders</span>
-                        <span class="stat-value" id="kpi-approved-so" style="color: #0284c7;">0</span>
+                        <span class="stat-value blue" id="kpi-approved-so">0</span>
                     </div>
                 </div>
 
@@ -129,7 +125,6 @@
 
             <!-- 3. Main Data Card: Table Container -->
             <section class="po-card">
-                <!-- Table View -->
                 <div class="po-table-wrapper">
                     <table class="po-table">
                         <thead>
@@ -144,7 +139,7 @@
                             </tr>
                         </thead>
                         <tbody id="so-table-body">
-                            <!-- แสดง Empty State รอข้อมูลจาก Backend API -->
+                            <!-- Empty State: Ready for Backend API Data -->
                             <tr>
                                 <td colspan="7" class="table-empty-state">
                                     <div class="empty-state-wrap">
@@ -170,66 +165,58 @@
                 <div class="po-pagination">
                     <span id="so-pagination-info">Showing 0 of 0 entries</span>
                     <div class="pagination-controls">
-                        <button class="btn-page" id="btn-prev-page" disabled>&lt;</button>
-                        <button class="btn-page active">1</button>
-                        <button class="btn-page" id="btn-next-page" disabled>&gt;</button>
+                        <button type="button" class="btn-page" id="btn-prev-page" disabled>&lt;</button>
+                        <button type="button" class="btn-page active">1</button>
+                        <button type="button" class="btn-page" id="btn-next-page" disabled>&gt;</button>
                     </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- ==========================================
-         MODAL 1: Create Sales Order Modal
-         ========================================== -->
+    <!-- MODAL: Create Sales Order Modal -->
     <div class="modal-overlay" id="modal-create-so">
         <div class="modal-box">
             <div class="modal-header">
                 <h3>Create Sales Order</h3>
-                <button class="btn-close-modal" onclick="closeCreateSOModal()">&times;</button>
+                <button type="button" class="btn-close-modal">&times;</button>
             </div>
             <form id="form-create-so" onsubmit="handleCreateSOSubmit(event)">
                 <div class="modal-body">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="modal-grid-2">
                         <div>
-                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Customer Name</label>
-                            <input type="text" id="so-customer-input" placeholder="e.g. RWTcomp." required
-                                style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; box-sizing: border-box;">
+                            <label for="so-customer-input">Customer Name</label>
+                            <input type="text" id="so-customer-input" class="modal-input" placeholder="e.g. RWTcomp." required>
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Order Date</label>
-                            <input type="date" id="so-date-input" required
-                                style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; box-sizing: border-box;">
+                            <label for="so-date-input">Order Date</label>
+                            <input type="date" id="so-date-input" class="modal-input" required>
                         </div>
                     </div>
 
-                    <div style="margin-top: 16px;">
-                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Product / Item Description</label>
-                        <input type="text" id="so-product-input" placeholder="Enter product name or SKU" required
-                            style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; box-sizing: border-box;">
+                    <div class="modal-field-mt">
+                        <label for="so-product-input">Product / Item Description</label>
+                        <input type="text" id="so-product-input" class="modal-input" placeholder="Enter product name or SKU" required>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+                    <div class="modal-grid-2 modal-field-mt">
                         <div>
-                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Quantity</label>
-                            <input type="number" id="so-qty-input" min="1" value="1" required
-                                style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; box-sizing: border-box;">
+                            <label for="so-qty-input">Quantity</label>
+                            <input type="number" id="so-qty-input" class="modal-input" min="1" value="1" required>
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Unit Price (฿)</label>
-                            <input type="number" id="so-price-input" min="0" step="0.01" placeholder="0.00" required
-                                style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.9rem; box-sizing: border-box;">
+                            <label for="so-price-input">Unit Price (฿)</label>
+                            <input type="number" id="so-price-input" class="modal-input" min="0" step="0.01" placeholder="0.00" required>
                         </div>
                     </div>
 
-                    <div style="margin-top: 16px;">
-                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Note / Delivery Remarks</label>
-                        <textarea id="so-note-input" rows="2" placeholder="Optional notes regarding delivery or payment terms"
-                            style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; font-size: 0.9rem; resize: vertical; box-sizing: border-box; font-family: inherit;"></textarea>
+                    <div class="modal-field-mt">
+                        <label for="so-note-input">Note / Delivery Remarks</label>
+                        <textarea id="so-note-input" class="modal-textarea" rows="2" placeholder="Optional notes regarding delivery or payment terms"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-cancel" onclick="closeCreateSOModal()">Cancel</button>
+                    <button type="button" class="btn-cancel" data-close-modal>Cancel</button>
                     <button type="submit" class="btn-submit" id="btn-submit-so">Create Order</button>
                 </div>
             </form>
@@ -238,41 +225,22 @@
 
     <!-- Scripts -->
     <script src="../js/sidebar.js"></script>
+    <script src="../js/admin.js"></script>
     <script>
-        // Modal functions
-        const modalCreateSO = document.getElementById('modal-create-so');
-        const btnOpenCreateSO = document.getElementById('btn-open-create-so-modal');
-
-        if (btnOpenCreateSO) {
-            btnOpenCreateSO.addEventListener('click', () => {
-                // Set default date to today
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('so-date-input').value = today;
-                modalCreateSO.classList.add('active');
-            });
-        }
+        document.getElementById('btn-open-create-so-modal')?.addEventListener('click', () => {
+            document.getElementById('so-date-input').value = AdminApp.getTodayISO();
+            AdminApp.openModal('modal-create-so');
+        });
 
         function closeCreateSOModal() {
-            modalCreateSO.classList.remove('active');
-            document.getElementById('form-create-so').reset();
+            AdminApp.closeModal('modal-create-so');
         }
-
-        modalCreateSO.addEventListener('click', (e) => {
-            if (e.target === modalCreateSO) closeCreateSOModal();
-        });
 
         function handleCreateSOSubmit(e) {
             e.preventDefault();
             alert('Sales Order submission endpoint is ready for Backend API integration.');
             closeCreateSOModal();
         }
-
-        // Close on Escape key
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeCreateSOModal();
-            }
-        });
     </script>
 </body>
 
