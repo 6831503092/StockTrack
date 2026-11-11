@@ -1,4 +1,4 @@
-/* ==========================================
+﻿/* ==========================================
    StockTrack - Modular Imports
    ========================================== */
 @import 'index.css';
@@ -6,7 +6,6 @@
 @import 'admin.css';
 @import 'manager.css';
 @import 'owner.css';
-@import 'staff.css';
 
 /* ==========================================
    StockTrack - Global Styles & Design Tokens

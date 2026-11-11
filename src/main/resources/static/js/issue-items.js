@@ -1,0 +1,125 @@
+﻿(function () {
+    'use strict';
+    const user = window.api.getCurrentUser();
+    if (!user || user.role !== 'STAFF') { window.location.replace('../index.html'); return; }
+    const requests = [
+        { id:'IS-2026-014', reference:'SO-2026-021', requester:'Alex Morgan', date:'02 Nov 2026', items:[['Modern table',40],['Wooden table',30],['Dining table',20]] },
+        { id:'IS-2026-013', reference:'SO-2026-020', requester:'Jamie Lee', date:'01 Nov 2026', items:[['Modern table',50],['Wooden table',25]] },
+        { id:'IS-2026-012', reference:'SO-2026-019', requester:'Taylor Kim', date:'31 Oct 2026', items:[['Modern table',20],['Wooden table',20],['Dining table',15],['Side table',10]] }
+    ];
+    const draftKey = 'stocktrack_issue_draft_' + (user.userId || user.username);
+    const receiptKey = 'stocktrack_issues_' + (user.userId || user.username);
+    let step = 0, selected = requests[0].id, quantities = [], notes = '', confirmed = false, completed = [];
+    const content = document.getElementById('issue-stage-content');
+    const alert = document.getElementById('issue-alert');
+    const next = document.getElementById('issue-next');
+    const back = document.getElementById('issue-back');
+    const titles = ['Requests','Details','Verify','Confirm','Result'];
+    function el(tag,text,parent) { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (parent) parent.appendChild(node); return node; }
+    function error(text) { alert.textContent = text; alert.hidden = false; }
+    function request() { return requests.find(item => item.id === selected); }
+    try {
+        const receipts = JSON.parse(localStorage.getItem(receiptKey) || '[]');
+        if (!Array.isArray(receipts)) throw new Error('Invalid history');
+        completed = receipts.map(item => item.requestId).filter(Boolean);
+        const draft = JSON.parse(localStorage.getItem(draftKey) || 'null');
+        if (draft && requests.some(item => item.id === draft.selected) && !completed.includes(draft.selected)) {
+            selected = draft.selected;
+            if (Array.isArray(draft.quantities) && draft.quantities.length === request().items.length && draft.quantities.every((q,i) => Number.isInteger(q) && q > 0 && q <= request().items[i][1])) quantities = draft.quantities;
+            notes = typeof draft.notes === 'string' ? draft.notes.slice(0,1000) : '';
+            if (Number.isInteger(draft.step) && draft.step >= 0 && draft.step <= 3 && quantities.length === request().items.length) step = draft.step;
+        } else selected = requests.find(item => !completed.includes(item.id))?.id || '';
+    } catch (err) { error('Local data could not be loaded. Saving may be unavailable.'); }
+    function saveDraft() {
+        try { localStorage.setItem(draftKey,JSON.stringify({selected,quantities,notes,step})); }
+        catch (err) { document.getElementById('issue-save-note').textContent = 'Draft could not be saved. Keep this page open to retain your progress.'; }
+    }
+    function choose(id) { selected = id; quantities = request().items.map(item => item[1]); notes = ''; confirmed = false; alert.hidden = true; saveDraft(); }
+    function table(headers) {
+        const wrapper = el('div',undefined,content); wrapper.className = 'issue-table-scroll';
+        const table = el('table',undefined,wrapper), row = el('tr',undefined,el('thead',undefined,table));
+        headers.forEach(text => { const th = el('th',text,row); th.scope = 'col'; });
+        return el('tbody',undefined,table);
+    }
+    function render() {
+        content.replaceChildren();
+        document.getElementById('issue-stage-title').textContent = titles[step];
+        document.getElementById('issue-stage-label').textContent = titles[step].toUpperCase();
+        document.getElementById('issue-subtitle').textContent = ['Select an approved request to begin','Review the approved request details','Check quantities against the products picked','Review and confirm your local issue record','Your issue record is complete'][step];
+        document.querySelectorAll('.issue-steps li').forEach((node,i) => { node.removeAttribute('aria-current'); if (i === step) node.setAttribute('aria-current','step'); node.classList.toggle('complete',i < step); });
+        back.hidden = step === 0 || step === 4;
+        next.textContent = step === 3 ? 'Confirm issue →' : step === 4 ? 'Issue another →' : 'Continue →';
+        document.getElementById('issue-tip-text').textContent = ['Only approved requests can be processed.','Check the request reference before continuing.','Issued quantities must be between 1 and the approved quantity.','Confirm only after checking the physical goods.','This issue record is saved locally. Warehouse inventory has not been updated.'][step];
+        if (step === 0) {
+            el('h3','Available approved requests',content);
+            const body = table(['Request ID','Reference','Requested By','Date','Items','Status','Action','Select']);
+            requests.filter(item => !completed.includes(item.id)).forEach(item => {
+                const row = el('tr',undefined,body);
+                [item.id,item.reference,item.requester,item.date,item.items.length,'Approved'].forEach(value => el('td',value,row));
+                const open = el('button','Open →',el('td',undefined,row)); open.type = 'button'; open.className = 'issue-open'; open.setAttribute('aria-label','Open ' + item.id);
+                open.addEventListener('click',() => { choose(item.id); step = 1; render(); focusTitle(); });
+                const radio = el('input',undefined,el('td',undefined,row)); radio.type = 'radio'; radio.name = 'request'; radio.value = item.id; radio.checked = item.id === selected; radio.setAttribute('aria-label','Select ' + item.id);
+                radio.addEventListener('change',() => choose(item.id));
+            });
+            if (!body.children.length) { const cell = el('td','No approved requests remain in this local workspace.',el('tr',undefined,body)); cell.colSpan = 8; }
+            return;
+        }
+        const item = request();
+        if (step === 4) {
+            const panel = el('div',undefined,content); panel.className = 'issue-details';
+            el('h3','Issue saved successfully',panel); el('p','Request ' + item.id + ' · ' + item.reference,panel); el('p',quantities.reduce((sum,q) => sum + q,0) + ' units recorded in this browser.',panel); el('p','Warehouse inventory has not been updated.',panel); return;
+        }
+        const panel = el('div',undefined,content); panel.className = 'issue-details';
+        el('h3',item.id + ' · ' + item.reference,panel); el('p','Requested by ' + item.requester + ' · ' + item.date,panel); el('p','Source: Warehouse 1 · Status: Approved',panel);
+        const body = table(['Product','Approved quantity',step === 1 ? 'Unit' : 'Issued quantity']);
+        item.items.forEach((product,i) => {
+            const row = el('tr',undefined,body); el('td',product[0],row); el('td',product[1],row);
+            const cell = el('td',step === 1 ? 'Units' : step === 3 ? quantities[i] : undefined,row);
+            if (step === 2) {
+                const input = el('input',undefined,cell); input.type = 'number'; input.min = '1'; input.max = String(product[1]); input.step = '1'; input.required = true; input.value = quantities[i]; input.className = 'issue-quantity'; input.setAttribute('aria-label','Issued quantity for ' + product[0]);
+                input.addEventListener('input',() => { quantities[i] = Number(input.value); saveDraft(); });
+            }
+        });
+        if (step === 2) {
+            const label = el('label','Issue notes (optional)',content); label.className = 'issue-notes-label';
+            const textarea = el('textarea',undefined,label); textarea.rows = 3; textarea.maxLength = 1000; textarea.value = notes; textarea.placeholder = 'Purpose of issue or picking instructions'; textarea.addEventListener('input',() => { notes = textarea.value; saveDraft(); });
+        }
+        if (step === 3) {
+            if (notes) el('p','Notes: ' + notes,panel);
+            const label = el('label',undefined,content); label.className = 'issue-confirm-check';
+            const check = el('input',undefined,label); check.type = 'checkbox'; check.checked = confirmed; check.addEventListener('change',() => { confirmed = check.checked; });
+            el('span','I have checked the goods and quantities. Save this issue record in this browser.',label);
+        }
+    }
+    function focusTitle() { document.getElementById('issue-stage-title').focus(); }
+    next.addEventListener('click',() => {
+        alert.hidden = true;
+        if (step === 4) { step = 0; selected = requests.find(item => !completed.includes(item.id))?.id || ''; quantities = []; notes = ''; confirmed = false; render(); focusTitle(); return; }
+        if (!request() || completed.includes(selected)) { error('Select an available approved request to continue.'); return; }
+        if (!quantities.length) quantities = request().items.map(item => item[1]);
+        if (step === 2) {
+            const inputs = [...content.querySelectorAll('input[type=number]')];
+            for (const input of inputs) { if (!input.reportValidity()) return; }
+            if (!quantities.every((q,i) => Number.isInteger(q) && q >= 1 && q <= request().items[i][1])) { error('Check all issued quantities.'); return; }
+        }
+        if (step === 3) {
+            if (!confirmed) { error('Please confirm that you have checked the goods and quantities.'); return; }
+            try {
+                const receipts = JSON.parse(localStorage.getItem(receiptKey) || '[]');
+                if (!Array.isArray(receipts)) throw new Error('Invalid history');
+                if (receipts.some(receipt => receipt.requestId === selected)) { error('This request has already been issued in this browser.'); return; }
+                const item = request();
+                receipts.push({requestId:item.id,reference:item.reference,confirmedAt:new Date().toISOString(),recipient:item.requester,issuedDate:new Date().toLocaleDateString('en-CA'),zone:'Warehouse 1',notes,items:item.items.map((product,i) => ({product:product[0],quantity:quantities[i],sku:''}))});
+                localStorage.setItem(receiptKey,JSON.stringify(receipts)); completed.push(selected);
+            } catch (err) { error('Unable to save the issue record. Your progress has been kept; please try again.'); return; }
+            try { localStorage.removeItem(draftKey); } catch (err) { /* A completed request is excluded when a stale draft loads. */ }
+        } else saveDraft();
+        step++; if (step < 4) saveDraft(); render(); focusTitle();
+    });
+    back.addEventListener('click',() => { if (step > 0 && step < 4) { step--; confirmed = false; alert.hidden = true; saveDraft(); render(); focusTitle(); } });
+    function connection() { const status = document.getElementById('issue-connection'); status.classList.toggle('offline',!navigator.onLine); status.replaceChildren(el('span'),document.createTextNode(navigator.onLine ? 'Online' : 'Offline')); }
+    window.addEventListener('online',connection); window.addEventListener('offline',connection); connection(); render();
+})();
+
+
+

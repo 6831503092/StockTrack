@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockTrack - Transfer Product</title><link rel="icon" href="../picture/favicon/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/staff.css">
+</head>
+<body class="staff-dashboard transfer-workflow">
+<a class="staff-skip-link" href="#staff-main">Skip to content</a>
+<div class="app-layout"><div id="sidebar-container" data-role="STAFF" data-active-menu="transfer"></div>
+<main class="main-content" id="staff-main" tabindex="-1">
+<header class="staff-header"><div><h1>Transfer Product</h1><p id="transfer-subtitle">Select an approved request to begin</p></div><span class="connection-status" id="transfer-connection" role="status"><span></span>Online</span></header>
+<p class="transfer-eyebrow">TRANSFER WORKFLOW / <span id="transfer-stage-label">REQUESTS</span></p>
+<h2 id="transfer-stage-title" tabindex="-1">Requests</h2>
+<ol class="transfer-steps" aria-label="Workflow progress"><li aria-current="step">1. Requests</li><li>2. Details</li><li>3. Verify</li><li>4. Confirm</li><li>5. Result</li></ol>
+<p id="transfer-alert" role="alert" hidden></p>
+<section aria-live="polite" id="transfer-stage-content" aria-labelledby="transfer-stage-title"></section>
+<aside class="transfer-tip"><h3>Tip</h3><p id="transfer-tip-text">Only approved requests can be processed.</p></aside>
+<footer class="transfer-footer"><div><p id="transfer-save-note">Draft progress is saved locally until the staff member confirms.</p><small>Sample requests · Browser only; warehouse inventory is not updated.</small></div><div><button type="button" id="transfer-back" hidden>← Back</button><button type="button" id="transfer-next">Continue →</button></div></footer>
+<a class="workflow-dashboard-link" href="dashboard.html">← Back to dashboard</a>
+</main></div>
+<script src="../js/api.js"></script><script src="../js/sidebar.js"></script><script>
+(function () {
+    'use strict';
+    const user = window.api.getCurrentUser();
+    if (!user || user.role !== 'STAFF') { window.location.replace('../index.html'); return; }
+    const requests = [
+        { id:'TR-2026-014', reference:'TR-2026-006', requester:'Alex Morgan', date:'02 Nov 2026', items:[['Modern table',40],['Wooden table',30],['Dining table',20]] },
+        { id:'TR-2026-013', reference:'TR-2026-005', requester:'Jamie Lee', date:'01 Nov 2026', items:[['Modern table',50],['Wooden table',25]] },
+        { id:'TR-2026-012', reference:'TR-2026-004', requester:'Taylor Kim', date:'31 Oct 2026', items:[['Modern table',20],['Wooden table',20],['Dining table',15],['Side table',10]] }
+    ];
+    const draftKey = 'stocktrack_transfer_draft_' + (user.userId || user.username);
+    const receiptKey = 'stocktrack_transfers_' + (user.userId || user.username);
+    let step = 0, selected = requests[0].id, quantities = [], notes = '', confirmed = false, completed = [];
+    const content = document.getElementById('transfer-stage-content');
+    const alert = document.getElementById('transfer-alert');
+    const next = document.getElementById('transfer-next');
+    const back = document.getElementById('transfer-back');
+    const titles = ['Requests','Details','Verify','Confirm','Result'];
+    function el(tag,text,parent) { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (parent) parent.appendChild(node); return node; }
+    function error(text) { alert.textContent = text; alert.hidden = false; }
+    function request() { return requests.find(item => item.id === selected); }
+    try {
+        const receipts = JSON.parse(localStorage.getItem(receiptKey) || '[]');
+        if (!Array.isArray(receipts)) throw new Error('Invalid history');
+        completed = receipts.map(item => item.requestId).filter(Boolean);
+        const draft = JSON.parse(localStorage.getItem(draftKey) || 'null');
+        if (draft && requests.some(item => item.id === draft.selected) && !completed.includes(draft.selected)) {
+            selected = draft.selected;
+            if (Array.isArray(draft.quantities) && draft.quantities.length === request().items.length && draft.quantities.every((q,i) => Number.isInteger(q) && q > 0 && q <= request().items[i][1])) quantities = draft.quantities;
+            notes = typeof draft.notes === 'string' ? draft.notes.slice(0,1000) : '';
+            if (Number.isInteger(draft.step) && draft.step >= 0 && draft.step <= 3 && quantities.length === request().items.length) step = draft.step;
+        } else selected = requests.find(item => !completed.includes(item.id))?.id || '';
+    } catch (err) { error('Local data could not be loaded. Saving may be unavailable.'); }
+    function saveDraft() {
+        try { localStorage.setItem(draftKey,JSON.stringify({selected,quantities,notes,step})); }
+        catch (err) { document.getElementById('transfer-save-note').textContent = 'Draft could not be saved. Keep this page open to retain your progress.'; }
+    }
+    function choose(id) { selected = id; quantities = request().items.map(item => item[1]); notes = ''; confirmed = false; alert.hidden = true; saveDraft(); }
+    function table(headers) {
+        const wrapper = el('div',undefined,content); wrapper.className = 'transfer-table-scroll';
+        const table = el('table',undefined,wrapper), row = el('tr',undefined,el('thead',undefined,table));
+        headers.forEach(text => { const th = el('th',text,row); th.scope = 'col'; });
+        return el('tbody',undefined,table);
+    }
+    function render() {
+        content.replaceChildren();
+        document.getElementById('transfer-stage-title').textContent = titles[step];
+        document.getElementById('transfer-stage-label').textContent = titles[step].toUpperCase();
+        document.getElementById('transfer-subtitle').textContent = ['Select an approved request to begin','Review the approved request details','Check quantities against the products to move','Review and confirm your local transfer record','Your transfer record is complete'][step];
+        document.querySelectorAll('.transfer-steps li').forEach((node,i) => { node.removeAttribute('aria-current'); if (i === step) node.setAttribute('aria-current','step'); node.classList.toggle('complete',i < step); });
+        back.hidden = step === 0 || step === 4;
+        next.textContent = step === 3 ? 'Confirm transfer →' : step === 4 ? 'Transfer another →' : 'Continue →';
+        document.getElementById('transfer-tip-text').textContent = ['Only approved requests can be processed.','Check the request reference before continuing.','Transfer quantities must be between 1 and the approved quantity.','Confirm only after checking the physical goods.','This transfer record is saved locally. Warehouse inventory has not been updated.'][step];
+        if (step === 0) {
+            el('h3','Available approved requests',content);
+            const body = table(['Request ID','Reference','Requested By','Date','Items','Status','Action','Select']);
+            requests.filter(item => !completed.includes(item.id)).forEach(item => {
+                const row = el('tr',undefined,body);
+                [item.id,item.reference,item.requester,item.date,item.items.length,'Approved'].forEach(value => el('td',value,row));
+                const open = el('button','Open →',el('td',undefined,row)); open.type = 'button'; open.className = 'transfer-open'; open.setAttribute('aria-label','Open ' + item.id);
+                open.addEventListener('click',() => { choose(item.id); step = 1; render(); focusTitle(); });
+                const radio = el('input',undefined,el('td',undefined,row)); radio.type = 'radio'; radio.name = 'request'; radio.value = item.id; radio.checked = item.id === selected; radio.setAttribute('aria-label','Select ' + item.id);
+                radio.addEventListener('change',() => choose(item.id));
+            });
+            if (!body.children.length) { const cell = el('td','No approved requests remain in this local workspace.',el('tr',undefined,body)); cell.colSpan = 8; }
+            return;
+        }
+        const item = request();
+        if (step === 4) {
+            const panel = el('div',undefined,content); panel.className = 'transfer-details';
+            el('h3','Transfer saved successfully',panel); el('p','Request ' + item.id + ' · ' + item.reference,panel); el('p',quantities.reduce((sum,q) => sum + q,0) + ' units recorded in this browser.',panel); el('p','Warehouse inventory has not been updated.',panel); return;
+        }
+        const panel = el('div',undefined,content); panel.className = 'transfer-details';
+        el('h3',item.id + ' · ' + item.reference,panel); el('p','Requested by ' + item.requester + ' · ' + item.date,panel); el('p','Source: Warehouse 1 → Destination: Warehouse 2 · Status: Approved',panel);
+        const body = table(['Product','Approved quantity',step === 1 ? 'Unit' : 'Transfer quantity']);
+        item.items.forEach((product,i) => {
+            const row = el('tr',undefined,body); el('td',product[0],row); el('td',product[1],row);
+            const cell = el('td',step === 1 ? 'Units' : step === 3 ? quantities[i] : undefined,row);
+            if (step === 2) {
+                const input = el('input',undefined,cell); input.type = 'number'; input.min = '1'; input.max = String(product[1]); input.step = '1'; input.required = true; input.value = quantities[i]; input.className = 'transfer-quantity'; input.setAttribute('aria-label','Transfer quantity for ' + product[0]);
+                input.addEventListener('input',() => { quantities[i] = Number(input.value); saveDraft(); });
+            }
+        });
+        if (step === 2) {
+            const label = el('label','Transfer notes (optional)',content); label.className = 'transfer-notes-label';
+            const textarea = el('textarea',undefined,label); textarea.rows = 3; textarea.maxLength = 1000; textarea.value = notes; textarea.placeholder = 'Reason for transfer or handling instructions'; textarea.addEventListener('input',() => { notes = textarea.value; saveDraft(); });
+        }
+        if (step === 3) {
+            if (notes) el('p','Notes: ' + notes,panel);
+            const label = el('label',undefined,content); label.className = 'transfer-confirm-check';
+            const check = el('input',undefined,label); check.type = 'checkbox'; check.checked = confirmed; check.addEventListener('change',() => { confirmed = check.checked; });
+            el('span','I have checked the goods and quantities. Save this transfer record in this browser.',label);
+        }
+    }
+    function focusTitle() { document.getElementById('transfer-stage-title').focus(); }
+    next.addEventListener('click',() => {
+        alert.hidden = true;
+        if (step === 4) { step = 0; selected = requests.find(item => !completed.includes(item.id))?.id || ''; quantities = []; notes = ''; confirmed = false; render(); focusTitle(); return; }
+        if (!request() || completed.includes(selected)) { error('Select an available approved request to continue.'); return; }
+        if (!quantities.length) quantities = request().items.map(item => item[1]);
+        if (step === 2) {
+            const inputs = [...content.querySelectorAll('input[type=number]')];
+            for (const input of inputs) { if (!input.reportValidity()) return; }
+            if (!quantities.every((q,i) => Number.isInteger(q) && q >= 1 && q <= request().items[i][1])) { error('Check all transfer quantities.'); return; }
+        }
+        if (step === 3) {
+            if (!confirmed) { error('Please confirm that you have checked the goods and quantities.'); return; }
+            try {
+                const receipts = JSON.parse(localStorage.getItem(receiptKey) || '[]');
+                if (!Array.isArray(receipts)) throw new Error('Invalid history');
+                if (receipts.some(receipt => receipt.requestId === selected)) { error('This request has already been transferred in this browser.'); return; }
+                const item = request();
+                receipts.push({requestId:item.id,reference:item.reference,confirmedAt:new Date().toISOString(),requestedBy:item.requester,transferDate:new Date().toLocaleDateString('en-CA'),source:'Warehouse 1',destination:'Warehouse 2',notes,items:item.items.map((product,i) => ({product:product[0],quantity:quantities[i],sku:''}))});
+                localStorage.setItem(receiptKey,JSON.stringify(receipts)); completed.push(selected);
+            } catch (err) { error('Unable to save the transfer record. Your progress has been kept; please try again.'); return; }
+            try { localStorage.removeItem(draftKey); } catch (err) { /* A completed request is excluded when a stale draft loads. */ }
+        } else saveDraft();
+        step++; if (step < 4) saveDraft(); render(); focusTitle();
+    });
+    back.addEventListener('click',() => { if (step > 0 && step < 4) { step--; confirmed = false; alert.hidden = true; saveDraft(); render(); focusTitle(); } });
+    function connection() { const status = document.getElementById('transfer-connection'); status.classList.toggle('offline',!navigator.onLine); status.replaceChildren(el('span'),document.createTextNode(navigator.onLine ? 'Online' : 'Offline')); }
+    window.addEventListener('online',connection); window.addEventListener('offline',connection); connection(); render();
+})();
+</script>
+</body></html>
+
