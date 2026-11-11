@@ -11,25 +11,19 @@
             defaultUserId: '503092',
             defaultFullName: 'Admin User',
             avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80',
-            homeUrl: 'dashboard.html',
+            homeUrl: 'my-requests.html',
             menus: [
                 {
-                    id: 'dashboard',
-                    title: 'Dashboard',
-                    url: 'dashboard.html',
-                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2.5"></rect><rect x="13" y="3" width="8" height="8" rx="2.5"></rect><rect x="3" y="13" width="8" height="8" rx="2.5"></rect><rect x="13" y="13" width="8" height="8" rx="2.5"></rect></svg>`
+                    id: 'my-requests',
+                    title: 'My requests',
+                    url: 'my-requests.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`
                 },
                 {
-                    id: 'purchase-order',
-                    title: 'Purchase Order',
-                    url: 'purchase-order.html',
-                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`
-                },
-                {
-                    id: 'sales-order',
-                    title: 'Sales Order',
-                    url: 'sales-order.html',
-                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`
+                    id: 'role-management',
+                    title: 'Role Management',
+                    url: 'role-management.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`
                 },
                 {
                     id: 'zone-product',
@@ -38,10 +32,16 @@
                     icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`
                 },
                 {
-                    id: 'role-management',
-                    title: 'Role Management',
-                    url: 'role-management.html',
-                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`
+                    id: 'purchase-order',
+                    title: 'Purchase Order',
+                    url: 'purchase-order.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24"><text x="12" y="17.5" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="15.5" font-weight="800" fill="currentColor" letter-spacing="-0.5">PO</text></svg>`
+                },
+                {
+                    id: 'sales-order',
+                    title: 'Sales Order',
+                    url: 'sales-order.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24"><text x="12" y="17.5" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="15.5" font-weight="800" fill="currentColor" letter-spacing="-0.5">SO</text></svg>`
                 }
             ]
         },
@@ -103,14 +103,14 @@
         if (e) e.preventDefault();
         try {
             sessionStorage.removeItem(SIDEBAR_STORAGE_KEY);
-        } catch (err) {}
+        } catch (err) { }
         fetch('/api/logout', {
             method: 'POST',
             credentials: 'include'
-        }).catch(() => {}).finally(() => {
+        }).catch(() => { }).finally(() => {
             try {
                 localStorage.removeItem('stocktrack_user');
-            } catch (err) {}
+            } catch (err) { }
             window.location.href = '../index.html';
         });
     };
@@ -123,11 +123,11 @@
         let isPreExpanded = false;
         try {
             isPreExpanded = sessionStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
-        } catch (e) {}
+        } catch (e) { }
 
         // Determine current role & active menu
         let userRole = container.getAttribute('data-role');
-        let activeMenu = container.getAttribute('data-active-menu') || 'dashboard';
+        let activeMenu = container.getAttribute('data-active-menu');
 
         let storedUser = null;
         try {
@@ -138,7 +138,7 @@
                     userRole = storedUser.role.toUpperCase();
                 }
             }
-        } catch (err) {}
+        } catch (err) { }
 
         // Infer role from current file path if not found
         if (!userRole) {
@@ -151,6 +151,9 @@
         }
 
         const roleConfig = ROLE_CONFIGS[userRole] || ROLE_CONFIGS.ADMIN;
+        if (!activeMenu) {
+            activeMenu = roleConfig.menus?.[0]?.id || 'dashboard';
+        }
 
         // Attempt to fetch sidebar.html
         let sidebarHtml = '';
@@ -252,7 +255,7 @@
                         sidebarEl.classList.remove('is-expanded');
                         try {
                             sessionStorage.removeItem(SIDEBAR_STORAGE_KEY);
-                        } catch (err) {}
+                        } catch (err) { }
                     }
                     window.removeEventListener('mousemove', checkInitialMouse);
                 };
@@ -265,7 +268,7 @@
             sidebarEl.addEventListener('mouseenter', function () {
                 try {
                     sessionStorage.setItem(SIDEBAR_STORAGE_KEY, 'true');
-                } catch (err) {}
+                } catch (err) { }
             });
 
             // When leaving sidebar, collapse smoothly unless navigating to another page
@@ -274,7 +277,7 @@
                 sidebarEl.classList.remove('is-expanded');
                 try {
                     sessionStorage.removeItem(SIDEBAR_STORAGE_KEY);
-                } catch (err) {}
+                } catch (err) { }
             });
 
             // Intercept clicks on links inside sidebar
@@ -286,7 +289,7 @@
                 if (link.id === 'sidebar-logout-btn' || link.classList.contains('nav-logout')) {
                     try {
                         sessionStorage.removeItem(SIDEBAR_STORAGE_KEY);
-                    } catch (err) {}
+                    } catch (err) { }
                     return;
                 }
 
@@ -295,7 +298,7 @@
                     isNavigating = true;
                     try {
                         sessionStorage.setItem(SIDEBAR_STORAGE_KEY, 'true');
-                    } catch (err) {}
+                    } catch (err) { }
                 }
             });
         }
@@ -321,12 +324,12 @@
         }
 
         // Populate user details (User ID & Full Name)
-        const currentUserId = (storedUser && (storedUser.userId || storedUser.username)) 
-            ? String(storedUser.userId || storedUser.username) 
+        const currentUserId = (storedUser && (storedUser.userId || storedUser.username))
+            ? String(storedUser.userId || storedUser.username)
             : roleConfig.defaultUserId;
 
-        const currentFullName = (storedUser && storedUser.fullName) 
-            ? storedUser.fullName 
+        const currentFullName = (storedUser && storedUser.fullName)
+            ? storedUser.fullName
             : roleConfig.defaultFullName;
 
         const userIdEl = container.querySelector('#sidebar-user-id');

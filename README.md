@@ -121,7 +121,7 @@ git checkout -b feature/frontend-staff      # สำหรับคนทำ Sta
 
 | ตำแหน่ง (Role) | User ID (ตัวเลข) | หรือกรอก Username | Password | หน้า Dashboard ที่ระบบพาไป |
 | :--- | :---: | :---: | :---: | :--- |
-| **Admin** | `503092` | `admin` | `1234` | `/admin/dashboard.html` |
+| **Admin** | `503092` | `admin` | `1234` | `/admin/my-requests.html` |
 | **Manager** | `503069` | `manager` | `1234` | `/manager/dashboard.html` |
 | **Staff** | `503080` | `staff` | `1234` | `/staff/dashboard.html` |
 | **Owner** | `503107` | `owner` | `1234` | `/owner/dashboard.html` |
@@ -134,7 +134,7 @@ git checkout -b feature/frontend-staff      # สำหรับคนทำ Sta
 
 | หน้าที่ / Role | ไฟล์ HTML ที่ต้องแก้ไข | ไฟล์ CSS เฉพาะของแต่ละคน |
 | :--- | :--- | :--- |
-| **Admin** | `src/main/resources/static/admin/dashboard.html` | `src/main/resources/static/css/admin.css` |
+| **Admin** | `src/main/resources/static/admin/my-requests.html` | `src/main/resources/static/css/admin.css` |
 | **Manager** | `src/main/resources/static/manager/dashboard.html` | `src/main/resources/static/css/manager.css` |
 | **Owner** | `src/main/resources/static/owner/dashboard.html` | `src/main/resources/static/css/owner.css` |
 | **Staff** | `src/main/resources/static/staff/dashboard.html` | `src/main/resources/static/css/staff.css` |
@@ -204,7 +204,7 @@ var(--bg-page)             /* #f8fafc - สีพื้นหลังหน้�
 ทุกหน้า Dashboard มีการเรียกใช้ Sidebar อัตโนมัติผ่าน `<script src="../js/sidebar.js"></script>` อยู่แล้ว:
 
 ```html
-<div id="sidebar-container" data-role="ADMIN" data-active-menu="dashboard"></div>
+<div id="sidebar-container" data-role="ADMIN" data-active-menu="my-requests"></div>
 ```
 
 ### รูปแบบที่ 1: สลับหน้าแบบ Single-Page (Tab Switching ในไฟล์ `dashboard.html` เดียว)

@@ -38,15 +38,23 @@
                         </svg>
                         Back
                     </a>
-
-                    <select id="select-zone" class="po-status-select zone-select-lg">
-                        <option value="ALL">Select Zone</option>
-                        <option value="ZONE_A">Zone A</option>
-                        <option value="ZONE_B">Zone B</option>
-                        <option value="ZONE_C">Zone C</option>
-                    </select>
                 </div>
             </header>
+            <section class="po-stats-grid">
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Active Zone</span>
+                        <span class="stat-value mint" id="kpi-pm-total">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Stored Units</span>
+                        <span class="stat-value blue" id="kpi-pm-units">0</span>
+                    </div>
+                </div>
+            </section>
 
             <!-- 2. Main Card: Product in Zone Details Table -->
             <section class="po-card">
@@ -65,7 +73,66 @@
                             </span>
                         </div>
 
+                        <select id="select-zone" class="po-status-select zone-select-lg">
+                            <option value="ALL">All Zones</option>
+                            <option value="Z1">Zone 1 (Z1)</option>
+                            <option value="Z2">Zone 2 (Z2)</option>
+                            <option value="Z3">Zone 3 (Z3)</option>
+                            <option value="Z4">Zone 4 (Z4)</option>
+                        </select>
+
+                        <div class="requests-date-box" id="requests-date-box" title="Click to filter by date">
+                            <span class="date-icon" id="date-picker-icon" title="Choose date">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </span>
+                            <input type="date" id="requests-date-input" aria-label="Filter by date">
+                            <button type="button" class="btn-clear-date" id="btn-clear-date" title="Clear date filter" style="display: none;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+
+                            <!-- Custom Styled Date Picker Popup (StockTrack Mint Theme) -->
+                            <div class="custom-calendar-popup" id="custom-calendar-popup" style="display: none;">
+                                <div class="cal-header">
+                                    <button type="button" class="cal-nav-btn" id="cal-prev-month" title="Previous month">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="15 18 9 12 15 6"></polyline>
+                                        </svg>
+                                    </button>
+                                    <span class="cal-month-title" id="cal-month-title">November 2026</span>
+                                    <button type="button" class="cal-nav-btn" id="cal-next-month" title="Next month">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="cal-weekdays">
+                                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                                </div>
+                                <div class="cal-days-grid" id="cal-days-grid"></div>
+                                <div class="cal-footer">
+                                    <button type="button" class="cal-quick-btn" id="cal-btn-today">Today</button>
+                                    <button type="button" class="cal-quick-btn cal-quick-clear" id="cal-btn-clear">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <button type="button" class="btn-create-po" id="btn-open-move-modal">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="17 1 21 5 17 9"></polyline>
+                                <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                                <polyline points="7 23 3 19 7 15"></polyline>
+                                <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                            </svg>
                             Move Product
                         </button>
                     </div>
@@ -77,34 +144,17 @@
                         <thead>
                             <tr>
                                 <th class="th-checkbox">
-                                    <input type="checkbox" id="check-all-zone-products" class="table-checkbox">
+                                    <input type="checkbox" id="check-all-zone-products" class="table-checkbox" title="Select all products">
                                 </th>
                                 <th>Product ID</th>
                                 <th>Product Name</th>
+                                <th>Location</th>
                                 <th>Current Stock</th>
                                 <th>Status</th>
-                                <th>Detail</th>
                             </tr>
                         </thead>
                         <tbody id="zone-products-table-body">
-                            <!-- Empty State: Ready for Backend API Data -->
-                            <tr>
-                                <td colspan="6" class="table-empty-state">
-                                    <div class="empty-state-wrap">
-                                        <div class="empty-state-icon-circle">
-                                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                            </svg>
-                                        </div>
-                                        <p>ยังไม่มีรายการสินค้าในโซนนี้</p>
-                                        <span class="empty-subtitle">ตารางนี้พร้อมสำหรับแสดงผลสินค้าตามโซนคลังสินค้าจาก Backend API</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            <!-- Populated dynamically via JS / Backend API -->
                         </tbody>
                     </table>
                 </div>
@@ -122,54 +172,43 @@
         </main>
     </div>
 
-    <!-- MODAL: Move Product Between Zones -->
+    <!-- MODAL: Request Product Transfer (Matching Reference Design) -->
     <div class="modal-overlay" id="modal-move-product">
-        <div class="modal-box modal-sm">
+        <div class="modal-box modal-transfer-box">
             <div class="modal-header">
-                <h3>Move Product Between Zones</h3>
-                <button type="button" class="btn-close-modal">&times;</button>
+                <h3>Request Product Transfer</h3>
+                <div class="modal-header-actions">
+                    <select id="modal-transfer-zone-select" class="modal-zone-select" aria-label="Select target zone" onchange="handleTargetZoneChange(this.value)">
+                        <option value="">Select move to zone</option>
+                        <option value="Z1">Zone 1 (Z1)</option>
+                        <option value="Z2">Zone 2 (Z2)</option>
+                        <option value="Z3">Zone 3 (Z3)</option>
+                        <option value="Z4">Zone 4 (Z4)</option>
+                    </select>
+                    <button type="button" class="btn-close-modal">&times;</button>
+                </div>
             </div>
             <form id="form-move-product" onsubmit="handleMoveSubmit(event)">
                 <div class="modal-body">
-                    <div class="modal-field-mb">
-                        <label for="move-product-select">Product</label>
-                        <select id="move-product-select" class="modal-input" required>
-                            <option value="">-- Select Product --</option>
-                        </select>
-                    </div>
-
-                    <div class="modal-grid-2-sm modal-field-mb">
-                        <div>
-                            <label for="move-from-zone">From Zone</label>
-                            <select id="move-from-zone" class="modal-input" required>
-                                <option value="ZONE_A">Zone A</option>
-                                <option value="ZONE_B">Zone B</option>
-                                <option value="ZONE_C">Zone C</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="move-to-zone">To Zone</label>
-                            <select id="move-to-zone" class="modal-input" required>
-                                <option value="ZONE_B">Zone B</option>
-                                <option value="ZONE_A">Zone A</option>
-                                <option value="ZONE_C">Zone C</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="modal-field-mb">
-                        <label for="move-quantity">Quantity to Move</label>
-                        <input type="number" id="move-quantity" class="modal-input" min="1" placeholder="Enter quantity" required>
-                    </div>
-
-                    <div>
-                        <label for="move-notes">Notes / Reason</label>
-                        <textarea id="move-notes" class="modal-textarea" rows="2" placeholder="Optional notes for transfer"></textarea>
+                    <div class="modal-transfer-table-wrapper">
+                        <table class="modal-transfer-table">
+                            <thead>
+                                <tr>
+                                    <th>Product ID</th>
+                                    <th class="text-left">Product Name</th>
+                                    <th>Location</th>
+                                    <th>Move to zone</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-transfer-tbody">
+                                <!-- Populated dynamically from selected products -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel" data-close-modal>Cancel</button>
-                    <button type="submit" class="btn-submit">Confirm Move</button>
+                    <button type="submit" class="btn-submit" id="btn-submit-transfer">Send Request</button>
                 </div>
             </form>
         </div>
@@ -177,9 +216,161 @@
 
     <!-- Scripts -->
     <script src="../js/sidebar.js"></script>
+    <script src="../js/api.js"></script>
     <script src="../js/admin.js"></script>
     <script>
+        AdminApp.checkAdminAccess();
+
+        // Available Warehouse Zones
+        const ALL_ZONES = [
+            { code: 'Z1', name: 'Zone 1 (Z1)' },
+            { code: 'Z2', name: 'Zone 2 (Z2)' },
+            { code: 'Z3', name: 'Zone 3 (Z3)' },
+            { code: 'Z4', name: 'Zone 4 (Z4)' }
+        ];
+
+        // Warehouse Products Data (Loaded directly from Backend API, No mockups)
+        const zoneProductsData = [];
+
+        const tbody = document.getElementById('zone-products-table-body');
+        const checkAll = document.getElementById('check-all-zone-products');
+        const searchInput = document.getElementById('search-zone-products');
+        const selectZone = document.getElementById('select-zone');
+        const paginationInfo = document.getElementById('zone-pagination-info');
+        const modalTransferTbody = document.getElementById('modal-transfer-tbody');
+        const modalTargetZoneSelect = document.getElementById('modal-transfer-zone-select');
+
+        function renderProducts(list) {
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="table-empty-state">
+                            <div class="empty-state-wrap">
+                                <div class="empty-state-icon-circle">
+                                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                    </svg>
+                                </div>
+                                <p>ยังไม่มีรายการสินค้าในโซนนี้</p>
+                                <span class="empty-subtitle">ตารางนี้พร้อมสำหรับแสดงผลสินค้าตามโซนคลังสินค้า</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                paginationInfo.textContent = 'Showing 0 of 0 entries';
+                return;
+            }
+
+            tbody.innerHTML = list.map(item => `
+                <tr class="zone-product-row" data-id="${item.id}" data-name="${item.name}" data-location="${item.location}">
+                    <td class="th-checkbox">
+                        <input type="checkbox" class="table-checkbox zone-product-checkbox"
+                            data-product-id="${item.id}"
+                            data-product-name="${item.name}"
+                            data-location="${item.location}"
+                            onchange="updateSelectionState()">
+                    </td>
+                    <td class="font-medium">${item.id}</td>
+                    <td>${item.name}</td>
+                    <td>${item.location}</td>
+                    <td>${item.stock} units</td>
+                    <td>
+                        <span class="badge-status ${item.status === 'In Stock' ? 'badge-approved' : 'badge-pending'}">
+                            ${item.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+
+            paginationInfo.textContent = `Showing 1 to ${list.length} of ${list.length} entries`;
+            updateKPIs(list);
+            updateSelectionState();
+        }
+
+        function updateKPIs(list) {
+            const activeZoneEl = document.getElementById('kpi-pm-total');
+            const storedUnitsEl = document.getElementById('kpi-pm-units');
+            if (activeZoneEl) activeZoneEl.textContent = list.length > 0 ? '1' : '0';
+            if (storedUnitsEl) {
+                const totalUnits = list.reduce((sum, item) => sum + (item.stock || 0), 0);
+                storedUnitsEl.textContent = totalUnits.toLocaleString();
+            }
+        }
+
+        // Selection Management
+        checkAll?.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            document.querySelectorAll('.zone-product-checkbox').forEach(cb => {
+                cb.checked = isChecked;
+            });
+            updateSelectionState();
+        });
+
+        function updateSelectionState() {
+            const checkboxes = Array.from(document.querySelectorAll('.zone-product-checkbox'));
+            const checked = checkboxes.filter(cb => cb.checked);
+            if (checkAll) {
+                checkAll.checked = checkboxes.length > 0 && checked.length === checkboxes.length;
+                checkAll.indeterminate = checked.length > 0 && checked.length < checkboxes.length;
+            }
+        }
+
+        function getSelectedProducts() {
+            const checkedBoxes = Array.from(document.querySelectorAll('.zone-product-checkbox:checked'));
+            return checkedBoxes.map(cb => ({
+                id: cb.getAttribute('data-product-id'),
+                name: cb.getAttribute('data-product-name'),
+                location: cb.getAttribute('data-location')
+            }));
+        }
+
+        // Populate Target Zones (Excluding the origin zone of selected products)
+        function populateTargetZoneOptions(selectedItems) {
+            if (!modalTargetZoneSelect) return;
+
+            // Collect all unique current locations of selected items
+            const currentLocations = new Set(selectedItems.map(p => p.location));
+
+            // Exclude current zones so user cannot select the same zone
+            const availableZones = ALL_ZONES.filter(z => !currentLocations.has(z.code) && !currentLocations.has(z.name));
+
+            modalTargetZoneSelect.innerHTML = `
+                <option value="">Select move to zone</option>
+                ${availableZones.map(z => `<option value="${z.code}">${z.name}</option>`).join('')}
+            `;
+            modalTargetZoneSelect.value = '';
+            modalTargetZoneSelect.disabled = selectedItems.length === 0;
+        }
+
+        // Modal Transfer Population
         function openMoveModal() {
+            const selected = getSelectedProducts();
+            populateTargetZoneOptions(selected);
+
+            if (selected.length === 0) {
+                modalTransferTbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="modal-transfer-empty">
+                            <p style="font-weight: 600; color: #475569; margin-bottom: 4px;">ยังไม่ได้เลือกรายการสินค้า</p>
+                            <span style="font-size: 0.85rem; color: #94a3b8;">กรุณาติ๊กเครื่องหมายถูกหน้าสินค้าที่ต้องการย้ายในตารางคลังสินค้า</span>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                modalTransferTbody.innerHTML = selected.map(p => `
+                    <tr>
+                        <td class="font-medium">${p.id}</td>
+                        <td class="text-left font-medium">${p.name}</td>
+                        <td>${p.location}</td>
+                        <td class="transfer-dest-cell empty-dest">-</td>
+                    </tr>
+                `).join('');
+            }
+
             AdminApp.openModal('modal-move-product');
         }
 
@@ -187,13 +378,73 @@
             AdminApp.closeModal('modal-move-product');
         }
 
-        document.getElementById('btn-open-move-modal')?.addEventListener('click', openMoveModal);
+        function handleTargetZoneChange(zoneCode) {
+            const destCells = modalTransferTbody.querySelectorAll('.transfer-dest-cell');
+            destCells.forEach(cell => {
+                if (zoneCode) {
+                    cell.textContent = zoneCode;
+                    cell.classList.remove('empty-dest');
+                } else {
+                    cell.textContent = '-';
+                    cell.classList.add('empty-dest');
+                }
+            });
+        }
 
         function handleMoveSubmit(e) {
             e.preventDefault();
-            alert('Move request submitted successfully.');
+            const selected = getSelectedProducts();
+            if (selected.length === 0) {
+                alert('กรุณาเลือกรายการสินค้าที่ต้องการย้ายอย่างน้อย 1 รายการ');
+                return;
+            }
+
+            const targetZone = modalTargetZoneSelect.value;
+            if (!targetZone) {
+                alert('กรุณาเลือกโซนปลายทาง (Select move to zone) ที่ต้องการย้าย');
+                modalTargetZoneSelect.focus();
+                return;
+            }
+
+            alert(`ส่งคำขอย้ายสินค้าจำนวน ${selected.length} รายการ ไปยังโซน ${targetZone} เรียบร้อยแล้ว`);
             closeMoveModal();
+
+            // Reset checkboxes
+            document.querySelectorAll('.zone-product-checkbox').forEach(cb => cb.checked = false);
+            if (checkAll) {
+                checkAll.checked = false;
+                checkAll.indeterminate = false;
+            }
         }
+
+        document.getElementById('btn-open-move-modal')?.addEventListener('click', openMoveModal);
+
+        // Search & Filter
+        function filterProducts() {
+            const query = (searchInput?.value || '').toLowerCase().trim();
+            const zone = selectZone?.value || 'ALL';
+
+            const filtered = zoneProductsData.filter(item => {
+                const matchQuery = !query || String(item.id).includes(query) || item.name.toLowerCase().includes(query);
+                const matchZone = zone === 'ALL' || item.location === zone;
+                return matchQuery && matchZone;
+            });
+
+            renderProducts(filtered);
+        }
+
+        searchInput?.addEventListener('input', filterProducts);
+        selectZone?.addEventListener('change', filterProducts);
+
+        AdminApp.initCustomDatePicker({
+            box: 'requests-date-box',
+            onChange: (dateVal) => {
+                filterProducts();
+            }
+        });
+
+        // Initialize table
+        renderProducts(zoneProductsData);
     </script>
 </body>
 

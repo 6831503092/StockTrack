@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrack - My Requests</title>
+    <link rel="icon" type="image/png" href="../picture/favicon/favicon.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation (Modular Component) -->
+        <div id="sidebar-container" data-role="ADMIN" data-active-menu="my-requests"></div>
+
+        <!-- Main Content Area (Full Height Layout) -->
+        <main class="main-content dashboard-main-layout">
+            <!-- 1. Top Header Row -->
+            <header class="requests-header-row">
+                <div class="requests-header-left">
+                    <h1>My requests</h1>
+                    <p>view your request and track their status</p>
+                </div>
+
+                <div class="requests-header-right">
+                    <div class="requests-filter-bar">
+                        <div class="requests-search-box">
+                            <input type="text" id="requests-search-input" placeholder="Search Request ID, type, requester...">
+                            <span class="search-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div class="requests-date-box" id="requests-date-box" title="Click to filter by date">
+                            <span class="date-icon" id="date-picker-icon" title="Choose date">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </span>
+                            <input type="date" id="requests-date-input" aria-label="Filter by date">
+                            <button type="button" class="btn-clear-date" id="btn-clear-date" title="Clear date filter" style="display: none;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+
+                            <!-- Custom Styled Date Picker Popup (StockTrack Mint Theme) -->
+                            <div class="custom-calendar-popup" id="custom-calendar-popup" style="display: none;">
+                                <div class="cal-header">
+                                    <button type="button" class="cal-nav-btn" id="cal-prev-month" title="Previous month">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="15 18 9 12 15 6"></polyline>
+                                        </svg>
+                                    </button>
+                                    <span class="cal-month-title" id="cal-month-title">November 2026</span>
+                                    <button type="button" class="cal-nav-btn" id="cal-next-month" title="Next month">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="cal-weekdays">
+                                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                                </div>
+                                <div class="cal-days-grid" id="cal-days-grid"></div>
+                                <div class="cal-footer">
+                                    <button type="button" class="cal-quick-btn" id="cal-btn-today">Today</button>
+                                    <button type="button" class="cal-quick-btn cal-quick-clear" id="cal-btn-clear">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="requests-tabs-row">
+                        <div class="requests-status-tabs" id="requests-tabs">
+                            <button type="button" class="tab-pill active" data-status="ALL">All</button>
+                            <button type="button" class="tab-pill" data-status="Pending">Pending</button>
+                            <button type="button" class="tab-pill" data-status="Approved">Approved</button>
+                            <button type="button" class="tab-pill" data-status="Rejected">Rejected</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 2. KPI Summary Cards -->
+            <section class="po-stats-grid">
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Total Requests</span>
+                        <span class="stat-value mint" id="kpi-req-total">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Pending Review</span>
+                        <span class="stat-value amber" id="kpi-req-pending">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Approved Requests</span>
+                        <span class="stat-value mint" id="kpi-req-approved">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Rejected Requests</span>
+                        <span class="stat-value red" id="kpi-req-rejected">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Main Data Card: Table Container -->
+            <section class="requests-card">
+                <div class="requests-table-wrapper">
+                    <table class="requests-table">
+                        <thead>
+                            <tr>
+                                <th>Request ID</th>
+                                <th>Type</th>
+                                <th>Requested by</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requests-table-body">
+                            
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 4. Table Footer / Pagination -->
+                <div class="po-pagination">
+                    <span id="requests-pagination-info">Showing 0 of 0 entries</span>
+                    <div class="pagination-controls">
+                        <button type="button" class="btn-page" id="btn-requests-prev" disabled>&lt;</button>
+                        <button type="button" class="btn-page active" id="btn-page-num">1</button>
+                        <button type="button" class="btn-page" id="btn-requests-next" disabled>&gt;</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: Request Details Modal -->
+    <div class="modal-overlay" id="modal-req-detail">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Request Details</h3>
+                <button type="button" class="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="req-detail-modal-body">
+                <!-- Dynamically filled by JS -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" data-close-modal>Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/admin.js"></script>
+    <script>
+        AdminApp.checkAdminAccess();
+
+        // Real data container (No mock data)
+        let requestsData = [];
+        let currentFilterStatus = 'ALL';
+
+        const requestsTbody = document.getElementById('requests-table-body');
+        const emptyRequestsHtml = requestsTbody.innerHTML;
+        const dateBox = document.getElementById('requests-date-box');
+        const dateInput = document.getElementById('requests-date-input');
+        const btnClearDate = document.getElementById('btn-clear-date');
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatDisplayDate(dateVal) {
+            if (!dateVal) return '-';
+            try {
+                const str = String(dateVal).trim();
+                const d = new Date(str);
+                if (isNaN(d.getTime())) return str;
+                const pad = (n) => String(n).padStart(2, '0');
+                return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+            } catch {
+                return String(dateVal);
+            }
+        }
+
+        function formatDisplayStatus(statusVal) {
+            if (!statusVal) return 'Pending';
+            const s = String(statusVal).trim();
+            return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+        }
+
+        function matchesDateFilter(itemDateStr, selectedIsoDate) {
+            if (!selectedIsoDate) return true;
+            if (!itemDateStr) return false;
+
+            const str = String(itemDateStr).trim();
+
+            // 1. Direct or startsWith (e.g. "2026-11-11" or "2026-11-11 14:00")
+            if (str.startsWith(selectedIsoDate) || str.includes(selectedIsoDate)) return true;
+
+            // 2. Format as DD/MM/YYYY
+            const parts = selectedIsoDate.split('-');
+            if (parts.length === 3) {
+                const [y, m, d] = parts;
+                const ddmmyyyy = `${d}/${m}/${y}`;
+                const dm = `${parseInt(d, 10)}/${parseInt(m, 10)}/${y}`;
+                if (str.includes(ddmmyyyy) || str.includes(dm)) return true;
+            }
+
+            // 3. Fallback to Date object comparison
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) {
+                const y = parsed.getFullYear();
+                const m = String(parsed.getMonth() + 1).padStart(2, '0');
+                const d = String(parsed.getDate()).padStart(2, '0');
+                if (`${y}-${m}-${d}` === selectedIsoDate) return true;
+            }
+
+            return false;
+        }
+
+        function renderRequestsTable(items) {
+            const pageInfo = document.getElementById('requests-pagination-info');
+
+            if (!items || items.length === 0) {
+                const hasFilters = currentFilterStatus !== 'ALL' ||
+                    (document.getElementById('requests-search-input')?.value.trim() !== '') ||
+                    (dateInput?.value !== '');
+
+                if (hasFilters && requestsData.length > 0) {
+                    requestsTbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="table-empty-state">
+                                <div class="empty-state-wrap">
+                                    <div class="empty-state-icon-circle">
+                                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                    </div>
+                                    <p>ไม่พบข้อมูลคำขอตามเงื่อนไขหรือวันที่ที่เลือก</p>
+                                    <span class="empty-subtitle">ลองเลือกวันที่อื่น หรือกดปุ่มกากบาทเพื่อดูประวัติคำขอทั้งหมด</span>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    requestsTbody.innerHTML = emptyRequestsHtml;
+                }
+                pageInfo.textContent = 'Showing 0 of 0 entries';
+                updateKPIs(requestsData);
+                return;
+            }
+
+            requestsTbody.innerHTML = items.map(req => {
+                const badgeClass = AdminApp.getStatusBadgeClass(req.status);
+                const reqId = req.requestId || (req.id ? ('#' + req.id) : '-');
+                const reqType = req.type || req.requestType || 'Request';
+                const requestedBy = req.requestedByName || req.requesterName || req.requestedBy || '-';
+                const role = req.role || 'Admin';
+                const displayDate = formatDisplayDate(req.date || req.requestedDatetime || req.createdAt);
+                const displayStatus = formatDisplayStatus(req.status);
+                const detailId = String(req.requestId || req.id || '');
+
+                return `
+                    <tr>
+                        <td class="cell-id">${escapeHtml(String(reqId))}</td>
+                        <td class="cell-medium">${escapeHtml(String(reqType))}</td>
+                        <td>
+                            <div><strong>${escapeHtml(String(requestedBy))}</strong></div>
+                            <div class="cell-subtext">(${escapeHtml(String(role))})</div>
+                        </td>
+                        <td>${escapeHtml(String(displayDate))}</td>
+                        <td>
+                            <span class="badge-status ${badgeClass}">${escapeHtml(String(displayStatus))}</span>
+                        </td>
+                        <td>
+                            <button type="button" class="btn-action-detail" onclick="viewRequestDetail('${escapeHtml(detailId)}')">[Detail]</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            pageInfo.textContent = `Showing 1 to ${items.length} of ${items.length} entries`;
+            updateKPIs(requestsData);
+        }
+
+        function updateKPIs(data) {
+            const list = Array.isArray(data) ? data : [];
+            document.getElementById('kpi-req-total').textContent = list.length;
+            document.getElementById('kpi-req-pending').textContent = list.filter(d => String(d.status || '').toUpperCase() === 'PENDING').length;
+            document.getElementById('kpi-req-approved').textContent = list.filter(d => String(d.status || '').toUpperCase() === 'APPROVED').length;
+            document.getElementById('kpi-req-rejected').textContent = list.filter(d => String(d.status || '').toUpperCase() === 'REJECTED').length;
+        }
+
+        function applyRequestsFilter() {
+            const query = document.getElementById('requests-search-input').value.toLowerCase().trim();
+            const selectedDate = dateInput ? dateInput.value : '';
+
+            const filtered = requestsData.filter(req => {
+                const reqStatusUpper = String(req.status || '').toUpperCase();
+                const matchesStatus = (currentFilterStatus === 'ALL') || (reqStatusUpper === currentFilterStatus.toUpperCase());
+                const matchesQuery = !query ||
+                    String(req.requestId || req.id || '').toLowerCase().includes(query) ||
+                    String(req.type || req.requestType || '').toLowerCase().includes(query) ||
+                    String(req.requestedByName || req.requesterName || '').toLowerCase().includes(query);
+                const matchesDate = matchesDateFilter(req.date || req.requestedDatetime || req.createdAt, selectedDate);
+
+                return matchesStatus && matchesQuery && matchesDate;
+            });
+            renderRequestsTable(filtered);
+        }
+
+        // Status Tabs Listener
+        document.getElementById('requests-tabs').addEventListener('click', (e) => {
+            const btn = e.target.closest('.tab-pill');
+            if (!btn) return;
+            document.querySelectorAll('#requests-tabs .tab-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilterStatus = btn.getAttribute('data-status');
+            applyRequestsFilter();
+        });
+
+        // Search Input Listener
+        document.getElementById('requests-search-input').addEventListener('input', applyRequestsFilter);
+        document.getElementById('btn-refresh-data')?.addEventListener('click', applyRequestsFilter);
+
+        // Custom Styled Date Picker Popup Controller
+        const calPopup = document.getElementById('custom-calendar-popup');
+        const calMonthTitle = document.getElementById('cal-month-title');
+        const calDaysGrid = document.getElementById('cal-days-grid');
+        const calPrevMonth = document.getElementById('cal-prev-month');
+        const calNextMonth = document.getElementById('cal-next-month');
+        const calBtnToday = document.getElementById('cal-btn-today');
+        const calBtnClear = document.getElementById('cal-btn-clear');
+
+        let calViewDate = new Date();
+
+        const CAL_MONTHS = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        function renderCalendar() {
+            if (!calMonthTitle || !calDaysGrid) return;
+            const year = calViewDate.getFullYear();
+            const month = calViewDate.getMonth();
+
+            calMonthTitle.textContent = `${CAL_MONTHS[month]} ${year}`;
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const lastDayDate = new Date(year, month + 1, 0).getDate();
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+            const today = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const todayIso = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+            const selectedIso = dateInput ? dateInput.value : '';
+
+            let cellsHtml = '';
+
+            // Previous month trailing days
+            for (let i = firstDayIndex - 1; i >= 0; i--) {
+                const dayNum = prevMonthLastDay - i;
+                const prevDate = new Date(year, month - 1, dayNum);
+                const iso = `${prevDate.getFullYear()}-${pad(prevDate.getMonth() + 1)}-${pad(dayNum)}`;
+                const isSelected = iso === selectedIso ? 'is-selected' : '';
+                cellsHtml += `<button type="button" class="cal-day-cell other-month ${isSelected}" data-date="${iso}">${dayNum}</button>`;
+            }
+
+            // Current month days
+            for (let d = 1; d <= lastDayDate; d++) {
+                const iso = `${year}-${pad(month + 1)}-${pad(d)}`;
+                const isToday = iso === todayIso ? 'is-today' : '';
+                const isSelected = iso === selectedIso ? 'is-selected' : '';
+                cellsHtml += `<button type="button" class="cal-day-cell ${isToday} ${isSelected}" data-date="${iso}">${d}</button>`;
+            }
+
+            // Next month leading days
+            const totalCells = firstDayIndex + lastDayDate;
+            const remaining = (totalCells % 7 === 0) ? 0 : 7 - (totalCells % 7);
+            for (let d = 1; d <= remaining; d++) {
+                const nextDate = new Date(year, month + 1, d);
+                const iso = `${nextDate.getFullYear()}-${pad(nextDate.getMonth() + 1)}-${pad(d)}`;
+                const isSelected = iso === selectedIso ? 'is-selected' : '';
+                cellsHtml += `<button type="button" class="cal-day-cell other-month ${isSelected}" data-date="${iso}">${d}</button>`;
+            }
+
+            calDaysGrid.innerHTML = cellsHtml;
+        }
+
+        function openCalendarPopup() {
+            if (!calPopup) return;
+            if (dateInput && dateInput.value) {
+                const parts = dateInput.value.split('-').map(Number);
+                if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                    calViewDate = new Date(parts[0], parts[1] - 1, 1);
+                }
+            } else {
+                calViewDate = new Date();
+            }
+            renderCalendar();
+            calPopup.style.display = 'block';
+        }
+
+        function closeCalendarPopup() {
+            if (calPopup) calPopup.style.display = 'none';
+        }
+
+        function toggleCalendarPopup() {
+            if (!calPopup) return;
+            if (calPopup.style.display === 'none' || !calPopup.style.display) {
+                openCalendarPopup();
+            } else {
+                closeCalendarPopup();
+            }
+        }
+
+        // Date Box Click Trigger (Custom Styled Calendar)
+        if (dateBox && dateInput) {
+            dateBox.addEventListener('click', (e) => {
+                if (e.target.closest('#btn-clear-date')) return;
+                if (e.target.closest('#custom-calendar-popup')) return;
+                toggleCalendarPopup();
+            });
+
+            dateInput.addEventListener('change', () => {
+                if (dateInput.value) {
+                    btnClearDate.style.display = 'inline-flex';
+                    dateBox.classList.add('has-date');
+                } else {
+                    btnClearDate.style.display = 'none';
+                    dateBox.classList.remove('has-date');
+                }
+                applyRequestsFilter();
+                if (calPopup && calPopup.style.display !== 'none') {
+                    renderCalendar();
+                }
+            });
+        }
+
+        // Calendar Popup Day Selection
+        if (calDaysGrid) {
+            calDaysGrid.addEventListener('click', (e) => {
+                const btn = e.target.closest('.cal-day-cell');
+                if (!btn) return;
+                const chosenDate = btn.getAttribute('data-date');
+                if (chosenDate && dateInput) {
+                    dateInput.value = chosenDate;
+                    dateInput.dispatchEvent(new Event('change'));
+                }
+                closeCalendarPopup();
+            });
+        }
+
+        // Calendar Month Navigation
+        if (calPrevMonth) {
+            calPrevMonth.addEventListener('click', (e) => {
+                e.stopPropagation();
+                calViewDate.setMonth(calViewDate.getMonth() - 1);
+                renderCalendar();
+            });
+        }
+
+        if (calNextMonth) {
+            calNextMonth.addEventListener('click', (e) => {
+                e.stopPropagation();
+                calViewDate.setMonth(calViewDate.getMonth() + 1);
+                renderCalendar();
+            });
+        }
+
+        // Calendar Quick Actions (Today & Clear)
+        if (calBtnToday) {
+            calBtnToday.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const now = new Date();
+                const pad = (n) => String(n).padStart(2, '0');
+                const iso = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+                if (dateInput) {
+                    dateInput.value = iso;
+                    dateInput.dispatchEvent(new Event('change'));
+                }
+                closeCalendarPopup();
+            });
+        }
+
+        if (calBtnClear) {
+            calBtnClear.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (dateInput) {
+                    dateInput.value = '';
+                    dateInput.dispatchEvent(new Event('change'));
+                }
+                closeCalendarPopup();
+            });
+        }
+
+        if (btnClearDate) {
+            btnClearDate.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dateInput.value = '';
+                dateInput.dispatchEvent(new Event('change'));
+                closeCalendarPopup();
+            });
+        }
+
+        // Close calendar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#requests-date-box')) {
+                closeCalendarPopup();
+            }
+        });
+
+        // Fetch Real Requests from Backend API
+        async function loadMyRequests() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/requests/my');
+                    if (res && res.success && Array.isArray(res.data)) {
+                        requestsData = res.data;
+                    } else if (Array.isArray(res)) {
+                        requestsData = res;
+                    }
+                }
+            } catch (err) {
+                // If backend API endpoint is not yet created, gracefully fall back to empty state
+                console.info('Requests API endpoint not yet connected or returned empty, rendering empty state:', err.message);
+            } finally {
+                applyRequestsFilter();
+            }
+        }
+
+        function viewRequestDetail(id) {
+            const req = requestsData.find(r => String(r.requestId || r.id) === String(id));
+            if (!req) return;
+
+            const badgeClass = AdminApp.getStatusBadgeClass(req.status);
+            const reqId = req.requestId || (req.id ? ('#' + req.id) : id);
+            const reqType = req.type || req.requestType || 'Request';
+            const displayDate = formatDisplayDate(req.date || req.requestedDatetime || req.createdAt);
+            const displayStatus = formatDisplayStatus(req.status);
+            const requestedBy = req.requestedByName || req.requesterName || req.requestedBy || '-';
+            const role = req.role || 'Admin';
+            const note = req.note || req.detail || req.payload || 'No additional note specified.';
+
+            const decisionInfo = (String(req.status || '').toUpperCase() === 'REJECTED' && req.decisionReason)
+                ? `<div class="detail-note-box warning-box" style="margin-top: 12px; background: #fff5f5; border: 1px solid #fed7d7; padding: 12px; border-radius: 8px;">
+                     <strong style="color: #c53030;">Reason for Rejection:</strong>
+                     <p style="color: #742a2a; margin-top: 4px;">${escapeHtml(req.decisionReason)}</p>
+                   </div>`
+                : '';
+
+            document.getElementById('req-detail-modal-body').innerHTML = `
+                <div class="detail-header-row">
+                    <div>
+                        <span class="detail-id-label">Request ID</span>
+                        <h4 class="detail-id-title">${escapeHtml(String(reqId))}</h4>
+                    </div>
+                    <span class="badge-status badge-lg ${badgeClass}">${escapeHtml(String(displayStatus))}</span>
+                </div>
+
+                <div class="detail-meta-grid">
+                    <div>
+                        <span>Action Type</span>
+                        <strong>${escapeHtml(String(reqType))}</strong>
+                    </div>
+                    <div>
+                        <span>Submitted Date</span>
+                        <strong>${escapeHtml(String(displayDate))}</strong>
+                    </div>
+                    <div>
+                        <span>Requested By</span>
+                        <strong>${escapeHtml(String(requestedBy))} (${escapeHtml(String(role))})</strong>
+                    </div>
+                </div>
+
+                <div class="detail-note-box">
+                    <span>Request Payload / Note:</span>
+                    <p>${escapeHtml(String(note))}</p>
+                </div>
+                ${decisionInfo}
+            `;
+
+            AdminApp.openModal('modal-req-detail');
+        }
+
+        function closeReqDetailModal() {
+            AdminApp.closeModal('modal-req-detail');
+        }
+
+        // Initialize: Load real requests (or empty state)
+        loadMyRequests();
+    </script>
+</body>
+
+</html>

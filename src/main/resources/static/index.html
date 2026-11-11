@@ -173,7 +173,7 @@
                     localStorage.setItem('stocktrack_user', JSON.stringify(data.user));
                     const role = (data.user.role || '').toUpperCase();
                     if (role === 'ADMIN') {
-                        window.location.href = 'admin/dashboard.html';
+                        window.location.href = 'admin/my-requests.html';
                     } else if (role === 'MANAGER') {
                         window.location.href = 'manager/dashboard.html';
                     } else if (role === 'OWNER') {
@@ -181,7 +181,7 @@
                     } else if (role === 'STAFF') {
                         window.location.href = 'staff/dashboard.html';
                     } else {
-                        window.location.href = 'admin/dashboard.html';
+                        window.location.href = 'admin/my-requests.html';
                     }
                 } else {
                     alert(data.message || 'Invalid ID or password');

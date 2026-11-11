@@ -13,6 +13,7 @@
         rel="stylesheet">
     <!-- Stylesheet -->
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/admin.css">
 </head>
 
 <body>
@@ -31,7 +32,7 @@
 
                 <div class="requests-header-right">
                     <div class="po-create-btn-row">
-                        <button type="button" class="btn-create-po" id="btn-open-create-so-modal">
+                        <button type="button" class="btn-create-po" id="btn-open-create-so-modal" onclick="openCreateSOModal()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                                 stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -39,6 +40,51 @@
                             </svg>
                             Create Sales Order
                         </button>
+
+                        <div class="requests-date-box" id="requests-date-box" title="Click to filter by date">
+                            <span class="date-icon" id="date-picker-icon" title="Choose date">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </span>
+                            <input type="date" id="requests-date-input" aria-label="Filter by date">
+                            <button type="button" class="btn-clear-date" id="btn-clear-date" title="Clear date filter" style="display: none;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+
+                            <!-- Custom Styled Date Picker Popup (StockTrack Mint Theme) -->
+                            <div class="custom-calendar-popup" id="custom-calendar-popup" style="display: none;">
+                                <div class="cal-header">
+                                    <button type="button" class="cal-nav-btn" id="cal-prev-month" title="Previous month">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="15 18 9 12 15 6"></polyline>
+                                        </svg>
+                                    </button>
+                                    <span class="cal-month-title" id="cal-month-title">November 2026</span>
+                                    <button type="button" class="cal-nav-btn" id="cal-next-month" title="Next month">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="cal-weekdays">
+                                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                                </div>
+                                <div class="cal-days-grid" id="cal-days-grid"></div>
+                                <div class="cal-footer">
+                                    <button type="button" class="cal-quick-btn" id="cal-btn-today">Today</button>
+                                    <button type="button" class="cal-quick-btn cal-quick-clear" id="cal-btn-clear">Clear</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="po-header-filters-row">
@@ -66,28 +112,13 @@
             <!-- 2. KPI / Summary Cards -->
             <section class="po-stats-grid">
                 <div class="po-stat-card">
-                    <div class="po-stat-icon mint">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <path d="M16 10a4 4 0 0 1-8 0"></path>
-                        </svg>
-                    </div>
                     <div class="po-stat-info">
                         <span class="stat-label">Total Sales Orders</span>
-                        <span class="stat-value" id="kpi-total-so">0</span>
+                        <span class="stat-value mint" id="kpi-total-so">0</span>
                     </div>
                 </div>
 
                 <div class="po-stat-card">
-                    <div class="po-stat-icon amber">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                    </div>
                     <div class="po-stat-info">
                         <span class="stat-label">Pending Approval</span>
                         <span class="stat-value amber" id="kpi-pending-so">0</span>
@@ -95,30 +126,9 @@
                 </div>
 
                 <div class="po-stat-card">
-                    <div class="po-stat-icon blue">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                    </div>
                     <div class="po-stat-info">
                         <span class="stat-label">Approved Orders</span>
                         <span class="stat-value blue" id="kpi-approved-so">0</span>
-                    </div>
-                </div>
-
-                <div class="po-stat-card">
-                    <div class="po-stat-icon purple">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                        </svg>
-                    </div>
-                    <div class="po-stat-info">
-                        <span class="stat-label">Total Sales Value</span>
-                        <span class="stat-value" id="kpi-total-sales">฿0.00</span>
                     </div>
                 </div>
             </section>
@@ -138,25 +148,8 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody id="so-table-body">
-                            <!-- Empty State: Ready for Backend API Data -->
-                            <tr>
-                                <td colspan="7" class="table-empty-state">
-                                    <div class="empty-state-wrap">
-                                        <div class="empty-state-icon-circle">
-                                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                                                <line x1="3" y1="6" x2="21" y2="6"></line>
-                                                <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                            </svg>
-                                        </div>
-                                        <p>ยังไม่มีข้อมูลใบสั่งขายในขณะนี้</p>
-                                        <span class="empty-subtitle">ตารางนี้พร้อมสำหรับดึงข้อมูล Sales Orders จาก Backend API มาแสดงผล</span>
-                                    </div>
-                                </td>
-                            </tr>
+                        <tbody id="requests-table-body">
+                            
                         </tbody>
                     </table>
                 </div>
@@ -174,50 +167,76 @@
         </main>
     </div>
 
-    <!-- MODAL: Create Sales Order Modal -->
+    <!-- MODAL: Create Sales Order Modal (Wireframe Reference Match) -->
     <div class="modal-overlay" id="modal-create-so">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3>Create Sales Order</h3>
-                <button type="button" class="btn-close-modal">&times;</button>
+        <div class="modal-box modal-po-wire">
+            <div class="po-wire-header">
+                <h2>Create Sales Order</h2>
+                <button type="button" class="btn-close-modal" aria-label="Close modal" onclick="closeCreateSOModal()">&times;</button>
             </div>
+
             <form id="form-create-so" onsubmit="handleCreateSOSubmit(event)">
-                <div class="modal-body">
-                    <div class="modal-grid-2">
-                        <div>
-                            <label for="so-customer-input">Customer Name</label>
-                            <input type="text" id="so-customer-input" class="modal-input" placeholder="e.g. RWTcomp." required>
-                        </div>
-                        <div>
-                            <label for="so-date-input">Order Date</label>
-                            <input type="date" id="so-date-input" class="modal-input" required>
-                        </div>
+                <!-- Row 1: Created by & UserID -->
+                <div class="po-wire-grid-2">
+                    <div>
+                        <label for="new-so-created-by" class="po-wire-label">Created by</label>
+                        <input type="text" id="new-so-created-by" class="po-wire-input-readonly" readonly placeholder="User Name">
                     </div>
-
-                    <div class="modal-field-mt">
-                        <label for="so-product-input">Product / Item Description</label>
-                        <input type="text" id="so-product-input" class="modal-input" placeholder="Enter product name or SKU" required>
-                    </div>
-
-                    <div class="modal-grid-2 modal-field-mt">
-                        <div>
-                            <label for="so-qty-input">Quantity</label>
-                            <input type="number" id="so-qty-input" class="modal-input" min="1" value="1" required>
-                        </div>
-                        <div>
-                            <label for="so-price-input">Unit Price (฿)</label>
-                            <input type="number" id="so-price-input" class="modal-input" min="0" step="0.01" placeholder="0.00" required>
-                        </div>
-                    </div>
-
-                    <div class="modal-field-mt">
-                        <label for="so-note-input">Note / Delivery Remarks</label>
-                        <textarea id="so-note-input" class="modal-textarea" rows="2" placeholder="Optional notes regarding delivery or payment terms"></textarea>
+                    <div>
+                        <label for="new-so-user-id" class="po-wire-label">UserID</label>
+                        <input type="text" id="new-so-user-id" class="po-wire-input-readonly" readonly placeholder="User ID">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" data-close-modal>Cancel</button>
-                    <button type="submit" class="btn-submit" id="btn-submit-so">Create Order</button>
+
+                <!-- Row 2: Customer -->
+                <div class="po-wire-group">
+                    <label for="new-so-customer" class="po-wire-label">Customer</label>
+                    <select id="new-so-customer" class="po-wire-select">
+                        <option value="" disabled selected></option>
+                        <option value="RWTcomp.">RWTcomp.</option>
+                        <option value="Office Pro Thailand">Office Pro Thailand</option>
+                        <option value="Bangkok Modern Living">Bangkok Modern Living</option>
+                        <option value="Siam Retail Group">Siam Retail Group</option>
+                    </select>
+                </div>
+
+                <!-- Row 3: Product Items Section -->
+                <div class="po-wire-items-section">
+                    <div class="po-wire-items-header">
+                        <span>Product name</span>
+                        <span>Quantity</span>
+                        <span>Unit price</span>
+                        <span>Total price</span>
+                    </div>
+
+                    <div class="po-wire-items-list" id="so-items-container">
+                        <div class="po-wire-item-row">
+                            <select class="po-wire-select so-item-product" onchange="handleSOProductChange(this)">
+                                <option value="" disabled selected></option>
+                                <option value="Executive Chair" data-price="4500">Executive Chair</option>
+                                <option value="Wooden Desk" data-price="6200">Wooden Desk</option>
+                                <option value="L-Shape Sofa" data-price="16800">L-Shape Sofa</option>
+                                <option value="Storage Cabinet" data-price="3900">Storage Cabinet</option>
+                                <option value="Ergonomic Mesh Chair" data-price="3400">Ergonomic Mesh Chair</option>
+                                <option value="Steel Filing Cabinet" data-price="2750">Steel Filing Cabinet</option>
+                            </select>
+                            <input type="number" min="1" class="po-wire-input so-item-qty" placeholder="" oninput="handleSOQtyChange(this)">
+                            <input type="text" class="po-wire-input-readonly so-item-unit-price" readonly placeholder="">
+                            <input type="text" class="po-wire-input-readonly so-item-total-price" readonly placeholder="">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 4: + Add Item / - Delete Item -->
+                <div class="po-wire-item-actions">
+                    <button type="button" class="po-wire-btn-text" id="btn-add-so-item" onclick="addSOItemRow()">+ Add Item</button>
+                    <button type="button" class="po-wire-btn-text delete" id="btn-delete-so-item" onclick="deleteLastSOItemRow()">- Delete Item</button>
+                </div>
+
+                <!-- Row 5: Action Buttons -->
+                <div class="po-wire-actions">
+                    <button type="button" class="po-wire-btn-cancel" data-close-modal onclick="closeCreateSOModal()">Cancel</button>
+                    <button type="submit" class="po-wire-btn-save">Save</button>
                 </div>
             </form>
         </div>
@@ -227,20 +246,124 @@
     <script src="../js/sidebar.js"></script>
     <script src="../js/admin.js"></script>
     <script>
-        document.getElementById('btn-open-create-so-modal')?.addEventListener('click', () => {
-            document.getElementById('so-date-input').value = AdminApp.getTodayISO();
-            AdminApp.openModal('modal-create-so');
+        AdminApp.checkAdminAccess();
+
+        const formatMoney = AdminApp.formatMoney;
+
+        AdminApp.initCustomDatePicker({
+            box: 'requests-date-box',
+            onChange: (dateVal) => {
+                // Ready for filtering when Backend API loads sales orders
+            }
         });
 
-        function closeCreateSOModal() {
-            AdminApp.closeModal('modal-create-so');
+        // --- Create SO Form Handlers (Wireframe UI Structure) ---
+        function handleSOProductChange(selectEl) {
+            const row = selectEl.closest('.po-wire-item-row');
+            if (!row) return;
+
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            const price = parseFloat(selectedOption ? selectedOption.getAttribute('data-price') : 0) || 0;
+
+            const unitPriceInput = row.querySelector('.so-item-unit-price');
+            const qtyInput = row.querySelector('.so-item-qty');
+            const totalPriceInput = row.querySelector('.so-item-total-price');
+
+            unitPriceInput.value = price > 0 ? formatMoney(price) : '';
+            unitPriceInput.dataset.price = price;
+
+            if (!qtyInput.value) {
+                qtyInput.value = '1';
+            }
+
+            const qty = parseInt(qtyInput.value, 10) || 0;
+            const total = qty * price;
+            totalPriceInput.value = total > 0 ? formatMoney(total) : '';
         }
+
+        function handleSOQtyChange(qtyInput) {
+            const row = qtyInput.closest('.po-wire-item-row');
+            if (!row) return;
+
+            const unitPriceInput = row.querySelector('.so-item-unit-price');
+            const totalPriceInput = row.querySelector('.so-item-total-price');
+            const price = parseFloat(unitPriceInput.dataset.price || 0);
+
+            const qty = parseInt(qtyInput.value, 10) || 0;
+            const total = qty * price;
+            totalPriceInput.value = total > 0 ? formatMoney(total) : '';
+        }
+
+        function addSOItemRow() {
+            const container = document.getElementById('so-items-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'po-wire-item-row';
+            newRow.innerHTML = `
+                <select class="po-wire-select so-item-product" onchange="handleSOProductChange(this)">
+                    <option value="" disabled selected></option>
+                    <option value="Executive Chair" data-price="4500">Executive Chair</option>
+                    <option value="Wooden Desk" data-price="6200">Wooden Desk</option>
+                    <option value="L-Shape Sofa" data-price="16800">L-Shape Sofa</option>
+                    <option value="Storage Cabinet" data-price="3900">Storage Cabinet</option>
+                    <option value="Ergonomic Mesh Chair" data-price="3400">Ergonomic Mesh Chair</option>
+                    <option value="Steel Filing Cabinet" data-price="2750">Steel Filing Cabinet</option>
+                </select>
+                <input type="number" min="1" class="po-wire-input so-item-qty" placeholder="" oninput="handleSOQtyChange(this)">
+                <input type="text" class="po-wire-input-readonly so-item-unit-price" readonly placeholder="">
+                <input type="text" class="po-wire-input-readonly so-item-total-price" readonly placeholder="">
+            `;
+            container.appendChild(newRow);
+            const select = newRow.querySelector('.so-item-product');
+            if (select) select.focus();
+        }
+
+        function deleteLastSOItemRow() {
+            const container = document.getElementById('so-items-container');
+            const rows = container.querySelectorAll('.po-wire-item-row');
+            if (rows.length > 1) {
+                rows[rows.length - 1].remove();
+            } else if (rows.length === 1) {
+                const row = rows[0];
+                row.querySelector('.so-item-product').value = '';
+                const qty = row.querySelector('.so-item-qty');
+                qty.value = '';
+                const unit = row.querySelector('.so-item-unit-price');
+                unit.value = '';
+                unit.dataset.price = '0';
+                row.querySelector('.so-item-total-price').value = '';
+            }
+        }
+
+        function syncUserInfo() {
+            const user = AdminApp.getCurrentUser();
+            if (user) {
+                const createdByEl = document.getElementById('new-so-created-by');
+                const userIdEl = document.getElementById('new-so-user-id');
+                if (createdByEl) createdByEl.value = user.fullName || user.username || '';
+                if (userIdEl) userIdEl.value = user.userId || user.username || '';
+            }
+        }
+
+        function openCreateSOModal() {
+            syncUserInfo();
+            const modal = document.getElementById('modal-create-so');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeCreateSOModal() {
+            const modal = document.getElementById('modal-create-so');
+            if (modal) modal.classList.remove('active');
+        }
+
+        document.getElementById('btn-open-create-so-modal')?.addEventListener('click', openCreateSOModal);
 
         function handleCreateSOSubmit(e) {
             e.preventDefault();
-            alert('Sales Order submission endpoint is ready for Backend API integration.');
+            // ปิด Modal (โครงสร้าง UI ยังไม่มีการบันทึกข้อมูลจริง)
             closeCreateSOModal();
         }
+
+        syncUserInfo();
     </script>
 </body>
 
