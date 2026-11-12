@@ -150,3 +150,137 @@
     gap: 12px;
   }
 }
+
+/* Staff dashboard */
+/* Reference layout, scoped to the staff dashboard. */
+.staff-dashboard { color: #152153; --staff-green: #10b981; }
+.staff-dashboard .app-layout { background: #f5f9f7; }
+.staff-dashboard .main-content { padding: 28px clamp(24px, 8.6vw, 92px) 30px; }
+.staff-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; padding-bottom: 24px; border-bottom: 1px solid #e9edf7; }
+.staff-header h1 { font-size: 26px; line-height: 1.4; letter-spacing: -.7px; font-weight: 700; }
+.staff-header p { margin-top: 8px; font-size: 12px; color: #6a7da5; }
+.connection-status { display: inline-flex; align-items: center; gap: 5px; min-width: 116px; padding: 12px 14px; border: 1px solid #e1e7f3; border-radius: 18px; background: white; color: #00af80; font-size: 11px; font-weight: 600; }
+.connection-status > span { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.connection-status.offline { color: #8b6470; }
+.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 26px; }
+.summary-card { min-height: 110px; padding: 18px 14px; border: 1px solid #e0e6f2; border-radius: 13px; background: white; }
+.summary-card h2 { font-size: 12px; font-weight: 400; color: #6a7da5; }
+.summary-card > div { display: flex; align-items: baseline; gap: 4px; margin-top: 8px; }
+.summary-card strong { font-size: 27px; line-height: 1.2; }
+.summary-card div span { flex: 1; text-align: center; font-size: 10px; color: #6a7da5; }
+.workflow-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 27px; }
+.workflow-card { display: flex; flex-direction: column; align-items: flex-start; text-align: left; min-height: 216px; padding: 24px 17px 38px; background: white; border: 1.5px solid var(--workflow-color); border-radius: 16px; cursor: pointer; color: #152153; transition: box-shadow .18s, transform .18s; }
+.receive { --workflow-color: #10b981; }
+.issue { --workflow-color: #10b981; }
+.transfer { --workflow-color: #10b981; }
+.workflow-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px #1521530c; }
+.workflow-card:focus-visible, .staff-dashboard a:focus-visible, .staff-dashboard button:focus-visible { outline: 3px solid #10b981; outline-offset: 4px; }
+.workflow-title { font-size: 18px; font-weight: 700; letter-spacing: -.4px; }
+.workflow-description { font-size: 12px; color: #6a7da5; margin-top: 12px; line-height: 1.6; }
+.workflow-link { color: var(--workflow-color); font-size: 12px; font-weight: 700; margin-top: auto; padding-top: 36px; }
+.recent-activities { margin-top: 26px; }
+.recent-activities h2 { font-size: 17px; margin-bottom: 16px; }
+.activity-table-wrapper { overflow-x: auto; }
+.recent-activities table { width: 100%; min-width: 570px; border-collapse: collapse; font-size: 10px; text-align: left; background: white; }
+.recent-activities th { background: #eff2f9; color: #52658a; font-weight: 600; padding: 13px 9px; }
+.recent-activities td { padding: 14px 9px; border-bottom: 1px solid #e3e9f6; }
+.recent-activities th:first-child { width: 21%; }
+.recent-activities th:nth-child(3) { width: 24%; }
+.sample-data-note { margin-top: 10px; font-size: 10px; color: #6a7da5; }
+.staff-dashboard .sidebar-user .role-title.role-staff { color: #6a7da5; font-weight: 400; }
+.staff-dashboard .sidebar-menu-label { text-transform: none; font-weight: 400; letter-spacing: 0; }
+.staff-dashboard .nav-item.active { background: #ededed; }
+.staff-dashboard .nav-item .sidebar-icon-box { color: #152153; }
+@media (min-width: 769px) and (max-width: 1000px) { .staff-dashboard .main-content { padding-left: 36px; padding-right: 30px; } }
+@media (max-width: 768px) {
+    .staff-dashboard .app-layout .main-content { padding: 26px 22px; }
+    .staff-header h1 { font-size: 24px; }
+    .connection-status { min-width: auto; padding: 10px 12px; }
+    .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .workflow-grid { gap: 12px; }
+    .workflow-card { padding: 20px 14px 26px; min-height: 210px; }
+    .workflow-title { font-size: 16px; }
+}
+@media (max-width: 540px) {
+    .staff-header { gap: 10px; }
+    .staff-header h1 { font-size: 21px; }
+    .staff-header p { max-width: 210px; line-height: 1.7; }
+    .summary-card > div { flex-wrap: wrap; }
+    .summary-card div span { text-align: left; flex-basis: 100%; margin-top: 4px; }
+    .workflow-grid { grid-template-columns: 1fr; }
+    .workflow-card { min-height: 168px; }
+    .workflow-link { padding-top: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .workflow-card { transition: none; } }
+
+/* Shared blue receiving, issuing, and transfer workflows. */
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) .main-content { padding: 28px clamp(24px,8vw,90px) 32px; display: flex; flex-direction: column; min-height: 100vh; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) .staff-header { padding-bottom: 24px; margin-bottom: 26px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-eyebrow,.issue-eyebrow,.transfer-eyebrow) { color: #10b981; font-size: 10px; font-weight: 700; margin-bottom: 12px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(#receive-stage-title,#issue-stage-title,#transfer-stage-title) { font-size: 21px; margin-bottom: 18px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-steps,.issue-steps,.transfer-steps) { display: flex; list-style: none; gap: 20px; margin-bottom: 28px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-steps,.issue-steps,.transfer-steps) li { flex: 1; padding: 12px; border-radius: 24px; background: #e8ecf5; color: #607296; font-size: 10px; font-weight: 700; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-steps,.issue-steps,.transfer-steps) [aria-current=step] { background: #10b981; color: white; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-steps,.issue-steps,.transfer-steps) .complete { color: #10b981; background: #d1fae5; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(#receive-stage-content,#issue-stage-content,#transfer-stage-content) h3 { font-size: 14px; margin-bottom: 16px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-table-scroll,.issue-table-scroll,.transfer-table-scroll) { overflow-x: auto; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) table { width: 100%; border-collapse: collapse; background: white; text-align: left; font-size: 11px; min-width: 650px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) th { font-weight: 600; color: #607296; background: #eff2f9; font-size: 10px; padding: 14px 10px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) td { padding: 18px 10px; border-bottom: 1px solid #e1e7f3; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) button { font: inherit; cursor: pointer; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-open,.issue-open,.transfer-open) { border: 0; background: none; color: #152153; font-size: 11px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) input[type=radio] { appearance: none; width: 16px; height: 20px; border: 1.5px solid #10b981; border-radius: 4px; cursor: pointer; display: grid; place-items: center; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) input[type=radio]:checked::after { content: '✓'; color: #10b981; font-size: 14px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-tip,.issue-tip,.transfer-tip) { margin-top: 54px; margin-bottom: 28px; padding: 16px 14px; background: white; border: 1px solid #e1e7f3; border-left: 3px solid #10b981; border-radius: 0 10px 10px 0; align-self: flex-start; max-width: 300px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-tip,.issue-tip,.transfer-tip) h3 { font-size: 13px; margin-bottom: 10px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-tip,.issue-tip,.transfer-tip) p { font-size: 11px; line-height: 1.8; color: #6a7da5; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-footer,.issue-footer,.transfer-footer) { margin-top: auto; padding-top: 0; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-footer,.issue-footer,.transfer-footer) p,:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-footer,.issue-footer,.transfer-footer) small { color: #6a7da5; font-size: 10px; line-height: 1.8; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-footer,.issue-footer,.transfer-footer) small { display: block; font-size: 9px; margin-top: 4px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-footer,.issue-footer,.transfer-footer) > div:last-child { display: flex; gap: 12px; flex-shrink: 0; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(#receive-next,#issue-next,#transfer-next),:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(#receive-back,#issue-back,#transfer-back) { padding: 14px 18px; min-width: 145px; border: 0; border-radius: 8px; background: #10b981; color: white; font-size: 12px; font-weight: 600; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(#receive-back,#issue-back,#transfer-back) { min-width: 80px; background: #e8ecf5; color: #152153; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(#receive-alert,#issue-alert,#transfer-alert) { padding: 12px; margin-bottom: 16px; border-radius: 6px; background: #fff1f2; color: #a63d4d; font-size: 12px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-details,.issue-details,.transfer-details) { background: white; border: 1px solid #e1e7f3; border-radius: 10px; padding: 20px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-details,.issue-details,.transfer-details) p { font-size: 12px; line-height: 2; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-quantity,.issue-quantity,.transfer-quantity) { width: 90px; padding: 8px; border: 1px solid #ccd6e9; border-radius: 6px; font: inherit; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-notes-label,.issue-notes-label,.transfer-notes-label) { display: block; margin-top: 18px; font-size: 12px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) textarea { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 1px solid #ccd6e9; border-radius: 8px; font: inherit; resize: vertical; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-confirm-check,.issue-confirm-check,.transfer-confirm-check) { display: flex; align-items: flex-start; gap: 10px; margin-top: 20px; font-size: 12px; line-height: 1.8; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-confirm-check,.issue-confirm-check,.transfer-confirm-check) input { margin-top: 4px; }
+@media(max-width:768px) { :is(.receive-workflow,.issue-workflow,.transfer-workflow) .app-layout .main-content { padding: 24px 18px; min-height: calc(100vh - 72px); }:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-steps,.issue-steps,.transfer-steps) { gap: 6px; }:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-steps,.issue-steps,.transfer-steps) li { padding: 10px 6px; font-size: 9px; }:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-footer,.issue-footer,.transfer-footer) { align-items: flex-start; flex-direction: column; }:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-footer,.issue-footer,.transfer-footer) > div:last-child { align-self: flex-end; }:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-tip,.issue-tip,.transfer-tip) { margin-top: 32px; } }
+
+
+/* Consistent staff links, selection states, and small-screen navigation. */
+.staff-dashboard .workflow-card { text-decoration: none; }
+.staff-dashboard [hidden] { display: none !important; }
+.staff-dashboard :is(.receive-workflow,.issue-workflow,.transfer-workflow) { --staff-workflow-green: #10b981; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) tr:has(input:checked) { background: #f3fbf7; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) input:focus-visible,
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) textarea:focus-visible { outline: 2px solid #10b981; outline-offset: 3px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) button:hover { filter: brightness(.96); }
+@media(max-width:768px) {
+ .staff-dashboard #sidebar-container .nav-item,.staff-dashboard #sidebar-container .nav-logout { margin: 0; width: 44px; flex-shrink: 0; }
+ .staff-dashboard #sidebar-container .sidebar { padding-left: 10px; padding-right: 10px; }
+}
+
+
+/* Staff page refinements shared by dashboard and all three workflows. */
+.staff-dashboard .main-content { width: 100%; }
+.staff-dashboard .staff-header h1 { letter-spacing: -.5px; }
+.staff-dashboard .workflow-card { border-color: #10b981; }
+.staff-dashboard .workflow-card:hover { background: #fbfefc; }
+.staff-dashboard .workflow-link { color: #10b981; }
+.staff-dashboard .summary-card { box-shadow: none; }
+.staff-dashboard .activity-table-wrapper { border: 1px solid #e3e9f6; border-radius: 6px; }
+.staff-dashboard .staff-skip-link { position: fixed; left: 90px; top: -80px; z-index: 2000; padding: 12px 18px; background: #10b981; color: white; border-radius: 8px; font-size: 13px; }
+.staff-dashboard .staff-skip-link:focus { top: 12px; }
+.staff-dashboard .workflow-dashboard-link { font-size: 11px; color: #607296; text-decoration: none; display: inline-block; margin-top: 18px; }
+.staff-dashboard .workflow-dashboard-link:hover { color: #10b981; }
+@media(min-width:1200px) { .staff-dashboard .main-content { padding-left: 90px; padding-right: 60px; } }
+@media(max-width:540px) {
+ .staff-dashboard .staff-header { gap: 12px; }
+ .staff-dashboard .connection-status { min-width: auto; padding: 10px; font-size: 10px; }
+ .staff-dashboard .summary-card { min-height: 108px; }
+ .staff-dashboard .staff-skip-link { left: 12px; }
+}

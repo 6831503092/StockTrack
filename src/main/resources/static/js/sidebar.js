@@ -1,4 +1,4 @@
-/**
+﻿/**
  * StockTrack - Shared Sidebar Navigation Component Script
  * Handles dynamic role rendering, zero-shift hover expansion, active states, and unified logout.
  */
@@ -62,9 +62,27 @@
             homeUrl: 'dashboard.html',
             menus: [
                 {
+                    id: 'receive',
+                    title: 'Receive Items',
+                    url: 'receive-items.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"></path></svg>`
+                },
+                {
+                    id: 'issue',
+                    title: 'Issue Items',
+                    url: 'issue-items.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h14m-5-5 5 5-5 5m9-10v10"></path></svg>`
+                },
+                {
+                    id: 'transfer',
+                    title: 'Transfer Product',
+                    url: 'transfer-items.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16m-4-4 4 4-4 4M20 16H4m4-4-4 4 4 4"></path></svg>`
+                },
+                {
                     id: 'dashboard',
                     title: 'Dashboard',
-                    url: '#dashboard',
+                    url: 'dashboard.html',
                     icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2.5"></rect><rect x="13" y="3" width="8" height="8" rx="2.5"></rect><rect x="3" y="13" width="8" height="8" rx="2.5"></rect><rect x="13" y="13" width="8" height="8" rx="2.5"></rect></svg>`
                 }
             ]
@@ -227,7 +245,10 @@
         // Render Nav Items with icon-box & title
         const navListEl = container.querySelector('#sidebar-nav-list');
         if (navListEl && roleConfig.menus) {
-            navListEl.innerHTML = roleConfig.menus.map(item => {
+            const menuItems = userRole === 'STAFF'
+                ? [...roleConfig.menus.filter(item => item.id === 'dashboard'), ...roleConfig.menus.filter(item => item.id !== 'dashboard')]
+                : roleConfig.menus;
+            navListEl.innerHTML = menuItems.map(item => {
                 const isActive = item.id === activeMenu ? 'active' : '';
                 return `
                     <a href="${item.url}" class="nav-item ${isActive}" data-nav-id="${item.id}" data-tooltip="${item.title}">
@@ -278,3 +299,4 @@
         }
     };
 })();
+

@@ -1,56 +1,94 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockTrack - Staff Dashboard</title>
-    <link rel="icon" type="image/png" href="../picture/favicon/favicon.png">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="../css/style.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockTrack - Staff Dashboard</title><link rel="icon" href="../picture/favicon/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/staff.css">
 </head>
-<body>
-    <div class="app-layout">
-        <!-- Sidebar Navigation (Modular Component) -->
-        <div id="sidebar-container" data-role="STAFF" data-active-menu="dashboard"></div>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <header class="content-header">
-                <h1>Staff Dashboard</h1>
-                <p>Welcome back, Staff. Check daily inventory, stock picking, and logistics tasks.</p>
-            </header>
-
-            <section class="placeholder-card">
-                <p style="color: #64748b;">พื้นที่ส่วนแสดงผลข้อมูลหลักของหน้า Staff Dashboard</p>
-            </section>
-        </main>
-    </div>
-
-    <!-- Scripts -->
-    <script src="../js/api.js"></script>
-    <script src="../js/sidebar.js"></script>
-    <script>
-        (function checkAccess() {
-            const raw = localStorage.getItem('stocktrack_user');
-            if (!raw) {
-                window.location.replace('../index.html');
-                return;
-            }
-            try {
-                const user = JSON.parse(raw);
-                if (!user || user.role !== 'STAFF') {
-                    window.location.replace('../index.html');
-                }
-            } catch (err) {
-                localStorage.removeItem('stocktrack_user');
-                window.location.replace('../index.html');
-            }
-        })();
-    </script>
-</body>
-</html>
+<body class="staff-dashboard">
+<a class="staff-skip-link" href="#staff-main">Skip to content</a>
+<div class="app-layout"><div id="sidebar-container" data-role="STAFF" data-active-menu="dashboard"></div>
+<main class="main-content" id="staff-main" tabindex="-1">
+<header class="staff-header"><div><h1>Welcome, Staff!</h1><p>Manage your inventory operations efficiently.</p></div><span class="connection-status" id="connection-status"><span></span>Online</span></header>
+<section class="summary-grid" aria-label="Inventory overview">
+<article class="summary-card"><h2>Total Products</h2><div><strong>300</strong><span>Items in Inventory</span></div></article>
+<article class="summary-card"><h2>Low Stock Items</h2><div><strong>0</strong><span>Need Attention</span></div></article>
+<article class="summary-card"><h2>Pending Requests</h2><div><strong>2</strong><span>Awaiting Approval</span></div></article>
+<article class="summary-card"><h2>Total Warehouses</h2><div><strong>2</strong><span>Active Locations</span></div></article>
+</section>
+<section class="workflow-grid" aria-label="Inventory workflows">
+<a class="workflow-card receive" href="receive-items.html"><span class="workflow-title">Receive Items</span><span class="workflow-description">Receive goods into warehouse</span><span class="workflow-link">Open workflow</span></a>
+<a class="workflow-card issue" href="issue-items.html"><span class="workflow-title">Issue Items</span><span class="workflow-description">Pick and issue products</span><span class="workflow-link">Open workflow</span></a>
+<a class="workflow-card transfer" href="transfer-items.html"><span class="workflow-title">Transfer Product</span><span class="workflow-description">Move products between warehouses</span><span class="workflow-link">Open workflow</span></a>
+</section>
+<section class="recent-activities" aria-labelledby="activity-title"><h2 id="activity-title">Recent Activities</h2>
+<div class="activity-table-wrapper"><table><thead><tr><th scope="col">Date &amp; Time</th><th scope="col">Operation</th><th scope="col">Product</th><th scope="col">Quantity</th><th scope="col">Status</th></tr></thead>
+<tbody id="staff-activity-rows">
+<tr><td><time datetime="2026-11-02T09:15">02 Nov 2026 09:15</time></td><td>Receive</td><td>Modern table</td><td>100</td><td>Completed</td></tr>
+<tr><td><time datetime="2026-11-02T08:45">02 Nov 2026 08:45</time></td><td>Issue</td><td>Wooden table</td><td>50</td><td>Completed</td></tr>
+<tr><td><time datetime="2026-11-01T16:30">01 Nov 2026 16:30</time></td><td>Transfer</td><td>Dining table</td><td>30</td><td>In Progress</td></tr>
+</tbody></table></div><p class="sample-data-note">Sample inventory data · Local workflow records appear here after confirmation.</p></section>
+</main></div>
+<script src="../js/api.js"></script><script src="../js/sidebar.js"></script><script>
+(function () {
+    'use strict';
+    const user = window.api.getCurrentUser();
+    if (!user || user.role !== 'STAFF') {
+        window.location.replace('../index.html');
+        return;
+    }
+    const status = document.getElementById('connection-status');
+    status.setAttribute('role', 'status');
+    function updateConnection() {
+        const dot = document.createElement('span');
+        dot.setAttribute('aria-hidden', 'true');
+        status.classList.toggle('offline', !navigator.onLine);
+        status.replaceChildren(dot, document.createTextNode(navigator.onLine ? 'Online' : 'Offline'));
+    }
+    window.addEventListener('online', updateConnection);
+    window.addEventListener('offline', updateConnection);
+    updateConnection();
+    const activityRows = document.getElementById('staff-activity-rows');
+    const identity = user.userId || user.username;
+    const sources = [
+        ['Receive', 'stocktrack_receipts_' + user.userId],
+        ['Issue', 'stocktrack_issues_' + identity],
+        ['Transfer', 'stocktrack_transfers_' + identity]
+    ];
+    const activities = [];
+    sources.forEach(([operation, key]) => {
+        try {
+            const records = JSON.parse(localStorage.getItem(key) || '[]');
+            if (!Array.isArray(records)) return;
+            records.forEach(record => {
+                if (!record || !Array.isArray(record.items)) return;
+                record.items.forEach(item => {
+                    if (!item || typeof item.product !== 'string' || !Number.isFinite(item.quantity)) return;
+                    activities.push({ operation, product: item.product, quantity: item.quantity,
+                        date: record.confirmedAt || record.receivedDate || record.issuedDate || record.transferDate || '' });
+                });
+            });
+        } catch (error) { /* Keep sample activity available when local storage cannot be read. */ }
+    });
+    activities.sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
+    const fragment = document.createDocumentFragment();
+    activities.slice(0, 10).forEach(activity => {
+        const row = document.createElement('tr');
+        const parsedDate = new Date(activity.date);
+        const date = Number.isNaN(parsedDate.getTime()) ? activity.date : parsedDate.toLocaleString('en-GB', {
+            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        [date, activity.operation, activity.product, activity.quantity, 'Saved locally'].forEach(value => {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+        fragment.appendChild(row);
+    });
+    activityRows.prepend(fragment);
+})();
+</script>
+</body></html>
 

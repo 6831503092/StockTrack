@@ -1,55 +1,35 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockTrack - Manager Dashboard</title>
-    <link rel="icon" type="image/png" href="../picture/favicon/favicon.png">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="../css/style.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockTrack - Manager Dashboard</title>
+<link rel="icon" href="../picture/favicon/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
-    <div class="app-layout">
-        <!-- Sidebar Navigation (Modular Component) -->
-        <div id="sidebar-container" data-role="MANAGER" data-active-menu="dashboard"></div>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <header class="content-header">
-                <h1>Manager Dashboard</h1>
-                <p>Welcome back, Manager. Review and approve inventory requests and purchase orders.</p>
-            </header>
-
-            <section class="placeholder-card">
-                <p style="color: #64748b;">พื้นที่ส่วนแสดงผลข้อมูลหลักของหน้า Manager Dashboard</p>
-            </section>
-        </main>
-    </div>
-
-    <!-- Scripts -->
-    <script src="../js/sidebar.js"></script>
-    <script>
-        (function checkAccess() {
-            const raw = localStorage.getItem('stocktrack_user');
-            if (!raw) {
-                window.location.replace('../index.html');
-                return;
-            }
-            try {
-                const user = JSON.parse(raw);
-                if (!user || user.role !== 'MANAGER') {
-                    window.location.replace('../index.html');
-                }
-            } catch (err) {
-                localStorage.removeItem('stocktrack_user');
-                window.location.replace('../index.html');
-            }
-        })();
-    </script>
-</body>
-</html>
-
+<body class="manager-dashboard">
+<div class="app-layout">
+<div id="sidebar-container" data-role="MANAGER" data-active-menu="dashboard"></div>
+<main class="main-content">
+<h1>Dashboard</h1>
+<section class="manager-summary" aria-label="Inventory overview">
+<article><div><span class="manager-icon blue">▣</span><h2>Total Items</h2></div><strong id="manager-total">300</strong><p>Items in inventory</p></article>
+<article><div><span class="manager-icon red">⚠</span><h2>Low Stock Items</h2></div><strong id="manager-low">0</strong></article>
+<article><div><span class="manager-icon orange">◷</span><h2>Pending Requests</h2></div><strong>2</strong><p>Awaiting approval</p></article>
+<article><div><span class="manager-icon green">⌂</span><h2>Total Warehouse</h2></div><strong>2</strong><p>Active locations</p></article>
+</section>
+<section class="manager-chart-panel" aria-labelledby="manager-chart-title">
+<div class="manager-chart-heading"><div><h2 id="manager-chart-title">Stock quantity by product</h2><p>Current available stock · Units</p></div><span class="manager-legend">In stock</span></div>
+<div class="manager-chart" role="img" aria-label="Stock quantities"><div class="manager-axis"><span id="manager-axis-top">100</span><span id="manager-axis-mid">50</span><span>0</span></div><div class="manager-bars" id="manager-bars"></div></div>
+</section>
+<section class="manager-products" aria-labelledby="manager-products-title">
+<div class="manager-products-toolbar"><h2 id="manager-products-title">Products Details</h2><label class="manager-search"><span class="manager-sr-only">Search products</span><input id="manager-search" type="search" placeholder="Search product name or ID..."></label><label><span class="manager-sr-only">Filter by zone</span><select id="manager-zone"><option value="1">Zone: 1</option><option value="2">Zone: 2</option><option value="all">All zones</option></select></label></div>
+<div class="manager-table-scroll"><table><thead><tr><th>Product ID</th><th>Product Name</th><th>Default Cost</th><th>Selling Price</th><th>Current Stock</th><th>Min Alert</th><th>Action</th></tr></thead><tbody id="manager-product-rows"></tbody></table></div>
+<p class="manager-data-note">Sample data · Edits are saved in this browser only.</p>
+</section>
+<p id="manager-feedback" role="status"></p>
+</main></div>
+<dialog id="manager-edit-dialog" aria-labelledby="manager-edit-title"><form id="manager-edit-form"><h2 id="manager-edit-title">Edit product</h2><label>Product name<input name="productName" required maxlength="50"></label><label>Default cost<input name="cost" type="number" required min="0" max="99999999" step="0.01"></label><label>Selling price<input name="price" type="number" required min="0" max="99999999" step="0.01"></label><label>Current stock<input name="stock" type="number" required min="0" max="1000000" step="1"></label><label>Minimum alert<input name="minimum" type="number" required min="0" max="1000000" step="1"></label><p id="manager-edit-error" role="alert"></p><div><button type="button" id="manager-edit-cancel">Cancel</button><button type="submit">Save changes</button></div></form></dialog>
+<script src="../js/api.js"></script><script src="../js/sidebar.js"></script><script src="../manager/dashboard.js"></script>
+</body></html>
