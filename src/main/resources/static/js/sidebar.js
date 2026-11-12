@@ -3,6 +3,8 @@
  * Handles dynamic role rendering, zero-shift hover expansion, active states, and unified logout.
  */
 (function () {
+    const DASHBOARD_ICON = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2.5"></rect><rect x="13" y="3" width="8" height="8" rx="2.5"></rect><rect x="3" y="13" width="8" height="8" rx="2.5"></rect><rect x="13" y="13" width="8" height="8" rx="2.5"></rect></svg>`;
+
     // Role Menu Configurations & Defaults
     const ROLE_CONFIGS = {
         ADMIN: {
@@ -57,7 +59,7 @@
                     id: 'dashboard',
                     title: 'Dashboard',
                     url: '#dashboard',
-                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2.5"></rect><rect x="13" y="3" width="8" height="8" rx="2.5"></rect><rect x="3" y="13" width="8" height="8" rx="2.5"></rect><rect x="13" y="13" width="8" height="8" rx="2.5"></rect></svg>`
+                    icon: DASHBOARD_ICON
                 }
             ]
         },
@@ -73,7 +75,7 @@
                     id: 'dashboard',
                     title: 'Dashboard',
                     url: '#dashboard',
-                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2.5"></rect><rect x="13" y="3" width="8" height="8" rx="2.5"></rect><rect x="3" y="13" width="8" height="8" rx="2.5"></rect><rect x="13" y="13" width="8" height="8" rx="2.5"></rect></svg>`
+                    icon: DASHBOARD_ICON
                 }
             ]
         },
@@ -89,7 +91,7 @@
                     id: 'dashboard',
                     title: 'Dashboard',
                     url: '#dashboard',
-                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2.5"></rect><rect x="13" y="3" width="8" height="8" rx="2.5"></rect><rect x="3" y="13" width="8" height="8" rx="2.5"></rect><rect x="13" y="13" width="8" height="8" rx="2.5"></rect></svg>`
+                    icon: DASHBOARD_ICON
                 }
             ]
         }

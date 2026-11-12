@@ -1,6 +1,6 @@
 /**
  * StockTrack - Shared Admin Utilities & Modal Controller
- * Centralizes role access checks, modal lifecycle, formatting, and fallback helpers.
+ * Centralizes role access checks, modal lifecycle, formatting, sanitization, and datepicker helpers.
  */
 (function () {
     const STATUS_BADGE_MAP = {
@@ -8,6 +8,14 @@
         Rejected: 'badge-rejected',
         Pending: 'badge-pending'
     };
+
+    const APPROVED_STATUSES = new Set(['APPROVED', 'COMPLETED', 'RECEIVED', 'ISSUED']);
+    const REJECTED_STATUSES = new Set(['REJECTED', 'REJECTED_ON_RECEIPT', 'REJECTED_ON_ISSUE']);
+
+    const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 
     const FALLBACK_ICONS = {
         warehouse: '<div class="zp-placeholder-box"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg></div>',
@@ -44,23 +52,45 @@
         }
     }
 
-    function getStatusBadgeClass(status) {
-        if (!status) return 'badge-pending';
-        const s = String(status).toUpperCase();
-        if (s === 'APPROVED' || s === 'COMPLETED' || s === 'RECEIVED' || s === 'ISSUED') {
-            return 'badge-approved';
-        }
-        if (s === 'REJECTED' || s === 'REJECTED_ON_RECEIPT' || s === 'REJECTED_ON_ISSUE') {
-            return 'badge-rejected';
-        }
-        return STATUS_BADGE_MAP[status] || 'badge-pending';
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     function formatMoney(amount) {
-        return Number(amount || 0).toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
+        return CURRENCY_FORMATTER.format(Number(amount) || 0);
+    }
+
+    function formatDisplayDate(dateVal) {
+        if (!dateVal) return '-';
+        try {
+            const str = String(dateVal).trim();
+            const d = new Date(str);
+            if (isNaN(d.getTime())) return str;
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+        } catch {
+            return String(dateVal);
+        }
+    }
+
+    function formatDisplayStatus(statusVal) {
+        if (!statusVal) return 'Pending';
+        const s = String(statusVal).trim();
+        return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+    }
+
+    function getStatusBadgeClass(status) {
+        if (!status) return 'badge-pending';
+        const s = String(status).toUpperCase();
+        if (APPROVED_STATUSES.has(s)) return 'badge-approved';
+        if (REJECTED_STATUSES.has(s)) return 'badge-rejected';
+        return STATUS_BADGE_MAP[status] || 'badge-pending';
     }
 
     function getTodayISO() {
@@ -310,27 +340,17 @@
             });
         }
 
-        if (calClearBtn) {
-            calClearBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (input) {
-                    input.value = '';
-                    input.dispatchEvent(new Event('change'));
-                }
-                closePopup();
-            });
-        }
+        const handleClear = (e) => {
+            e.stopPropagation();
+            if (input) {
+                input.value = '';
+                input.dispatchEvent(new Event('change'));
+            }
+            closePopup();
+        };
 
-        if (clearBtn) {
-            clearBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (input) {
-                    input.value = '';
-                    input.dispatchEvent(new Event('change'));
-                }
-                closePopup();
-            });
-        }
+        if (calClearBtn) calClearBtn.addEventListener('click', handleClear);
+        if (clearBtn) clearBtn.addEventListener('click', handleClear);
 
         document.addEventListener('click', (e) => {
             if (!box.contains(e.target)) {
@@ -363,6 +383,9 @@
         getCurrentUser,
         getStatusBadgeClass,
         formatMoney,
+        formatDisplayDate,
+        formatDisplayStatus,
+        escapeHtml,
         getTodayISO,
         openModal,
         closeModal,

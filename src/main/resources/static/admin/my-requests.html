@@ -186,81 +186,30 @@
     <script>
         AdminApp.checkAdminAccess();
 
-        // Real data container (No mock data)
+        const {
+            escapeHtml,
+            formatDisplayDate,
+            formatDisplayStatus,
+            getStatusBadgeClass,
+            matchesDateFilter,
+            openModal,
+            closeModal
+        } = AdminApp;
+
         let requestsData = [];
         let currentFilterStatus = 'ALL';
 
         const requestsTbody = document.getElementById('requests-table-body');
         const emptyRequestsHtml = requestsTbody.innerHTML;
-        const dateBox = document.getElementById('requests-date-box');
         const dateInput = document.getElementById('requests-date-input');
-        const btnClearDate = document.getElementById('btn-clear-date');
-
-        function escapeHtml(str) {
-            if (str === null || str === undefined) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        function formatDisplayDate(dateVal) {
-            if (!dateVal) return '-';
-            try {
-                const str = String(dateVal).trim();
-                const d = new Date(str);
-                if (isNaN(d.getTime())) return str;
-                const pad = (n) => String(n).padStart(2, '0');
-                return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
-            } catch {
-                return String(dateVal);
-            }
-        }
-
-        function formatDisplayStatus(statusVal) {
-            if (!statusVal) return 'Pending';
-            const s = String(statusVal).trim();
-            return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-        }
-
-        function matchesDateFilter(itemDateStr, selectedIsoDate) {
-            if (!selectedIsoDate) return true;
-            if (!itemDateStr) return false;
-
-            const str = String(itemDateStr).trim();
-
-            // 1. Direct or startsWith (e.g. "2026-11-11" or "2026-11-11 14:00")
-            if (str.startsWith(selectedIsoDate) || str.includes(selectedIsoDate)) return true;
-
-            // 2. Format as DD/MM/YYYY
-            const parts = selectedIsoDate.split('-');
-            if (parts.length === 3) {
-                const [y, m, d] = parts;
-                const ddmmyyyy = `${d}/${m}/${y}`;
-                const dm = `${parseInt(d, 10)}/${parseInt(m, 10)}/${y}`;
-                if (str.includes(ddmmyyyy) || str.includes(dm)) return true;
-            }
-
-            // 3. Fallback to Date object comparison
-            const parsed = new Date(str);
-            if (!isNaN(parsed.getTime())) {
-                const y = parsed.getFullYear();
-                const m = String(parsed.getMonth() + 1).padStart(2, '0');
-                const d = String(parsed.getDate()).padStart(2, '0');
-                if (`${y}-${m}-${d}` === selectedIsoDate) return true;
-            }
-
-            return false;
-        }
+        const searchInput = document.getElementById('requests-search-input');
 
         function renderRequestsTable(items) {
             const pageInfo = document.getElementById('requests-pagination-info');
 
             if (!items || items.length === 0) {
                 const hasFilters = currentFilterStatus !== 'ALL' ||
-                    (document.getElementById('requests-search-input')?.value.trim() !== '') ||
+                    (searchInput?.value.trim() !== '') ||
                     (dateInput?.value !== '');
 
                 if (hasFilters && requestsData.length > 0) {
@@ -291,7 +240,7 @@
             }
 
             requestsTbody.innerHTML = items.map(req => {
-                const badgeClass = AdminApp.getStatusBadgeClass(req.status);
+                const badgeClass = getStatusBadgeClass(req.status);
                 const reqId = req.requestId || (req.id ? ('#' + req.id) : '-');
                 const reqType = req.type || req.requestType || 'Request';
                 const requestedBy = req.requestedByName || req.requesterName || req.requestedBy || '-';
@@ -302,15 +251,15 @@
 
                 return `
                     <tr>
-                        <td class="cell-id">${escapeHtml(String(reqId))}</td>
-                        <td class="cell-medium">${escapeHtml(String(reqType))}</td>
+                        <td class="cell-id">${escapeHtml(reqId)}</td>
+                        <td class="cell-medium">${escapeHtml(reqType)}</td>
                         <td>
-                            <div><strong>${escapeHtml(String(requestedBy))}</strong></div>
-                            <div class="cell-subtext">(${escapeHtml(String(role))})</div>
+                            <div><strong>${escapeHtml(requestedBy)}</strong></div>
+                            <div class="cell-subtext">(${escapeHtml(role)})</div>
                         </td>
-                        <td>${escapeHtml(String(displayDate))}</td>
+                        <td>${escapeHtml(displayDate)}</td>
                         <td>
-                            <span class="badge-status ${badgeClass}">${escapeHtml(String(displayStatus))}</span>
+                            <span class="badge-status ${badgeClass}">${escapeHtml(displayStatus)}</span>
                         </td>
                         <td>
                             <button type="button" class="btn-action-detail" onclick="viewRequestDetail('${escapeHtml(detailId)}')">[Detail]</button>
@@ -332,7 +281,7 @@
         }
 
         function applyRequestsFilter() {
-            const query = document.getElementById('requests-search-input').value.toLowerCase().trim();
+            const query = (searchInput?.value || '').toLowerCase().trim();
             const selectedDate = dateInput ? dateInput.value : '';
 
             const filtered = requestsData.filter(req => {
@@ -350,7 +299,7 @@
         }
 
         // Status Tabs Listener
-        document.getElementById('requests-tabs').addEventListener('click', (e) => {
+        document.getElementById('requests-tabs')?.addEventListener('click', (e) => {
             const btn = e.target.closest('.tab-pill');
             if (!btn) return;
             document.querySelectorAll('#requests-tabs .tab-pill').forEach(b => b.classList.remove('active'));
@@ -360,194 +309,13 @@
         });
 
         // Search Input Listener
-        document.getElementById('requests-search-input').addEventListener('input', applyRequestsFilter);
+        searchInput?.addEventListener('input', applyRequestsFilter);
         document.getElementById('btn-refresh-data')?.addEventListener('click', applyRequestsFilter);
 
-        // Custom Styled Date Picker Popup Controller
-        const calPopup = document.getElementById('custom-calendar-popup');
-        const calMonthTitle = document.getElementById('cal-month-title');
-        const calDaysGrid = document.getElementById('cal-days-grid');
-        const calPrevMonth = document.getElementById('cal-prev-month');
-        const calNextMonth = document.getElementById('cal-next-month');
-        const calBtnToday = document.getElementById('cal-btn-today');
-        const calBtnClear = document.getElementById('cal-btn-clear');
-
-        let calViewDate = new Date();
-
-        const CAL_MONTHS = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-        ];
-
-        function renderCalendar() {
-            if (!calMonthTitle || !calDaysGrid) return;
-            const year = calViewDate.getFullYear();
-            const month = calViewDate.getMonth();
-
-            calMonthTitle.textContent = `${CAL_MONTHS[month]} ${year}`;
-
-            const firstDayIndex = new Date(year, month, 1).getDay();
-            const lastDayDate = new Date(year, month + 1, 0).getDate();
-            const prevMonthLastDay = new Date(year, month, 0).getDate();
-
-            const today = new Date();
-            const pad = (n) => String(n).padStart(2, '0');
-            const todayIso = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
-            const selectedIso = dateInput ? dateInput.value : '';
-
-            let cellsHtml = '';
-
-            // Previous month trailing days
-            for (let i = firstDayIndex - 1; i >= 0; i--) {
-                const dayNum = prevMonthLastDay - i;
-                const prevDate = new Date(year, month - 1, dayNum);
-                const iso = `${prevDate.getFullYear()}-${pad(prevDate.getMonth() + 1)}-${pad(dayNum)}`;
-                const isSelected = iso === selectedIso ? 'is-selected' : '';
-                cellsHtml += `<button type="button" class="cal-day-cell other-month ${isSelected}" data-date="${iso}">${dayNum}</button>`;
-            }
-
-            // Current month days
-            for (let d = 1; d <= lastDayDate; d++) {
-                const iso = `${year}-${pad(month + 1)}-${pad(d)}`;
-                const isToday = iso === todayIso ? 'is-today' : '';
-                const isSelected = iso === selectedIso ? 'is-selected' : '';
-                cellsHtml += `<button type="button" class="cal-day-cell ${isToday} ${isSelected}" data-date="${iso}">${d}</button>`;
-            }
-
-            // Next month leading days
-            const totalCells = firstDayIndex + lastDayDate;
-            const remaining = (totalCells % 7 === 0) ? 0 : 7 - (totalCells % 7);
-            for (let d = 1; d <= remaining; d++) {
-                const nextDate = new Date(year, month + 1, d);
-                const iso = `${nextDate.getFullYear()}-${pad(nextDate.getMonth() + 1)}-${pad(d)}`;
-                const isSelected = iso === selectedIso ? 'is-selected' : '';
-                cellsHtml += `<button type="button" class="cal-day-cell other-month ${isSelected}" data-date="${iso}">${d}</button>`;
-            }
-
-            calDaysGrid.innerHTML = cellsHtml;
-        }
-
-        function openCalendarPopup() {
-            if (!calPopup) return;
-            if (dateInput && dateInput.value) {
-                const parts = dateInput.value.split('-').map(Number);
-                if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-                    calViewDate = new Date(parts[0], parts[1] - 1, 1);
-                }
-            } else {
-                calViewDate = new Date();
-            }
-            renderCalendar();
-            calPopup.style.display = 'block';
-        }
-
-        function closeCalendarPopup() {
-            if (calPopup) calPopup.style.display = 'none';
-        }
-
-        function toggleCalendarPopup() {
-            if (!calPopup) return;
-            if (calPopup.style.display === 'none' || !calPopup.style.display) {
-                openCalendarPopup();
-            } else {
-                closeCalendarPopup();
-            }
-        }
-
-        // Date Box Click Trigger (Custom Styled Calendar)
-        if (dateBox && dateInput) {
-            dateBox.addEventListener('click', (e) => {
-                if (e.target.closest('#btn-clear-date')) return;
-                if (e.target.closest('#custom-calendar-popup')) return;
-                toggleCalendarPopup();
-            });
-
-            dateInput.addEventListener('change', () => {
-                if (dateInput.value) {
-                    btnClearDate.style.display = 'inline-flex';
-                    dateBox.classList.add('has-date');
-                } else {
-                    btnClearDate.style.display = 'none';
-                    dateBox.classList.remove('has-date');
-                }
-                applyRequestsFilter();
-                if (calPopup && calPopup.style.display !== 'none') {
-                    renderCalendar();
-                }
-            });
-        }
-
-        // Calendar Popup Day Selection
-        if (calDaysGrid) {
-            calDaysGrid.addEventListener('click', (e) => {
-                const btn = e.target.closest('.cal-day-cell');
-                if (!btn) return;
-                const chosenDate = btn.getAttribute('data-date');
-                if (chosenDate && dateInput) {
-                    dateInput.value = chosenDate;
-                    dateInput.dispatchEvent(new Event('change'));
-                }
-                closeCalendarPopup();
-            });
-        }
-
-        // Calendar Month Navigation
-        if (calPrevMonth) {
-            calPrevMonth.addEventListener('click', (e) => {
-                e.stopPropagation();
-                calViewDate.setMonth(calViewDate.getMonth() - 1);
-                renderCalendar();
-            });
-        }
-
-        if (calNextMonth) {
-            calNextMonth.addEventListener('click', (e) => {
-                e.stopPropagation();
-                calViewDate.setMonth(calViewDate.getMonth() + 1);
-                renderCalendar();
-            });
-        }
-
-        // Calendar Quick Actions (Today & Clear)
-        if (calBtnToday) {
-            calBtnToday.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const now = new Date();
-                const pad = (n) => String(n).padStart(2, '0');
-                const iso = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-                if (dateInput) {
-                    dateInput.value = iso;
-                    dateInput.dispatchEvent(new Event('change'));
-                }
-                closeCalendarPopup();
-            });
-        }
-
-        if (calBtnClear) {
-            calBtnClear.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (dateInput) {
-                    dateInput.value = '';
-                    dateInput.dispatchEvent(new Event('change'));
-                }
-                closeCalendarPopup();
-            });
-        }
-
-        if (btnClearDate) {
-            btnClearDate.addEventListener('click', (e) => {
-                e.stopPropagation();
-                dateInput.value = '';
-                dateInput.dispatchEvent(new Event('change'));
-                closeCalendarPopup();
-            });
-        }
-
-        // Close calendar when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#requests-date-box')) {
-                closeCalendarPopup();
-            }
+        // Date Picker via Shared AdminApp
+        AdminApp.initCustomDatePicker({
+            box: 'requests-date-box',
+            onChange: applyRequestsFilter
         });
 
         // Fetch Real Requests from Backend API
@@ -562,7 +330,6 @@
                     }
                 }
             } catch (err) {
-                // If backend API endpoint is not yet created, gracefully fall back to empty state
                 console.info('Requests API endpoint not yet connected or returned empty, rendering empty state:', err.message);
             } finally {
                 applyRequestsFilter();
@@ -573,7 +340,7 @@
             const req = requestsData.find(r => String(r.requestId || r.id) === String(id));
             if (!req) return;
 
-            const badgeClass = AdminApp.getStatusBadgeClass(req.status);
+            const badgeClass = getStatusBadgeClass(req.status);
             const reqId = req.requestId || (req.id ? ('#' + req.id) : id);
             const reqType = req.type || req.requestType || 'Request';
             const displayDate = formatDisplayDate(req.date || req.requestedDatetime || req.createdAt);
@@ -593,38 +360,38 @@
                 <div class="detail-header-row">
                     <div>
                         <span class="detail-id-label">Request ID</span>
-                        <h4 class="detail-id-title">${escapeHtml(String(reqId))}</h4>
+                        <h4 class="detail-id-title">${escapeHtml(reqId)}</h4>
                     </div>
-                    <span class="badge-status badge-lg ${badgeClass}">${escapeHtml(String(displayStatus))}</span>
+                    <span class="badge-status badge-lg ${badgeClass}">${escapeHtml(displayStatus)}</span>
                 </div>
 
                 <div class="detail-meta-grid">
                     <div>
                         <span>Action Type</span>
-                        <strong>${escapeHtml(String(reqType))}</strong>
+                        <strong>${escapeHtml(reqType)}</strong>
                     </div>
                     <div>
                         <span>Submitted Date</span>
-                        <strong>${escapeHtml(String(displayDate))}</strong>
+                        <strong>${escapeHtml(displayDate)}</strong>
                     </div>
                     <div>
                         <span>Requested By</span>
-                        <strong>${escapeHtml(String(requestedBy))} (${escapeHtml(String(role))})</strong>
+                        <strong>${escapeHtml(requestedBy)} (${escapeHtml(role)})</strong>
                     </div>
                 </div>
 
                 <div class="detail-note-box">
                     <span>Request Payload / Note:</span>
-                    <p>${escapeHtml(String(note))}</p>
+                    <p>${escapeHtml(note)}</p>
                 </div>
                 ${decisionInfo}
             `;
 
-            AdminApp.openModal('modal-req-detail');
+            openModal('modal-req-detail');
         }
 
         function closeReqDetailModal() {
-            AdminApp.closeModal('modal-req-detail');
+            closeModal('modal-req-detail');
         }
 
         // Initialize: Load real requests (or empty state)
