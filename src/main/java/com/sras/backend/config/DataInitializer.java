@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -33,6 +34,8 @@ public class DataInitializer implements CommandLineRunner {
     private final JdbcTemplate jdbcTemplate;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    private record ProductSeed(String name, double cost, double price, Zone zone) {}
+
     @Override
     public void run(String... args) {
         seedUserIfMissing(503092, "admin", "1234", Role.ADMIN);
@@ -40,10 +43,9 @@ public class DataInitializer implements CommandLineRunner {
         seedUserIfMissing(503080, "staff", "1234", Role.STAFF);
         seedUserIfMissing(503107, "owner", "1234", Role.OWNER);
 
-        seedZoneIfMissing("Z1", "Zone 1");
-        seedZoneIfMissing("Z2", "Zone 2");
-        seedZoneIfMissing("Z3", "Zone 3");
-        seedZoneIfMissing("Z4", "Zone 4");
+        for (int i = 1; i <= 4; i++) {
+            seedZoneIfMissing("Z" + i, "Zone " + i);
+        }
 
         seedProductsIfEmpty();
         seedSuppliersIfEmpty();
@@ -51,19 +53,20 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedCustomersIfEmpty() {
-        seedCustomerIfMissing("RWTcomp.");
-        seedCustomerIfMissing("Office Pro Thailand");
-        seedCustomerIfMissing("Bangkok Modern Living");
-        seedCustomerIfMissing("Siam Retail Group");
+        List.of(
+                "RWTcomp.",
+                "Office Pro Thailand",
+                "Bangkok Modern Living",
+                "Siam Retail Group"
+        ).forEach(this::seedCustomerIfMissing);
     }
 
     private void seedCustomerIfMissing(String customerName) {
         if (!customerRepository.existsByCustomerName(customerName)) {
-            Customer c = Customer.builder()
+            customerRepository.save(Customer.builder()
                     .customerName(customerName)
                     .isActive(true)
-                    .build();
-            customerRepository.save(c);
+                    .build());
         }
     }
 
@@ -75,20 +78,14 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedSupplier(String companyName, String zoneCode, String category) {
-        Supplier s = supplierRepository.findByCompanyName(companyName).orElse(null);
-        if (s == null) {
-            s = Supplier.builder()
-                    .companyName(companyName)
-                    .zoneCode(zoneCode)
-                    .category(category)
-                    .isActive(true)
-                    .build();
-            supplierRepository.save(s);
-        } else {
-            s.setZoneCode(zoneCode);
-            s.setCategory(category);
-            supplierRepository.save(s);
-        }
+        Supplier s = supplierRepository.findByCompanyName(companyName)
+                .orElseGet(() -> Supplier.builder()
+                        .companyName(companyName)
+                        .isActive(true)
+                        .build());
+        s.setZoneCode(zoneCode);
+        s.setCategory(category);
+        supplierRepository.save(s);
     }
 
     private void seedUserIfMissing(Integer userId, String fullName, String rawPassword, Role role) {
@@ -126,33 +123,36 @@ public class DataInitializer implements CommandLineRunner {
         Random random = new Random();
         Set<Integer> usedIds = new HashSet<>();
 
-        // 1. Tables (Zone Z1)
-        createProduct("Office Desk", 1000.0, 1500.0, z1, random, usedIds);
-        createProduct("Dining Table", 2000.0, 3000.0, z1, random, usedIds);
-        createProduct("Coffee Table", 500.0, 1000.0, z1, random, usedIds);
-        createProduct("Computer Desk", 1500.0, 2500.0, z1, random, usedIds);
-        createProduct("Meeting Table", 4000.0, 6000.0, z1, random, usedIds);
+        List<ProductSeed> seeds = List.of(
+                // 1. Tables (Zone Z1)
+                new ProductSeed("Office Desk", 1000.0, 1500.0, z1),
+                new ProductSeed("Dining Table", 2000.0, 3000.0, z1),
+                new ProductSeed("Coffee Table", 500.0, 1000.0, z1),
+                new ProductSeed("Computer Desk", 1500.0, 2500.0, z1),
+                new ProductSeed("Meeting Table", 4000.0, 6000.0, z1),
+                // 2. Chairs (Zone Z2)
+                new ProductSeed("Office Chair", 1000.0, 1500.0, z2),
+                new ProductSeed("Dining Chair", 500.0, 1000.0, z2),
+                new ProductSeed("Gaming Chair", 2000.0, 3000.0, z2),
+                new ProductSeed("Folding Chair", 300.0, 500.0, z2),
+                new ProductSeed("Sofa Chair", 3000.0, 5000.0, z2),
+                // 3. Beds (Zone Z3)
+                new ProductSeed("Single Bed", 2000.0, 3000.0, z3),
+                new ProductSeed("Queen Bed", 3000.0, 5000.0, z3),
+                new ProductSeed("King Bed", 4000.0, 6000.0, z3),
+                new ProductSeed("Bunk Bed", 3000.0, 5000.0, z3),
+                new ProductSeed("Folding Bed", 1000.0, 1500.0, z3),
+                // 4. Cabinets (Zone Z4)
+                new ProductSeed("Wardrobe", 3000.0, 5000.0, z4),
+                new ProductSeed("Shoe Cabinet", 1000.0, 1500.0, z4),
+                new ProductSeed("Bookshelf", 1500.0, 2500.0, z4),
+                new ProductSeed("TV Cabinet", 2000.0, 3000.0, z4),
+                new ProductSeed("Drawer Cabinet", 1000.0, 2000.0, z4)
+        );
 
-        // 2. Chairs (Zone Z2)
-        createProduct("Office Chair", 1000.0, 1500.0, z2, random, usedIds);
-        createProduct("Dining Chair", 500.0, 1000.0, z2, random, usedIds);
-        createProduct("Gaming Chair", 2000.0, 3000.0, z2, random, usedIds);
-        createProduct("Folding Chair", 300.0, 500.0, z2, random, usedIds);
-        createProduct("Sofa Chair", 3000.0, 5000.0, z2, random, usedIds);
-
-        // 3. Beds (Zone Z3)
-        createProduct("Single Bed", 2000.0, 3000.0, z3, random, usedIds);
-        createProduct("Queen Bed", 3000.0, 5000.0, z3, random, usedIds);
-        createProduct("King Bed", 4000.0, 6000.0, z3, random, usedIds);
-        createProduct("Bunk Bed", 3000.0, 5000.0, z3, random, usedIds);
-        createProduct("Folding Bed", 1000.0, 1500.0, z3, random, usedIds);
-
-        // 4. Cabinets (Zone Z4)
-        createProduct("Wardrobe", 3000.0, 5000.0, z4, random, usedIds);
-        createProduct("Shoe Cabinet", 1000.0, 1500.0, z4, random, usedIds);
-        createProduct("Bookshelf", 1500.0, 2500.0, z4, random, usedIds);
-        createProduct("TV Cabinet", 2000.0, 3000.0, z4, random, usedIds);
-        createProduct("Drawer Cabinet", 1000.0, 2000.0, z4, random, usedIds);
+        for (ProductSeed seed : seeds) {
+            createProduct(seed.name(), seed.cost(), seed.price(), seed.zone(), random, usedIds);
+        }
     }
 
     private void createProduct(String name, double cost, double price, Zone zone, Random random, Set<Integer> usedIds) {

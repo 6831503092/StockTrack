@@ -25,12 +25,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,7 +66,7 @@ public class ZoneService {
                         countMap.getOrDefault(z.getZoneId(), 0L),
                         unitsMap.getOrDefault(z.getZoneId(), 0L)
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -97,22 +97,14 @@ public class ZoneService {
 
     @Transactional(readOnly = true)
     public List<ProductDto> getZoneProducts(String zoneCode, String search) {
-        List<Product> products = productRepository.findByIsActiveTrue();
-
         String q = search != null ? search.trim().toLowerCase() : "";
         String zFilter = zoneCode != null ? zoneCode.trim() : "";
 
-        return products.stream()
+        return productRepository.findByIsActiveTrue().stream()
+                .filter(p -> zFilter.isEmpty() || zFilter.equalsIgnoreCase("ALL") ||
+                        (p.getZone() != null && p.getZone().getZoneCode().equalsIgnoreCase(zFilter)))
                 .filter(p -> {
-                    if (zFilter.isEmpty() || zFilter.equalsIgnoreCase("ALL")) {
-                        return true;
-                    }
-                    return p.getZone() != null && p.getZone().getZoneCode().equalsIgnoreCase(zFilter);
-                })
-                .filter(p -> {
-                    if (q.isEmpty()) {
-                        return true;
-                    }
+                    if (q.isEmpty()) return true;
                     boolean matchId = p.getProductId() != null && String.valueOf(p.getProductId()).contains(q);
                     boolean matchName = p.getProductName() != null && p.getProductName().toLowerCase().contains(q);
                     boolean matchZone = p.getZone() != null && (
@@ -123,7 +115,7 @@ public class ZoneService {
                 })
                 .sorted(Comparator.comparing(Product::getProductId))
                 .map(ProductDto::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
@@ -136,10 +128,8 @@ public class ZoneService {
         List<Product> sourceProducts = new ArrayList<>();
 
         if (req.sourceZoneCode() != null && !req.sourceZoneCode().isBlank()) {
-            sourceZone = zoneRepository.findByZoneCode(req.sourceZoneCode().trim()).orElse(null);
-            if (sourceZone == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Source zone not found: " + req.sourceZoneCode());
-            }
+            sourceZone = zoneRepository.findByZoneCode(req.sourceZoneCode().trim())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Source zone not found: " + req.sourceZoneCode()));
             sourceProducts = productRepository.findByZoneZoneIdAndIsActiveTrue(sourceZone.getZoneId());
         } else if (req.productIds() != null && !req.productIds().isEmpty()) {
             sourceProducts = productRepository.findAllById(req.productIds());
@@ -151,7 +141,6 @@ public class ZoneService {
         if (sourceZone == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please specify a valid source zone or products to move");
         }
-
         if (sourceProducts.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No active products found in " + sourceZone.getZoneName());
         }
@@ -166,9 +155,9 @@ public class ZoneService {
         if (targetZone == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Target zone not found");
         }
-
         if (sourceZone.getZoneId().equals(targetZone.getZoneId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Source and target zone cannot be the same (" + targetZone.getZoneCode() + ")");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Source and target zone cannot be the same (" + targetZone.getZoneCode() + ")");
         }
 
         List<Product> targetProducts = targetZone.getZoneId() != null
@@ -180,28 +169,8 @@ public class ZoneService {
 
         boolean isSwap = !targetProducts.isEmpty();
 
-        final Zone srcZ = sourceZone;
-        final Zone tgtZ = targetZone;
-
-        List<Map<String, Object>> sourceDetails = sourceProducts.stream().map(p -> {
-            Map<String, Object> itemMap = new HashMap<>();
-            itemMap.put("productId", p.getProductId());
-            itemMap.put("productName", p.getProductName());
-            itemMap.put("fromZoneCode", srcZ.getZoneCode());
-            itemMap.put("toZoneCode", tgtZ.getZoneCode());
-            itemMap.put("stock", p.getCurrentStock());
-            return itemMap;
-        }).collect(Collectors.toList());
-
-        List<Map<String, Object>> targetDetails = targetProducts.stream().map(p -> {
-            Map<String, Object> itemMap = new HashMap<>();
-            itemMap.put("productId", p.getProductId());
-            itemMap.put("productName", p.getProductName());
-            itemMap.put("fromZoneCode", tgtZ.getZoneCode());
-            itemMap.put("toZoneCode", srcZ.getZoneCode());
-            itemMap.put("stock", p.getCurrentStock());
-            return itemMap;
-        }).collect(Collectors.toList());
+        List<Map<String, Object>> sourceDetails = toProductMoveItems(sourceProducts, sourceZone.getZoneCode(), targetZone.getZoneCode());
+        List<Map<String, Object>> targetDetails = toProductMoveItems(targetProducts, targetZone.getZoneCode(), sourceZone.getZoneCode());
 
         String reason = req.reason() != null && !req.reason().isBlank()
                 ? req.reason().trim()
@@ -229,28 +198,19 @@ public class ZoneService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to serialize request payload");
         }
 
-        String detail;
-        if (isSwap) {
-            detail = "Swap Zone " + sourceZone.getZoneCode() + " (" + sourceProducts.size() + " items) <-> Zone " + targetZone.getZoneCode() + " (" + targetProducts.size() + " items)";
-        } else {
-            detail = "Move entire Zone " + sourceZone.getZoneCode() + " (" + sourceProducts.size() + " items) -> Zone " + targetZone.getZoneCode();
-        }
+        String detail = isSwap
+                ? "Swap Zone " + sourceZone.getZoneCode() + " (" + sourceProducts.size() + " items) <-> Zone " + targetZone.getZoneCode() + " (" + targetProducts.size() + " items)"
+                : "Move entire Zone " + sourceZone.getZoneCode() + " (" + sourceProducts.size() + " items) -> Zone " + targetZone.getZoneCode();
         if (detail.length() > 255) {
             detail = detail.substring(0, 252) + "...";
         }
 
-        ApprovalRequest approvalRequest = ApprovalRequest.builder()
-                .requestType(RequestType.PRODUCT_MOVE)
-                .targetType(TargetType.ZONE)
-                .targetId(sourceZone.getZoneId())
-                .payload(payloadJson)
-                .detail(detail)
-                .status(ApprovalStatus.PENDING)
-                .requestedBy(adminUser)
-                .requestedDatetime(LocalDateTime.now())
-                .build();
+        ApprovalRequest saved = approvalRequestRepository.save(
+                ApprovalRequestService.buildPendingRequest(
+                        RequestType.PRODUCT_MOVE, TargetType.ZONE, sourceZone.getZoneId(), payloadJson, detail, adminUser
+                )
+        );
 
-        ApprovalRequest saved = approvalRequestRepository.save(approvalRequest);
         auditLogService.log(adminUser, "REQUEST_SUBMIT",
                 (isSwap ? "Requested swap between Zone " : "Requested move of Zone ")
                 + sourceZone.getZoneCode() + " and Zone " + targetZone.getZoneCode());
@@ -273,6 +233,24 @@ public class ZoneService {
         BigDecimal newPrice = req.sellingPrice() != null ? req.sellingPrice() : product.getSellingPrice();
         Integer newStock = req.currentStock() != null ? req.currentStock() : product.getCurrentStock();
 
+        boolean nameChanged = !Objects.equals(
+                product.getProductName() != null ? product.getProductName().trim() : "",
+                newName
+        );
+        boolean priceChanged = (newPrice != null && product.getSellingPrice() != null)
+                ? newPrice.compareTo(product.getSellingPrice()) != 0
+                : !Objects.equals(newPrice, product.getSellingPrice());
+        boolean stockChanged = !Objects.equals(newStock, product.getCurrentStock());
+
+        if (!nameChanged && !priceChanged && !stockChanged) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No changes detected. Please modify at least one field.");
+        }
+
+        if (approvalRequestRepository.existsByRequestTypeAndTargetIdAndStatus(
+                RequestType.PRODUCT_UPDATE, product.getProductId(), ApprovalStatus.PENDING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "A pending edit request already exists for this product.");
+        }
+
         Map<String, Object> payloadMap = new HashMap<>();
         payloadMap.put("productId", product.getProductId());
         payloadMap.put("productName", newName);
@@ -294,20 +272,27 @@ public class ZoneService {
 
         String detail = "Edit Product #" + product.getProductId() + " (" + newName + ")";
 
-        ApprovalRequest approvalRequest = ApprovalRequest.builder()
-                .requestType(RequestType.PRODUCT_UPDATE)
-                .targetType(TargetType.PRODUCT)
-                .targetId(product.getProductId())
-                .payload(payloadJson)
-                .detail(detail)
-                .status(ApprovalStatus.PENDING)
-                .requestedBy(adminUser)
-                .requestedDatetime(LocalDateTime.now())
-                .build();
+        ApprovalRequest saved = approvalRequestRepository.save(
+                ApprovalRequestService.buildPendingRequest(
+                        RequestType.PRODUCT_UPDATE, TargetType.PRODUCT, product.getProductId(), payloadJson, detail, adminUser
+                )
+        );
 
-        ApprovalRequest saved = approvalRequestRepository.save(approvalRequest);
-        auditLogService.log(adminUser, "REQUEST_SUBMIT", "Requested edit for Product #" + product.getProductId() + " (" + newName + ")");
+        auditLogService.log(adminUser, "REQUEST_SUBMIT",
+                "Requested edit for Product #" + product.getProductId() + " (" + newName + ")");
 
         return ApprovalRequestDto.fromEntity(saved);
+    }
+
+    private List<Map<String, Object>> toProductMoveItems(List<Product> products, String fromZoneCode, String toZoneCode) {
+        return products.stream().map(p -> {
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("productId", p.getProductId());
+            itemMap.put("productName", p.getProductName());
+            itemMap.put("fromZoneCode", fromZoneCode);
+            itemMap.put("toZoneCode", toZoneCode);
+            itemMap.put("stock", p.getCurrentStock());
+            return itemMap;
+        }).toList();
     }
 }

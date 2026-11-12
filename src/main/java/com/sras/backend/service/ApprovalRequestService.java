@@ -3,6 +3,10 @@ package com.sras.backend.service;
 import com.sras.backend.dto.ApprovalRequestDto;
 import com.sras.backend.entity.ApprovalRequest;
 import com.sras.backend.entity.User;
+import com.sras.backend.enums.ApprovalStatus;
+import com.sras.backend.enums.RequestType;
+import com.sras.backend.enums.Role;
+import com.sras.backend.enums.TargetType;
 import com.sras.backend.repository.ApprovalRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,28 +15,29 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ApprovalRequestService {
 
+    private static final DateTimeFormatter SLASH_DATE_FMT = DateTimeFormatter.ofPattern("d/M/yyyy");
+
     private final ApprovalRequestRepository approvalRequestRepository;
 
     public List<ApprovalRequestDto> getMyRequests(User currentUser, String search, String dateStr, String statusStr) {
-        List<ApprovalRequest> requests = approvalRequestRepository
-                .findByRequestedByUserIdOrderByRequestedDatetimeDesc(currentUser.getUserId());
-
-        return requests.stream()
-                .filter(r -> matchesStatus(r, statusStr))
+        return approvalRequestRepository
+                .findByRequestedByUserIdOrderByRequestedDatetimeDesc(currentUser.getUserId())
+                .stream()
+                .filter(r -> matchesStatusFilter(r.getStatus() != null ? r.getStatus().name() : null, statusStr))
                 .filter(r -> matchesSearch(r, search))
-                .filter(r -> matchesDate(r, dateStr))
+                .filter(r -> matchesDateFilter(r.getRequestedDatetime(), dateStr))
                 .map(ApprovalRequestDto::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public ApprovalRequestDto getRequestById(Integer requestId, User currentUser) {
@@ -41,8 +46,7 @@ public class ApprovalRequestService {
 
         boolean isRequester = request.getRequestedBy() != null &&
                 request.getRequestedBy().getUserId().equals(currentUser.getUserId());
-        boolean isPrivileged = currentUser.getRole() != null &&
-                (currentUser.getRole().name().equals("ADMIN") || currentUser.getRole().name().equals("MANAGER"));
+        boolean isPrivileged = currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.MANAGER;
 
         if (!isRequester && !isPrivileged) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied to this request");
@@ -51,11 +55,49 @@ public class ApprovalRequestService {
         return ApprovalRequestDto.fromEntity(request);
     }
 
-    private boolean matchesStatus(ApprovalRequest request, String statusStr) {
-        if (statusStr == null || statusStr.isBlank() || statusStr.equalsIgnoreCase("ALL")) {
+    public static ApprovalRequest buildPendingRequest(
+            RequestType requestType,
+            TargetType targetType,
+            Integer targetId,
+            String payloadJson,
+            String detail,
+            User requestedBy
+    ) {
+        return ApprovalRequest.builder()
+                .requestType(requestType)
+                .targetType(targetType)
+                .targetId(targetId)
+                .payload(payloadJson)
+                .detail(detail)
+                .status(ApprovalStatus.PENDING)
+                .requestedBy(requestedBy)
+                .requestedDatetime(LocalDateTime.now())
+                .build();
+    }
+
+    public static boolean matchesStatusFilter(String actualStatus, String statusFilter) {
+        if (statusFilter == null || statusFilter.isBlank() || statusFilter.equalsIgnoreCase("ALL")) {
             return true;
         }
-        return request.getStatus() != null && request.getStatus().name().equalsIgnoreCase(statusStr.trim());
+        return actualStatus != null && actualStatus.equalsIgnoreCase(statusFilter.trim());
+    }
+
+    public static boolean matchesDateFilter(LocalDateTime dateTime, String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) {
+            return true;
+        }
+        if (dateTime == null) {
+            return false;
+        }
+        try {
+            String trimmed = dateStr.trim();
+            LocalDate filterDate = trimmed.contains("/")
+                    ? LocalDate.parse(trimmed, SLASH_DATE_FMT)
+                    : LocalDate.parse(trimmed);
+            return dateTime.toLocalDate().isEqual(filterDate);
+        } catch (DateTimeParseException e) {
+            return true;
+        }
     }
 
     private boolean matchesSearch(ApprovalRequest request, String search) {
@@ -69,27 +111,5 @@ public class ApprovalRequestService {
         String targetTypeStr = request.getTargetType() != null ? request.getTargetType().name().toLowerCase() : "";
 
         return idStr.contains(q) || typeStr.contains(q) || detailStr.contains(q) || targetTypeStr.contains(q);
-    }
-
-    private boolean matchesDate(ApprovalRequest request, String dateStr) {
-        if (dateStr == null || dateStr.isBlank()) {
-            return true;
-        }
-        if (request.getRequestedDatetime() == null) {
-            return false;
-        }
-        try {
-            String trimmed = dateStr.trim();
-            LocalDate filterDate;
-            if (trimmed.contains("/")) {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d/M/yyyy");
-                filterDate = LocalDate.parse(trimmed, dtf);
-            } else {
-                filterDate = LocalDate.parse(trimmed);
-            }
-            return request.getRequestedDatetime().toLocalDate().isEqual(filterDate);
-        } catch (DateTimeParseException e) {
-            return true;
-        }
     }
 }

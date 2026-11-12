@@ -1,7 +1,9 @@
 package com.sras.backend.dto;
 
+import com.sras.backend.entity.Customer;
 import com.sras.backend.entity.SalesOrder;
 import com.sras.backend.entity.SalesOrderItem;
+import com.sras.backend.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +12,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,6 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SalesOrderDto {
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     private Integer id;
     private Integer soId;
     private Integer requestId;
@@ -37,55 +40,47 @@ public class SalesOrderDto {
     public static SalesOrderDto fromEntity(SalesOrder so, List<SalesOrderItem> items) {
         if (so == null) return null;
 
-        int totalQty = 0;
-        List<SalesOrderItemDto> itemDtos = new ArrayList<>();
-        if (items != null) {
-            for (SalesOrderItem item : items) {
-                totalQty += (item.getQuantity() != null ? item.getQuantity() : 0);
-                itemDtos.add(SalesOrderItemDto.fromEntity(item));
-            }
-        }
+        List<SalesOrderItem> safeItems = items != null ? items : List.of();
+        int totalQty = safeItems.stream()
+                .mapToInt(item -> item.getQuantity() != null ? item.getQuantity() : 0)
+                .sum();
+        List<SalesOrderItemDto> itemDtos = safeItems.stream()
+                .map(SalesOrderItemDto::fromEntity)
+                .toList();
 
-        String formattedDate = "";
-        if (so.getOrderDatetime() != null) {
-            formattedDate = so.getOrderDatetime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        }
-
-        String custName = so.getCustomer() != null ? so.getCustomer().getCustomerName() : "-";
-        Integer custId = so.getCustomer() != null ? so.getCustomer().getCustomerId() : null;
-        String createdByName = so.getCreatedBy() != null ? so.getCreatedBy().getFullName() : "-";
-        Integer creatorUserId = so.getCreatedBy() != null ? so.getCreatedBy().getUserId() : null;
-
-        String displayStatus = so.getStatus() != null ? formatStatus(so.getStatus().name()) : "Pending";
+        Customer cust = so.getCustomer();
+        String custName = cust != null ? cust.getCustomerName() : "-";
+        User creator = so.getCreatedBy();
+        Integer creatorUserId = creator != null ? creator.getUserId() : null;
 
         return SalesOrderDto.builder()
                 .id(so.getSoId())
                 .soId(so.getSoId())
                 .requestId(so.getRequest() != null ? so.getRequest().getRequestId() : null)
-                .customerId(custId)
+                .customerId(cust != null ? cust.getCustomerId() : null)
                 .customer(custName)
                 .customerName(custName)
                 .createdByUserId(creatorUserId)
-                .createdBy(createdByName)
+                .createdBy(creator != null ? creator.getFullName() : "-")
                 .userId(creatorUserId != null ? String.valueOf(creatorUserId) : "")
                 .orderDatetime(so.getOrderDatetime())
-                .date(formattedDate)
+                .date(so.getOrderDatetime() != null ? so.getOrderDatetime().format(DATE_FMT) : "")
                 .totalQty(totalQty)
                 .totalPrice(so.getTotalAmount() != null ? so.getTotalAmount() : BigDecimal.ZERO)
-                .status(displayStatus)
+                .status(so.getStatus() != null ? formatStatus(so.getStatus().name()) : "Pending")
                 .items(itemDtos)
                 .build();
     }
 
     private static String formatStatus(String raw) {
         if (raw == null) return "Pending";
-        switch (raw.toUpperCase()) {
-            case "PENDING": return "Pending";
-            case "APPROVED": return "Approved";
-            case "REJECTED": return "Rejected";
-            case "ISSUED": return "Issued";
-            case "REJECTED_ON_ISSUE": return "Rejected on Issue";
-            default: return raw;
-        }
+        return switch (raw.toUpperCase()) {
+            case "PENDING" -> "Pending";
+            case "APPROVED" -> "Approved";
+            case "REJECTED" -> "Rejected";
+            case "ISSUED" -> "Issued";
+            case "REJECTED_ON_ISSUE" -> "Rejected on Issue";
+            default -> raw;
+        };
     }
 }

@@ -2,6 +2,8 @@ package com.sras.backend.dto;
 
 import com.sras.backend.entity.PurchaseOrder;
 import com.sras.backend.entity.PurchaseOrderItem;
+import com.sras.backend.entity.Supplier;
+import com.sras.backend.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +12,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,6 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PurchaseOrderDto {
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     private Integer id;
     private Integer poId;
     private Integer requestId;
@@ -36,53 +39,45 @@ public class PurchaseOrderDto {
     public static PurchaseOrderDto fromEntity(PurchaseOrder po, List<PurchaseOrderItem> items) {
         if (po == null) return null;
 
-        int totalQty = 0;
-        List<PurchaseOrderItemDto> itemDtos = new ArrayList<>();
-        if (items != null) {
-            for (PurchaseOrderItem item : items) {
-                totalQty += (item.getQuantity() != null ? item.getQuantity() : 0);
-                itemDtos.add(PurchaseOrderItemDto.fromEntity(item));
-            }
-        }
+        List<PurchaseOrderItem> safeItems = items != null ? items : List.of();
+        int totalQty = safeItems.stream()
+                .mapToInt(item -> item.getQuantity() != null ? item.getQuantity() : 0)
+                .sum();
+        List<PurchaseOrderItemDto> itemDtos = safeItems.stream()
+                .map(PurchaseOrderItemDto::fromEntity)
+                .toList();
 
-        String formattedDate = "";
-        if (po.getOrderDatetime() != null) {
-            formattedDate = po.getOrderDatetime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        }
-
-        String supplierName = po.getSupplier() != null ? po.getSupplier().getCompanyName() : "-";
-        String createdByName = po.getCreatedBy() != null ? po.getCreatedBy().getFullName() : "-";
-        Integer creatorUserId = po.getCreatedBy() != null ? po.getCreatedBy().getUserId() : null;
-
-        String displayStatus = po.getStatus() != null ? formatStatus(po.getStatus().name()) : "Pending";
+        Supplier supplier = po.getSupplier();
+        User creator = po.getCreatedBy();
+        Integer creatorUserId = creator != null ? creator.getUserId() : null;
 
         return PurchaseOrderDto.builder()
                 .id(po.getPoId())
                 .poId(po.getPoId())
                 .requestId(po.getRequest() != null ? po.getRequest().getRequestId() : null)
-                .supplierId(po.getSupplier() != null ? po.getSupplier().getSupplierId() : null)
-                .supplier(supplierName)
+                .supplierId(supplier != null ? supplier.getSupplierId() : null)
+                .supplier(supplier != null ? supplier.getCompanyName() : "-")
                 .createdByUserId(creatorUserId)
-                .createdBy(createdByName)
+                .createdBy(creator != null ? creator.getFullName() : "-")
                 .userId(creatorUserId != null ? String.valueOf(creatorUserId) : "")
                 .orderDatetime(po.getOrderDatetime())
-                .date(formattedDate)
+                .date(po.getOrderDatetime() != null ? po.getOrderDatetime().format(DATE_FMT) : "")
                 .totalQty(totalQty)
                 .totalPrice(po.getTotalAmount() != null ? po.getTotalAmount() : BigDecimal.ZERO)
-                .status(displayStatus)
+                .status(po.getStatus() != null ? formatStatus(po.getStatus().name()) : "Pending")
                 .items(itemDtos)
                 .build();
     }
 
     private static String formatStatus(String raw) {
         if (raw == null) return "Pending";
-        switch (raw.toUpperCase()) {
-            case "PENDING": return "Pending";
-            case "APPROVED": return "Approved";
-            case "REJECTED": return "Rejected";
-            case "RECEIVED": return "Received";
-            case "REJECTED_ON_RECEIPT": return "Rejected on Receipt";
-            default: return raw;
-        }
+        return switch (raw.toUpperCase()) {
+            case "PENDING" -> "Pending";
+            case "APPROVED" -> "Approved";
+            case "REJECTED" -> "Rejected";
+            case "RECEIVED" -> "Received";
+            case "REJECTED_ON_RECEIPT" -> "Rejected on Receipt";
+            default -> raw;
+        };
     }
 }

@@ -1,5 +1,6 @@
 package com.sras.backend.dto;
 
+import com.sras.backend.entity.Product;
 import com.sras.backend.entity.PurchaseOrderItem;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,19 +25,13 @@ public class PurchaseOrderItemDto {
 
     public static PurchaseOrderItemDto fromEntity(PurchaseOrderItem item) {
         if (item == null) return null;
-        String zone = "";
-        String prodName = "";
-        Integer prodId = null;
-        if (item.getProduct() != null) {
-            prodId = item.getProduct().getProductId();
-            prodName = item.getProduct().getProductName();
-            if (item.getProduct().getZone() != null) {
-                zone = item.getProduct().getZone().getZoneCode();
-            }
-        }
+        Product prod = item.getProduct();
+        String prodName = prod != null ? prod.getProductName() : "";
+        String zone = (prod != null && prod.getZone() != null) ? prod.getZone().getZoneCode() : "";
+
         return PurchaseOrderItemDto.builder()
                 .poItemId(item.getPoItemId())
-                .productId(prodId)
+                .productId(prod != null ? prod.getProductId() : null)
                 .productName(prodName)
                 .zoneCode(zone)
                 .imageUrl(ProductDto.resolveImageUrl(prodName, zone))

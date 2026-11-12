@@ -27,10 +27,10 @@ public class SupplierDto {
         // Fallback default zone mapping if not set
         if (zCode == null && supplier.getCompanyName() != null) {
             switch (supplier.getCompanyName().trim()) {
-                case "JRScomp.": zCode = "Z1"; cat = "Tables"; break;
-                case "Thai Wood Supply Co.": zCode = "Z2"; cat = "Chairs"; break;
-                case "Modern Steel Ltd.": zCode = "Z3"; cat = "Beds"; break;
-                case "Decor Fabric Asia": zCode = "Z4"; cat = "Cabinets"; break;
+                case "JRScomp." -> { zCode = "Z1"; cat = "Tables"; }
+                case "Thai Wood Supply Co." -> { zCode = "Z2"; cat = "Chairs"; }
+                case "Modern Steel Ltd." -> { zCode = "Z3"; cat = "Beds"; }
+                case "Decor Fabric Asia" -> { zCode = "Z4"; cat = "Cabinets"; }
             }
         }
         String zName = zCode != null ? ("Zone " + zCode.replace("Z", "")) : null;
