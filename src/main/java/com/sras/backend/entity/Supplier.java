@@ -29,6 +29,12 @@ public class Supplier {
     @Column(name = "company_name", length = 50, nullable = false)
     private String companyName;
 
+    @Column(name = "zone_code", length = 10)
+    private String zoneCode;
+
+    @Column(name = "category", length = 50)
+    private String category;
+
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;

@@ -519,6 +519,7 @@
                                 <table class="modal-transfer-table">
                                     <thead>
                                         <tr>
+                                            <th style="width: 50px; text-align: center;">Image</th>
                                             <th style="width: 80px;">Product ID</th>
                                             <th class="text-left">Product Name</th>
                                             <th style="width: 90px;">Location</th>
@@ -526,14 +527,21 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        ${sourceProducts.map(p => `
-                                            <tr>
-                                                <td class="font-medium">${escapeHtml(String(p.productId || p.id))}</td>
-                                                <td class="text-left font-medium">${escapeHtml(p.productName || p.name)}</td>
-                                                <td>${escapeHtml(p.fromZoneCode || sourceZoneCode)}</td>
-                                                <td class="transfer-dest-cell" style="font-weight: 600; color: #0d9488;">${escapeHtml(p.toZoneCode || targetZoneCode)}</td>
-                                            </tr>
-                                        `).join('')}
+                                        ${sourceProducts.map(p => {
+                                            const pName = p.productName || p.name;
+                                            const imgUrl = AdminApp.getProductImageUrl(pName, p.fromZoneCode || sourceZoneCode);
+                                            return `
+                                                <tr>
+                                                    <td style="width: 50px; text-align: center; padding: 4px;">
+                                                        <img src="${escapeHtml(imgUrl)}" style="width: 38px; height: 30px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
+                                                    </td>
+                                                    <td class="font-medium">${escapeHtml(String(p.productId || p.id))}</td>
+                                                    <td class="text-left font-medium">${escapeHtml(pName)}</td>
+                                                    <td>${escapeHtml(p.fromZoneCode || sourceZoneCode)}</td>
+                                                    <td class="transfer-dest-cell" style="font-weight: 600; color: #0d9488;">${escapeHtml(p.toZoneCode || targetZoneCode)}</td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
                                     </tbody>
                                 </table>
                             </div>
@@ -551,6 +559,7 @@
                                 <table class="modal-transfer-table">
                                     <thead>
                                         <tr>
+                                            <th style="width: 50px; text-align: center;">Image</th>
                                             <th style="width: 80px;">Product ID</th>
                                             <th class="text-left">Product Name</th>
                                             <th style="width: 90px;">Location</th>
@@ -558,14 +567,21 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        ${targetProducts.map(p => `
-                                            <tr>
-                                                <td class="font-medium">${escapeHtml(String(p.productId || p.id))}</td>
-                                                <td class="text-left font-medium">${escapeHtml(p.productName || p.name)}</td>
-                                                <td>${escapeHtml(p.fromZoneCode || targetZoneCode)}</td>
-                                                <td class="transfer-dest-cell" style="font-weight: 600; color: #0d9488;">${escapeHtml(p.toZoneCode || sourceZoneCode)}</td>
-                                            </tr>
-                                        `).join('')}
+                                        ${targetProducts.map(p => {
+                                            const pName = p.productName || p.name;
+                                            const imgUrl = AdminApp.getProductImageUrl(pName, p.fromZoneCode || targetZoneCode);
+                                            return `
+                                                <tr>
+                                                    <td style="width: 50px; text-align: center; padding: 4px;">
+                                                        <img src="${escapeHtml(imgUrl)}" style="width: 38px; height: 30px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
+                                                    </td>
+                                                    <td class="font-medium">${escapeHtml(String(p.productId || p.id))}</td>
+                                                    <td class="text-left font-medium">${escapeHtml(pName)}</td>
+                                                    <td>${escapeHtml(p.fromZoneCode || targetZoneCode)}</td>
+                                                    <td class="transfer-dest-cell" style="font-weight: 600; color: #0d9488;">${escapeHtml(p.toZoneCode || sourceZoneCode)}</td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
                                     </tbody>
                                 </table>
                             </div>
@@ -580,6 +596,175 @@
                 } else {
                     reasonText = '';
                 }
+            } else if (typeUpper === 'PO_CREATE') {
+                const supplierName = payload?.supplierName || '-';
+                const totalAmount = payload?.totalPrice || payload?.totalAmount || 0;
+                const totalQty = payload?.totalQuantity || payload?.totalQty || 0;
+                const poId = payload?.poId || req.targetId;
+                const items = payload?.items || [];
+
+                extraGridHtml = `
+                    <div>
+                        <span>PO ID</span>
+                        <strong>#${escapeHtml(String(poId || '-'))}</strong>
+                    </div>
+                    <div>
+                        <span>Supplier</span>
+                        <strong>${escapeHtml(supplierName)}</strong>
+                    </div>
+                    <div>
+                        <span>Total Items</span>
+                        <strong>${totalQty} items (฿${AdminApp.formatMoney(totalAmount)})</strong>
+                    </div>
+                `;
+
+                if (items && items.length > 0) {
+                    productTablesHtml = `
+                        <div style="margin-top: 14px;">
+                            <span style="font-size: 0.85rem; font-weight: 600; color: #334155; display: block; margin-bottom: 8px;">
+                                Order Items (${items.length} item${items.length > 1 ? 's' : ''}):
+                            </span>
+                            <div class="modal-transfer-table-wrapper" style="max-height: 180px; overflow-y: auto;">
+                                <table class="modal-transfer-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px; text-align: center;">Image</th>
+                                            <th style="width: 80px;">Product ID</th>
+                                            <th class="text-left">Product Name</th>
+                                            <th style="width: 70px; text-align: center;">Qty</th>
+                                            <th style="width: 100px; text-align: right;">Unit Cost</th>
+                                            <th style="width: 110px; text-align: right;">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${items.map(it => {
+                                            const pName = it.productName || it.name || '-';
+                                            const imgUrl = it.imageUrl || AdminApp.getProductImageUrl(pName, it.zoneCode);
+                                            return `
+                                                <tr>
+                                                    <td style="width: 50px; text-align: center; padding: 4px;">
+                                                        <img src="${escapeHtml(imgUrl)}" style="width: 38px; height: 30px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
+                                                    </td>
+                                                    <td class="font-medium">${escapeHtml(String(it.productId || '-'))}</td>
+                                                    <td class="text-left font-medium">${escapeHtml(pName)}</td>
+                                                    <td style="text-align: center;">${it.quantity || it.qty || 1}</td>
+                                                    <td style="text-align: right;">฿${AdminApp.formatMoney(it.unitCost || it.unitPrice || 0)}</td>
+                                                    <td style="text-align: right; font-weight: 600; color: #0d9488;">฿${AdminApp.formatMoney(it.subtotal || ((it.quantity || 1) * (it.unitCost || 0)))}</td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+                reasonText = payload?.note || '';
+            } else if (typeUpper === 'SO_CREATE') {
+                const customerName = payload?.customerName || '-';
+                const totalAmount = payload?.totalPrice || payload?.totalAmount || 0;
+                const totalQty = payload?.totalQuantity || payload?.totalQty || 0;
+                const soId = payload?.soId || req.targetId;
+                const items = payload?.items || [];
+
+                extraGridHtml = `
+                    <div>
+                        <span>SO ID</span>
+                        <strong>#${escapeHtml(String(soId || '-'))}</strong>
+                    </div>
+                    <div>
+                        <span>Customer</span>
+                        <strong>${escapeHtml(customerName)}</strong>
+                    </div>
+                    <div>
+                        <span>Total Items</span>
+                        <strong>${totalQty} items (฿${AdminApp.formatMoney(totalAmount)})</strong>
+                    </div>
+                `;
+
+                if (items && items.length > 0) {
+                    productTablesHtml = `
+                        <div style="margin-top: 14px;">
+                            <span style="font-size: 0.85rem; font-weight: 600; color: #334155; display: block; margin-bottom: 8px;">
+                                Order Items (${items.length} item${items.length > 1 ? 's' : ''}):
+                            </span>
+                            <div class="modal-transfer-table-wrapper" style="max-height: 180px; overflow-y: auto;">
+                                <table class="modal-transfer-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px; text-align: center;">Image</th>
+                                            <th style="width: 80px;">Product ID</th>
+                                            <th class="text-left">Product Name</th>
+                                            <th style="width: 70px; text-align: center;">Qty</th>
+                                            <th style="width: 100px; text-align: right;">Unit Price</th>
+                                            <th style="width: 110px; text-align: right;">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${items.map(it => {
+                                            const pName = it.productName || it.name || '-';
+                                            const imgUrl = it.imageUrl || AdminApp.getProductImageUrl(pName, it.zoneCode);
+                                            return `
+                                                <tr>
+                                                    <td style="width: 50px; text-align: center; padding: 4px;">
+                                                        <img src="${escapeHtml(imgUrl)}" style="width: 38px; height: 30px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
+                                                    </td>
+                                                    <td class="font-medium">${escapeHtml(String(it.productId || '-'))}</td>
+                                                    <td class="text-left font-medium">${escapeHtml(pName)}</td>
+                                                    <td style="text-align: center;">${it.quantity || it.qty || 1}</td>
+                                                    <td style="text-align: right;">฿${AdminApp.formatMoney(it.unitPrice || 0)}</td>
+                                                    <td style="text-align: right; font-weight: 600; color: #0d9488;">฿${AdminApp.formatMoney(it.subtotal || ((it.quantity || 1) * (it.unitPrice || 0)))}</td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+                reasonText = payload?.note || '';
+            } else if (typeUpper === 'PRODUCT_UPDATE') {
+                const prodId = payload?.productId || req.targetId || '-';
+                const prodName = payload?.productName || '-';
+                const oldName = payload?.oldProductName;
+                const sellingPrice = payload?.sellingPrice;
+                const oldPrice = payload?.oldSellingPrice;
+                const currentStock = payload?.currentStock;
+                const oldStock = payload?.oldCurrentStock;
+                const cost = payload?.defaultCost;
+                const zoneCode = payload?.zoneCode || '-';
+                const imgUrl = AdminApp.getProductImageUrl(prodName, zoneCode);
+
+                extraGridHtml = `
+                    <div>
+                        <span>Product ID</span>
+                        <strong>#${escapeHtml(String(prodId))}</strong>
+                    </div>
+                    <div>
+                        <span>Product Name</span>
+                        <strong>${escapeHtml(prodName)} ${oldName && oldName !== prodName ? `<span style="font-size: 0.8rem; color: #94a3b8; font-weight: normal;">(was ${escapeHtml(oldName)})</span>` : ''}</strong>
+                    </div>
+                    <div>
+                        <span>Selling Price</span>
+                        <strong>฿${AdminApp.formatMoney(sellingPrice || 0)} ${oldPrice && oldPrice !== sellingPrice ? `<span style="font-size: 0.8rem; color: #94a3b8; font-weight: normal;">(was ฿${AdminApp.formatMoney(oldPrice)})</span>` : ''}</strong>
+                    </div>
+                    <div>
+                        <span>Current Stock</span>
+                        <strong>${Number(currentStock || 0).toLocaleString()} Units ${oldStock !== undefined && oldStock !== currentStock ? `<span style="font-size: 0.8rem; color: #94a3b8; font-weight: normal;">(was ${Number(oldStock).toLocaleString()})</span>` : ''}</strong>
+                    </div>
+                `;
+
+                productTablesHtml = `
+                    <div style="margin-top: 14px; display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(prodName)}" style="width: 58px; height: 42px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
+                        <div>
+                            <div style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">${escapeHtml(prodName)}</div>
+                            <div style="font-size: 0.82rem; color: #64748b;">Cost: ฿${AdminApp.formatMoney(cost || 0)} • Zone: ${escapeHtml(zoneCode)}</div>
+                        </div>
+                    </div>
+                `;
+                reasonText = '';
             } else {
                 reasonText = detailText.includes('Reason:')
                     ? detailText.split(/Reason:\s*/i)[1]

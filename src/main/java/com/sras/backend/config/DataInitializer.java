@@ -1,9 +1,13 @@
 package com.sras.backend.config;
 
+import com.sras.backend.entity.Customer;
 import com.sras.backend.entity.Product;
+import com.sras.backend.entity.Supplier;
 import com.sras.backend.entity.Zone;
 import com.sras.backend.enums.Role;
+import com.sras.backend.repository.CustomerRepository;
 import com.sras.backend.repository.ProductRepository;
+import com.sras.backend.repository.SupplierRepository;
 import com.sras.backend.repository.UserRepository;
 import com.sras.backend.repository.ZoneRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,8 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final ZoneRepository zoneRepository;
     private final ProductRepository productRepository;
+    private final SupplierRepository supplierRepository;
+    private final CustomerRepository customerRepository;
     private final JdbcTemplate jdbcTemplate;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -40,6 +46,49 @@ public class DataInitializer implements CommandLineRunner {
         seedZoneIfMissing("Z4", "Zone 4");
 
         seedProductsIfEmpty();
+        seedSuppliersIfEmpty();
+        seedCustomersIfEmpty();
+    }
+
+    private void seedCustomersIfEmpty() {
+        seedCustomerIfMissing("RWTcomp.");
+        seedCustomerIfMissing("Office Pro Thailand");
+        seedCustomerIfMissing("Bangkok Modern Living");
+        seedCustomerIfMissing("Siam Retail Group");
+    }
+
+    private void seedCustomerIfMissing(String customerName) {
+        if (!customerRepository.existsByCustomerName(customerName)) {
+            Customer c = Customer.builder()
+                    .customerName(customerName)
+                    .isActive(true)
+                    .build();
+            customerRepository.save(c);
+        }
+    }
+
+    private void seedSuppliersIfEmpty() {
+        seedSupplier("JRScomp.", "Z1", "Tables");
+        seedSupplier("Thai Wood Supply Co.", "Z2", "Chairs");
+        seedSupplier("Modern Steel Ltd.", "Z3", "Beds");
+        seedSupplier("Decor Fabric Asia", "Z4", "Cabinets");
+    }
+
+    private void seedSupplier(String companyName, String zoneCode, String category) {
+        Supplier s = supplierRepository.findByCompanyName(companyName).orElse(null);
+        if (s == null) {
+            s = Supplier.builder()
+                    .companyName(companyName)
+                    .zoneCode(zoneCode)
+                    .category(category)
+                    .isActive(true)
+                    .build();
+            supplierRepository.save(s);
+        } else {
+            s.setZoneCode(zoneCode);
+            s.setCategory(category);
+            supplierRepository.save(s);
+        }
     }
 
     private void seedUserIfMissing(Integer userId, String fullName, String rawPassword, Role role) {

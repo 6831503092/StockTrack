@@ -168,105 +168,294 @@
 
     <!-- MODAL 1: Create Purchase Order Modal (Wireframe Reference Match) -->
     <div class="modal-overlay" id="modal-create-po">
-        <div class="modal-box modal-po-wire">
-            <div class="po-wire-header">
-                <h2>Create Purchase Order</h2>
-                <button type="button" class="btn-close-modal" aria-label="Close modal">&times;</button>
+        <div class="modal-box modal-po-wire" id="po-modal-box">
+            <!-- STEP 1: Form Input -->
+            <div id="po-create-step-1">
+                <div class="po-wire-header">
+                    <h2>Create Purchase Order</h2>
+                    <button type="button" class="btn-close-modal" aria-label="Close modal">&times;</button>
+                </div>
+
+                <form id="form-create-po" onsubmit="handlePOStep1Next(event)">
+                    <!-- Row 1: Created by & UserID -->
+                    <div class="po-wire-grid-2">
+                        <div>
+                            <label for="new-po-created-by" class="po-wire-label">Created by</label>
+                            <input type="text" id="new-po-created-by" class="po-wire-input-readonly" readonly placeholder="User Name">
+                        </div>
+                        <div>
+                            <label for="new-po-user-id" class="po-wire-label">UserID</label>
+                            <input type="text" id="new-po-user-id" class="po-wire-input-readonly" readonly placeholder="User ID">
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Supplier -->
+                    <div class="po-wire-group">
+                        <label for="new-po-supplier" class="po-wire-label">Supplier</label>
+                        <select id="new-po-supplier" class="po-wire-select" required onchange="handleSupplierChange(this.value)">
+                            <option value="" disabled selected>Select Supplier</option>
+                            <option value="JRScomp." data-zone="Z1">JRScomp.</option>
+                            <option value="Thai Wood Supply Co." data-zone="Z2">Thai Wood Supply Co.</option>
+                            <option value="Modern Steel Ltd." data-zone="Z3">Modern Steel Ltd.</option>
+                            <option value="Decor Fabric Asia" data-zone="Z4">Decor Fabric Asia</option>
+                        </select>
+                    </div>
+
+                    <!-- Row 3: Product Items Section -->
+                    <div class="po-wire-items-section">
+                        <div class="po-wire-items-header">
+                            <span>Product name</span>
+                            <span>Quantity</span>
+                            <span>Unit price</span>
+                            <span>Total price</span>
+                        </div>
+
+                        <div class="po-wire-items-list" id="po-items-container">
+                            <div class="po-wire-item-row">
+                                <select class="po-wire-select po-item-product" onchange="handleProductChange(this)">
+                                    <option value="" disabled selected>Please select supplier first</option>
+                                </select>
+                                <input type="number" min="1" class="po-wire-input po-item-qty" placeholder="" oninput="handleQtyChange(this)">
+                                <input type="text" class="po-wire-input-readonly po-item-unit-price" readonly placeholder="">
+                                <input type="text" class="po-wire-input-readonly po-item-total-price" readonly placeholder="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: + Add Item / - Delete Item -->
+                    <div class="po-wire-item-actions">
+                        <button type="button" class="po-wire-btn-text" id="btn-add-item" onclick="addPOItemRow()">+ Add Item</button>
+                        <button type="button" class="po-wire-btn-text delete" id="btn-delete-item" onclick="deleteLastPOItemRow()">- Delete Item</button>
+                    </div>
+
+                    <!-- Row 5: Action Buttons (Changed Save to Next) -->
+                    <div class="po-wire-actions">
+                        <button type="button" class="po-wire-btn-cancel" data-close-modal>Cancel</button>
+                        <button type="submit" class="po-wire-btn-save" id="btn-po-step1-next">Next</button>
+                    </div>
+                </form>
             </div>
 
-            <form id="form-create-po" onsubmit="handleCreatePOSubmit(event)">
-                <!-- Row 1: Created by & UserID -->
-                <div class="po-wire-grid-2">
-                    <div>
-                        <label for="new-po-created-by" class="po-wire-label">Created by</label>
-                        <input type="text" id="new-po-created-by" class="po-wire-input-readonly" readonly placeholder="User Name">
-                    </div>
-                    <div>
-                        <label for="new-po-user-id" class="po-wire-label">UserID</label>
-                        <input type="text" id="new-po-user-id" class="po-wire-input-readonly" readonly placeholder="User ID">
-                    </div>
-                </div>
-
-                <!-- Row 2: Supplier -->
-                <div class="po-wire-group">
-                    <label for="new-po-supplier" class="po-wire-label">Supplier</label>
-                    <select id="new-po-supplier" class="po-wire-select" required>
-                        <option value="" disabled selected></option>
-                        <option value="JRScomp.">JRScomp.</option>
-                        <option value="Thai Wood Supply Co.">Thai Wood Supply Co.</option>
-                        <option value="Modern Steel Ltd.">Modern Steel Ltd.</option>
-                        <option value="Decor Fabric Asia">Decor Fabric Asia</option>
-                    </select>
-                </div>
-
-                <!-- Row 3: Product Items Section -->
-                <div class="po-wire-items-section">
-                    <div class="po-wire-items-header">
-                        <span>Product name</span>
-                        <span>Quantity</span>
-                        <span>Unit price</span>
-                        <span>Total price</span>
+            <!-- STEP 2: Detail Confirmation View (Matches Mockup Reference) -->
+            <div id="po-create-step-2" style="display: none; position: relative;">
+                <button type="button" class="btn-close-modal" data-close-modal aria-label="Close modal">&times;</button>
+                <div class="order-review-container">
+                    <div class="order-review-header">
+                        <h2>Purchase Order Detail</h2>
+                        <div class="order-review-subtitle">
+                            <span>Date: <span id="po-step2-date">-</span></span>
+                            <span>•</span>
+                            <span>Status: <span class="status-tag">[ pending ]</span></span>
+                        </div>
                     </div>
 
-                    <div class="po-wire-items-list" id="po-items-container">
-                        <div class="po-wire-item-row">
-                            <select class="po-wire-select po-item-product" onchange="handleProductChange(this)">
-                                <option value="" disabled selected></option>
-                                <option value="Executive Chair" data-cost="3200">Executive Chair</option>
-                                <option value="Wooden Desk" data-cost="4500">Wooden Desk</option>
-                                <option value="L-Shape Sofa" data-cost="12000">L-Shape Sofa</option>
-                                <option value="Storage Cabinet" data-cost="2800">Storage Cabinet</option>
-                                <option value="Ergonomic Mesh Chair" data-cost="2400">Ergonomic Mesh Chair</option>
-                                <option value="Steel Filing Cabinet" data-cost="1950">Steel Filing Cabinet</option>
-                            </select>
-                            <input type="number" min="1" class="po-wire-input po-item-qty" placeholder="" oninput="handleQtyChange(this)">
-                            <input type="text" class="po-wire-input-readonly po-item-unit-price" readonly placeholder="">
-                            <input type="text" class="po-wire-input-readonly po-item-total-price" readonly placeholder="">
+                    <div class="order-info-card">
+                        <h4>Information</h4>
+                        <div class="order-info-grid">
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Created by:</span>
+                                    <span class="order-info-value" id="po-step2-created-by">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">User ID:</span>
+                                    <span class="order-info-value" id="po-step2-user-id">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Role:</span>
+                                    <span class="order-info-value" id="po-step2-role">Admin</span>
+                                </div>
+                            </div>
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Supplier Name:</span>
+                                    <span class="order-info-value" id="po-step2-supplier-name">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Supplier ID:</span>
+                                    <span class="order-info-value" id="po-step2-supplier-id">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-review-table-wrapper">
+                        <table class="order-review-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 38px; text-align: center;">#</th>
+                                    <th class="col-thumb" style="text-align: center;">Image</th>
+                                    <th>Product ID</th>
+                                    <th>Product name</th>
+                                    <th style="text-align: center;">Zone</th>
+                                    <th style="text-align: center;">Qty</th>
+                                    <th style="text-align: right;">Unit Cost</th>
+                                    <th style="text-align: right;">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="po-step2-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="order-review-summary-card">
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Quantity:</span>
+                            <span class="order-summary-val" id="po-step2-total-qty">0 Units</span>
+                        </div>
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Price:</span>
+                            <span class="order-summary-val" id="po-step2-total-price">0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="order-review-bottom-bar">
+                        <div class="order-review-actions">
+                            <button type="button" class="po-wire-btn-cancel" onclick="goBackToPOStep1()">Cancel</button>
+                            <button type="button" class="po-wire-btn-save" id="btn-submit-final-po" onclick="submitFinalPO()">Create</button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Row 4: + Add Item / - Delete Item -->
-                <div class="po-wire-item-actions">
-                    <button type="button" class="po-wire-btn-text" id="btn-add-item" onclick="addPOItemRow()">+ Add Item</button>
-                    <button type="button" class="po-wire-btn-text delete" id="btn-delete-item" onclick="deleteLastPOItemRow()">- Delete Item</button>
-                </div>
-
-                <!-- Row 5: Action Buttons -->
-                <div class="po-wire-actions">
-                    <button type="button" class="po-wire-btn-cancel" data-close-modal>Cancel</button>
-                    <button type="submit" class="po-wire-btn-save">Save</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
     <!-- MODAL 2: Purchase Order Details Modal -->
     <div class="modal-overlay" id="modal-po-detail">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3>Purchase Order Details</h3>
-                <button type="button" class="btn-close-modal">&times;</button>
-            </div>
-            <div class="modal-body" id="detail-modal-body">
+        <div class="modal-box modal-order-flow" id="po-detail-modal-box">
+            <button type="button" class="btn-close-modal" data-close-modal aria-label="Close modal">&times;</button>
+            <div id="detail-modal-body">
                 <!-- Dynamically filled by JS -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-secondary" data-close-modal>Close</button>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="../js/sidebar.js"></script>
+    <script src="../js/api.js"></script>
     <script src="../js/admin.js"></script>
     <script>
         AdminApp.checkAdminAccess();
 
         let poData = [];
+        let availableProducts = [];
+        let availableSuppliers = [];
+
         const poTbody = document.getElementById('po-table-body');
-        const emptyPOHtml = poTbody ? poTbody.innerHTML : '';
+        const emptyPOHtml = '';
         const formatMoney = AdminApp.formatMoney;
+        const escapeHtml = AdminApp.escapeHtml;
+
+        function getCurrentSupplierZone() {
+            const supplierSelect = document.getElementById('new-po-supplier');
+            if (!supplierSelect || !supplierSelect.value) return null;
+            const selectedOpt = supplierSelect.options[supplierSelect.selectedIndex];
+            return selectedOpt ? selectedOpt.getAttribute('data-zone') : null;
+        }
+
+        function getProductOptionsHtml(filterZoneCode) {
+            const zoneCode = filterZoneCode || getCurrentSupplierZone();
+
+            if (!zoneCode) {
+                return `<option value="" disabled selected>Please select supplier first</option>`;
+            }
+
+            const productsInZone = (availableProducts || []).filter(p => p.location === zoneCode);
+
+            if (productsInZone.length === 0) {
+                return `<option value="" disabled selected>No products available in ${escapeHtml(zoneCode)}</option>`;
+            }
+
+            return `
+                <option value="" disabled selected>Select Product</option>
+                ${productsInZone.map(p => {
+                    const cost = p.defaultCost || 0;
+                    return `<option value="${p.id}" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-cost="${cost}">${escapeHtml(p.name)}</option>`;
+                }).join('')}
+            `;
+        }
+
+        function handleSupplierChange(supplierName) {
+            const selectedSupplier = availableSuppliers.find(s => s.companyName === supplierName);
+            const targetZoneCode = selectedSupplier ? selectedSupplier.zoneCode : getCurrentSupplierZone();
+            refreshProductSelects(targetZoneCode);
+        }
+
+        function refreshProductSelects(filterZoneCode) {
+            const zoneCode = filterZoneCode || getCurrentSupplierZone();
+            const selects = document.querySelectorAll('.po-item-product');
+            const optionsHtml = getProductOptionsHtml(zoneCode);
+
+            selects.forEach(sel => {
+                sel.innerHTML = optionsHtml;
+                const row = sel.closest('.po-wire-item-row');
+                if (row) {
+                    const qtyInput = row.querySelector('.po-item-qty');
+                    const unitPriceInput = row.querySelector('.po-item-unit-price');
+                    const totalPriceInput = row.querySelector('.po-item-total-price');
+                    if (qtyInput) qtyInput.value = '';
+                    if (unitPriceInput) {
+                        unitPriceInput.value = '';
+                        unitPriceInput.dataset.cost = '0';
+                    }
+                    if (totalPriceInput) totalPriceInput.value = '';
+                }
+            });
+        }
+
+        async function loadSuppliers() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/suppliers');
+                    if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+                        availableSuppliers = res.data;
+                        const selectSupplier = document.getElementById('new-po-supplier');
+                        if (selectSupplier) {
+                            selectSupplier.innerHTML = `
+                                <option value="" disabled selected>Select Supplier</option>
+                                ${availableSuppliers.map(s => `
+                                    <option value="${escapeHtml(s.companyName)}" data-id="${s.supplierId}" data-zone="${escapeHtml(s.zoneCode || '')}">
+                                        ${escapeHtml(s.companyName)}
+                                    </option>
+                                `).join('')}
+                            `;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load suppliers:', err);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/zones/products');
+                    if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+                        availableProducts = res.data;
+                        refreshProductSelects();
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load products:', err);
+            }
+        }
+
+        async function loadPurchaseOrders() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/purchase-orders');
+                    if (res && res.success && Array.isArray(res.data)) {
+                        poData = res.data;
+                        applyFilters();
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load purchase orders:', err);
+            }
+            renderPOTable(poData);
+        }
 
         function renderPOTable(data) {
             const pageInfo = document.getElementById('po-pagination-info');
@@ -278,21 +467,26 @@
                 return;
             }
 
-            const escape = AdminApp.escapeHtml;
             poTbody.innerHTML = data.map(po => {
                 const statusClass = AdminApp.getStatusBadgeClass(po.status);
+                const displayId = po.id || po.poId;
+                const displayDate = po.date || (po.orderDatetime ? AdminApp.formatDisplayDate(po.orderDatetime) : '-');
+                const supplierName = po.supplier || po.supplierName || '-';
+                const totalQty = po.totalQty !== undefined ? po.totalQty : (po.totalQuantity || 0);
+                const totalPrice = po.totalPrice !== undefined ? po.totalPrice : (po.totalAmount || 0);
+
                 return `
                     <tr>
-                        <td>${escape(po.date)}</td>
-                        <td class="cell-id">#${escape(po.id)}</td>
-                        <td>${escape(po.supplier)}</td>
-                        <td>${escape(po.totalQty)}</td>
-                        <td>฿${formatMoney(po.totalPrice)}</td>
+                        <td>${escapeHtml(displayDate)}</td>
+                        <td class="cell-id">#${escapeHtml(displayId)}</td>
+                        <td>${escapeHtml(supplierName)}</td>
+                        <td>${escapeHtml(totalQty)}</td>
+                        <td>฿${formatMoney(totalPrice)}</td>
                         <td>
-                            <span class="badge-status ${statusClass}">${escape(po.status)}</span>
+                            <span class="badge-status ${statusClass}">${escapeHtml(po.status)}</span>
                         </td>
                         <td>
-                            <button type="button" class="btn-action-detail" onclick="viewPODetail('${escape(po.id)}')">Detail</button>
+                            <button type="button" class="btn-action-detail" onclick="viewPODetail('${escapeHtml(displayId)}')">Detail</button>
                         </td>
                     </tr>
                 `;
@@ -309,8 +503,8 @@
             const approvedOrdersEl = document.getElementById('kpi-approved-orders');
 
             if (totalOrdersEl) totalOrdersEl.textContent = list.length;
-            if (pendingOrdersEl) pendingOrdersEl.textContent = list.filter(d => d.status === 'Pending').length;
-            if (approvedOrdersEl) approvedOrdersEl.textContent = list.filter(d => d.status === 'Approved').length;
+            if (pendingOrdersEl) pendingOrdersEl.textContent = list.filter(d => String(d.status).toUpperCase() === 'PENDING').length;
+            if (approvedOrdersEl) approvedOrdersEl.textContent = list.filter(d => String(d.status).toUpperCase() === 'APPROVED').length;
         }
 
         function applyFilters() {
@@ -320,11 +514,19 @@
             const selectedDate = dateInput ? dateInput.value : '';
 
             const filtered = poData.filter(po => {
-                const matchesSearch = String(po.id || '').toLowerCase().includes(searchTerm) ||
-                    String(po.supplier || '').toLowerCase().includes(searchTerm) ||
-                    String(po.date || '').toLowerCase().includes(searchTerm);
-                const matchesStatus = (selectedStatus === 'ALL') || (po.status === selectedStatus);
-                const matchesDate = AdminApp.matchesDateFilter(po.date, selectedDate);
+                const displayId = String(po.id || po.poId || '');
+                const supplier = String(po.supplier || po.supplierName || '');
+                const date = String(po.date || '');
+
+                const matchesSearch = displayId.toLowerCase().includes(searchTerm) ||
+                    supplier.toLowerCase().includes(searchTerm) ||
+                    date.toLowerCase().includes(searchTerm);
+
+                const matchesStatus = (selectedStatus === 'ALL') ||
+                    (String(po.status).toUpperCase() === selectedStatus.toUpperCase());
+
+                const matchesDate = AdminApp.matchesDateFilter(po.date || po.orderDatetime, selectedDate);
+
                 return matchesSearch && matchesStatus && matchesDate;
             });
 
@@ -339,7 +541,7 @@
         document.getElementById('po-search-input')?.addEventListener('input', applyFilters);
         document.getElementById('po-status-filter')?.addEventListener('change', applyFilters);
 
-        // --- Create PO Form Handlers (Wireframe UI Structure) ---
+        // --- Create PO Form Handlers ---
         function handleProductChange(selectEl) {
             const row = selectEl.closest('.po-wire-item-row');
             if (!row) return;
@@ -354,7 +556,7 @@
             unitPriceInput.value = cost > 0 ? formatMoney(cost) : '';
             unitPriceInput.dataset.cost = cost;
 
-            if (!qtyInput.value) {
+            if (!qtyInput.value || parseInt(qtyInput.value, 10) <= 0) {
                 qtyInput.value = '1';
             }
 
@@ -378,19 +580,32 @@
 
         function addPOItemRow() {
             const container = document.getElementById('po-items-container');
-            const firstRow = container?.querySelector('.po-wire-item-row');
-            if (!container || !firstRow) return;
+            if (!container) return;
 
-            const newRow = firstRow.cloneNode(true);
-            newRow.querySelectorAll('input').forEach(input => input.value = '');
-            const select = newRow.querySelector('.po-item-product');
-            if (select) {
-                select.selectedIndex = 0;
-                select.focus();
+            const zoneCode = getCurrentSupplierZone();
+            if (!zoneCode) {
+                AdminApp.showCenterAlert({
+                    title: 'Select Supplier First',
+                    message: 'Please select a supplier before adding items.',
+                    type: 'warning'
+                });
+                document.getElementById('new-po-supplier')?.focus();
+                return;
             }
-            const unitPriceInput = newRow.querySelector('.po-item-unit-price');
-            if (unitPriceInput) unitPriceInput.dataset.cost = '0';
+
+            const newRow = document.createElement('div');
+            newRow.className = 'po-wire-item-row';
+            newRow.innerHTML = `
+                <select class="po-wire-select po-item-product" onchange="handleProductChange(this)">
+                    ${getProductOptionsHtml(zoneCode)}
+                </select>
+                <input type="number" min="1" class="po-wire-input po-item-qty" placeholder="" oninput="handleQtyChange(this)">
+                <input type="text" class="po-wire-input-readonly po-item-unit-price" readonly placeholder="">
+                <input type="text" class="po-wire-input-readonly po-item-total-price" readonly placeholder="">
+            `;
             container.appendChild(newRow);
+            const sel = newRow.querySelector('.po-item-product');
+            if (sel) sel.focus();
         }
 
         function deleteLastPOItemRow() {
@@ -409,6 +624,13 @@
             }
         }
 
+        function formatReviewDateTime(date = new Date()) {
+            const pad = (n) => String(n).padStart(2, '0');
+            const d = date instanceof Date ? date : new Date(date);
+            if (isNaN(d.getTime())) return '-';
+            return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+
         function syncUserInfo() {
             const user = AdminApp.getCurrentUser();
             if (user) {
@@ -419,93 +641,366 @@
             }
         }
 
+        function goBackToPOStep1() {
+            document.getElementById('po-modal-box')?.classList.remove('is-review-step');
+            const step1 = document.getElementById('po-create-step-1');
+            const step2 = document.getElementById('po-create-step-2');
+            if (step2) step2.style.display = 'none';
+            if (step1) step1.style.display = 'block';
+        }
+
         function openCreatePOModal() {
             syncUserInfo();
+            goBackToPOStep1();
+            const supplierSelect = document.getElementById('new-po-supplier');
+            if (supplierSelect) supplierSelect.selectedIndex = 0;
+            resetPOItemsForm();
             AdminApp.openModal('modal-create-po');
         }
 
         function closeCreatePOModal() {
+            document.getElementById('po-modal-box')?.classList.remove('is-review-step');
             AdminApp.closeModal('modal-create-po');
         }
 
         document.getElementById('btn-open-create-modal')?.addEventListener('click', openCreatePOModal);
 
-        function handleCreatePOSubmit(e) {
+        let pendingPOPayload = null;
+
+        function handlePOStep1Next(e) {
             e.preventDefault();
-            closeCreatePOModal();
+
+            const supplierSelect = document.getElementById('new-po-supplier');
+            const selectedSupplierName = supplierSelect ? supplierSelect.value : '';
+            const selectedSupplierOption = supplierSelect?.options[supplierSelect.selectedIndex];
+            const selectedSupplierId = selectedSupplierOption ? selectedSupplierOption.getAttribute('data-id') : null;
+            const selectedSupplierZone = selectedSupplierOption ? selectedSupplierOption.getAttribute('data-zone') : getCurrentSupplierZone();
+
+            if (!selectedSupplierName) {
+                AdminApp.showCenterAlert({
+                    title: 'Supplier Required',
+                    message: 'Please select a supplier for the purchase order.',
+                    type: 'error'
+                });
+                supplierSelect?.focus();
+                return;
+            }
+
+            const rows = document.querySelectorAll('#po-items-container .po-wire-item-row');
+            const items = [];
+            const reviewItems = [];
+            let totalQty = 0;
+            let totalPrice = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const selectEl = row.querySelector('.po-item-product');
+                const qtyEl = row.querySelector('.po-item-qty');
+                const unitEl = row.querySelector('.po-item-unit-price');
+
+                const opt = selectEl?.options[selectEl.selectedIndex];
+                const prodVal = selectEl?.value;
+                if (!prodVal) {
+                    AdminApp.showCenterAlert({
+                        title: 'Product Required',
+                        message: `Please select a product for Item row #${i + 1}.`,
+                        type: 'error'
+                    });
+                    selectEl?.focus();
+                    return;
+                }
+
+                const qty = parseInt(qtyEl?.value, 10);
+                if (!qty || qty <= 0) {
+                    AdminApp.showCenterAlert({
+                        title: 'Invalid Quantity',
+                        message: `Please enter a valid quantity (> 0) for Item row #${i + 1}.`,
+                        type: 'error'
+                    });
+                    qtyEl?.focus();
+                    return;
+                }
+
+                const prodId = opt?.getAttribute('data-id') || prodVal;
+                const prodName = opt?.getAttribute('data-name') || opt?.text?.split(' (')[0] || prodVal;
+                const cost = parseFloat(unitEl?.dataset?.cost || opt?.getAttribute('data-cost') || 0);
+                const subtotal = qty * cost;
+
+                const foundProd = availableProducts.find(p => String(p.id) === String(prodId) || p.name === prodName);
+                const zoneCode = (foundProd && foundProd.location) ? foundProd.location : (selectedSupplierZone || '-');
+                const resolvedProdId = (foundProd && foundProd.id) ? foundProd.id : prodId;
+                const prodImg = (foundProd && foundProd.imageUrl) ? foundProd.imageUrl : AdminApp.getProductImageUrl(prodName, zoneCode);
+
+                items.push({
+                    productId: /^\d+$/.test(resolvedProdId) ? parseInt(resolvedProdId, 10) : null,
+                    productName: prodName,
+                    quantity: qty,
+                    unitCost: cost
+                });
+
+                reviewItems.push({
+                    productId: resolvedProdId,
+                    productName: prodName,
+                    zone: zoneCode,
+                    imageUrl: prodImg,
+                    quantity: qty,
+                    unitCost: cost,
+                    subtotal: subtotal
+                });
+
+                totalQty += qty;
+                totalPrice += subtotal;
+            }
+
+            if (items.length === 0) {
+                AdminApp.showCenterAlert({
+                    title: 'No Items',
+                    message: 'Please add at least one item to the purchase order.',
+                    type: 'error'
+                });
+                return;
+            }
+
+            const currentUser = AdminApp.getCurrentUser() || {};
+            const createdByName = currentUser.fullName || 'Admin';
+            const currentUserId = currentUser.userId || '-';
+            const currentUserRole = currentUser.role || 'Admin';
+
+            pendingPOPayload = {
+                supplierId: selectedSupplierId ? parseInt(selectedSupplierId, 10) : null,
+                supplierName: selectedSupplierName,
+                items: items
+            };
+
+            // Populate Step 2 review fields
+            document.getElementById('po-step2-date').textContent = formatReviewDateTime(new Date());
+            document.getElementById('po-step2-created-by').textContent = createdByName;
+            document.getElementById('po-step2-user-id').textContent = currentUserId;
+            document.getElementById('po-step2-role').textContent = currentUserRole;
+            document.getElementById('po-step2-supplier-name').textContent = selectedSupplierName;
+            document.getElementById('po-step2-supplier-id').textContent = selectedSupplierId || '-';
+
+            // Populate review table rows
+            const tbody = document.getElementById('po-step2-table-body');
+            tbody.innerHTML = reviewItems.map((item, idx) => `
+                <tr>
+                    <td style="text-align: center;">${idx + 1}</td>
+                    <td class="col-thumb">
+                        <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.productName)}" class="order-product-thumb" onerror="this.src='../picture/favicon/favicon.png'">
+                    </td>
+                    <td>${escapeHtml(item.productId)}</td>
+                    <td class="cell-prod-name">${escapeHtml(item.productName)}</td>
+                    <td style="text-align: center;">${escapeHtml(item.zone)}</td>
+                    <td style="text-align: center;">${escapeHtml(item.quantity)}</td>
+                    <td style="text-align: right;">${formatMoney(item.unitCost)}</td>
+                    <td style="text-align: right;">${formatMoney(item.subtotal)}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('po-step2-total-qty').textContent = `${totalQty} Units`;
+            document.getElementById('po-step2-total-price').textContent = formatMoney(totalPrice);
+
+            // Transition view
+            document.getElementById('po-modal-box')?.classList.add('is-review-step');
+            document.getElementById('po-create-step-1').style.display = 'none';
+            document.getElementById('po-create-step-2').style.display = 'block';
         }
 
-        function viewPODetail(poId) {
-            const po = poData.find(item => String(item.id) === String(poId));
+        async function submitFinalPO() {
+            if (!pendingPOPayload) return;
+
+            const submitBtn = document.getElementById('btn-submit-final-po');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const res = await window.api.post('/api/purchase-orders', pendingPOPayload);
+                closeCreatePOModal();
+
+                // Reset form
+                document.getElementById('form-create-po')?.reset();
+                resetPOItemsForm();
+                goBackToPOStep1();
+                pendingPOPayload = null;
+
+                const poId = res?.data?.id || res?.data?.poId || '';
+                AdminApp.showCenterAlert({
+                    title: 'Purchase Order Created!',
+                    message: `Purchase Order #${poId} created and submitted for approval.`,
+                    type: 'success'
+                });
+
+                await loadPurchaseOrders();
+            } catch (err) {
+                AdminApp.showCenterAlert({
+                    title: 'Creation Failed',
+                    message: err.message || 'Failed to create purchase order',
+                    type: 'error'
+                });
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        }
+
+        function resetPOItemsForm() {
+            const container = document.getElementById('po-items-container');
+            if (!container) return;
+            const zoneCode = getCurrentSupplierZone();
+            container.innerHTML = `
+                <div class="po-wire-item-row">
+                    <select class="po-wire-select po-item-product" onchange="handleProductChange(this)">
+                        ${getProductOptionsHtml(zoneCode)}
+                    </select>
+                    <input type="number" min="1" class="po-wire-input po-item-qty" placeholder="" oninput="handleQtyChange(this)">
+                    <input type="text" class="po-wire-input-readonly po-item-unit-price" readonly placeholder="">
+                    <input type="text" class="po-wire-input-readonly po-item-total-price" readonly placeholder="">
+                </div>
+            `;
+            syncUserInfo();
+        }
+
+        async function viewPODetail(poId) {
+            let po = poData.find(item => String(item.id || item.poId) === String(poId));
+
+            if (!po || !po.items || po.items.length === 0) {
+                try {
+                    if (window.api && typeof window.api.get === 'function') {
+                        const res = await window.api.get(`/api/purchase-orders/${poId}`);
+                        if (res && res.success && res.data) {
+                            po = res.data;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch PO details:', err);
+                }
+            }
+
             if (!po) return;
 
-            const statusClass = AdminApp.getStatusBadgeClass(po.status);
-            const escape = AdminApp.escapeHtml;
+            const displayId = po.id || po.poId;
+            const displayDate = po.date || (po.orderDatetime ? AdminApp.formatDisplayDate(po.orderDatetime) : '-');
+            const supplierName = po.supplier || po.supplierName || '-';
+            const supplierId = po.supplierId || '-';
+            const createdByName = po.createdBy || po.createdByName || 'Admin';
+            const userId = po.userId || po.createdByUserId || '-';
+            const userRole = po.role || 'Admin';
+            const totalQty = po.totalQty !== undefined ? po.totalQty : (po.totalQuantity || 0);
+            const totalPrice = po.totalPrice !== undefined ? po.totalPrice : (po.totalAmount || 0);
+            const items = po.items || [];
+            const statusUpper = String(po.status || 'PENDING').toUpperCase();
+            const statusColor = statusUpper === 'APPROVED' ? '#10b981' : (statusUpper === 'REJECTED' ? '#ef4444' : '#b45309');
 
             document.getElementById('detail-modal-body').innerHTML = `
-                <div class="detail-header-row">
-                    <div>
-                        <span class="detail-id-label">Purchase Order</span>
-                        <h4 class="detail-id-title">#${escape(po.id)}</h4>
+                <div class="order-review-container">
+                    <div class="order-review-header">
+                        <h2>Purchase Order Detail</h2>
+                        <div class="order-review-subtitle">
+                            <span>PO ID: #${escapeHtml(displayId)}</span>
+                            <span>•</span>
+                            <span>Date: ${escapeHtml(displayDate)}</span>
+                            <span>•</span>
+                            <span>Status: <span class="status-tag" style="color: ${statusColor};">[ ${escapeHtml(po.status).toLowerCase()} ]</span></span>
+                        </div>
                     </div>
-                    <span class="badge-status badge-lg ${statusClass}">${escape(po.status)}</span>
-                </div>
 
-                <div class="detail-meta-grid">
-                    <div>
-                        <span>Supplier</span>
-                        <strong>${escape(po.supplier)}</strong>
+                    <div class="order-info-card">
+                        <h4>Information</h4>
+                        <div class="order-info-grid">
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Created by:</span>
+                                    <span class="order-info-value">${escapeHtml(createdByName)}</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">User ID:</span>
+                                    <span class="order-info-value">${escapeHtml(userId)}</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Role:</span>
+                                    <span class="order-info-value">${escapeHtml(userRole)}</span>
+                                </div>
+                            </div>
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Supplier Name:</span>
+                                    <span class="order-info-value">${escapeHtml(supplierName)}</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Supplier ID:</span>
+                                    <span class="order-info-value">${escapeHtml(supplierId)}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <span>Order Date</span>
-                        <strong>${escape(po.date)}</strong>
-                    </div>
-                    <div>
-                        <span>Created By</span>
-                        <strong>${escape(po.createdBy || 'Jeerasak Chalam')}</strong>
-                    </div>
-                    <div>
-                        <span>User ID</span>
-                        <strong>${escape(po.userId || '70315')}</strong>
-                    </div>
-                </div>
 
-                <div class="detail-items-section">
-                    <span>Order Items</span>
-                    <table class="detail-items-table">
-                        <thead>
-                            <tr>
-                                <th class="align-left">Item</th>
-                                <th class="align-center">Qty</th>
-                                <th class="align-right">Unit Cost</th>
-                                <th class="align-right">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${(po.items || []).map(item => `
+                    <div class="order-review-table-wrapper">
+                        <table class="order-review-table">
+                            <thead>
                                 <tr>
-                                    <td>${escape(item.name)}</td>
-                                    <td class="align-center">${escape(item.qty)}</td>
-                                    <td class="align-right">฿${formatMoney(item.unitPrice)}</td>
-                                    <td class="cell-subtotal">฿${formatMoney(item.subtotal)}</td>
+                                    <th style="width: 38px; text-align: center;">#</th>
+                                    <th class="col-thumb" style="text-align: center;">Image</th>
+                                    <th>Product ID</th>
+                                    <th>Product name</th>
+                                    <th style="text-align: center;">Zone</th>
+                                    <th style="text-align: center;">Qty</th>
+                                    <th style="text-align: right;">Unit Cost</th>
+                                    <th style="text-align: right;">Subtotal</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="3" class="total-label">Total Amount:</td>
-                                <td class="total-amount">฿${formatMoney(po.totalPrice)}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                            </thead>
+                            <tbody>
+                                ${items.map((item, idx) => {
+                                    const pId = item.productId || item.id || '-';
+                                    const pName = item.productName || item.name || '-';
+                                    const zCode = item.zoneCode || '-';
+                                    const qty = item.quantity !== undefined ? item.quantity : (item.qty || 1);
+                                    const cost = item.unitPrice !== undefined ? item.unitPrice : (item.unitCost || 0);
+                                    const subtotal = item.subtotal !== undefined ? item.subtotal : (qty * cost);
+                                    const imgUrl = item.imageUrl || AdminApp.getProductImageUrl(pName, zCode);
+                                    return `
+                                        <tr>
+                                            <td style="text-align: center;">${idx + 1}</td>
+                                            <td class="col-thumb">
+                                                <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(pName)}" class="order-product-thumb" onerror="this.src='../picture/favicon/favicon.png'">
+                                            </td>
+                                            <td>${escapeHtml(pId)}</td>
+                                            <td class="cell-prod-name">${escapeHtml(pName)}</td>
+                                            <td style="text-align: center;">${escapeHtml(zCode)}</td>
+                                            <td style="text-align: center;">${escapeHtml(qty)}</td>
+                                            <td style="text-align: right;">${formatMoney(cost)}</td>
+                                            <td style="text-align: right;">${formatMoney(subtotal)}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="order-review-summary-card">
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Quantity:</span>
+                            <span class="order-summary-val">${escapeHtml(totalQty)}&nbsp;Units</span>
+                        </div>
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Price:</span>
+                            <span class="order-summary-val">${formatMoney(totalPrice)}</span>
+                        </div>
+                    </div>
+
+                    <div class="order-review-bottom-bar">
+                        <div class="order-review-actions">
+                            <button type="button" class="po-wire-btn-cancel" data-close-modal>Close</button>
+                        </div>
+                    </div>
                 </div>
             `;
 
             AdminApp.openModal('modal-po-detail');
         }
 
+        // Initialize: Load all data from API
         syncUserInfo();
-        renderPOTable(poData);
+        loadSuppliers();
+        loadProducts();
+        loadPurchaseOrders();
     </script>
 </body>
 

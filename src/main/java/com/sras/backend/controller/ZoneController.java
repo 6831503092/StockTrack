@@ -4,6 +4,7 @@ import com.sras.backend.dto.ApiResponse;
 import com.sras.backend.dto.ApprovalRequestDto;
 import com.sras.backend.dto.ProductDto;
 import com.sras.backend.dto.ProductMoveRequest;
+import com.sras.backend.dto.ProductUpdateRequest;
 import com.sras.backend.dto.ZoneDto;
 import com.sras.backend.dto.ZoneProductSummaryDto;
 import com.sras.backend.entity.User;
@@ -72,5 +73,16 @@ public class ZoneController {
         User adminUser = authService.requireRole(session, xUserId, Role.ADMIN);
         ApprovalRequestDto result = zoneService.submitProductMoveRequest(req, adminUser);
         return ResponseEntity.ok(ApiResponse.ok("Product move request submitted for approval", result));
+    }
+
+    @PostMapping("/requests/product-update")
+    public ResponseEntity<ApiResponse<ApprovalRequestDto>> submitProductUpdate(
+            @RequestBody ProductUpdateRequest req,
+            HttpSession session,
+            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+    ) {
+        User adminUser = authService.requireRole(session, xUserId, Role.ADMIN);
+        ApprovalRequestDto result = zoneService.submitProductUpdateRequest(req, adminUser);
+        return ResponseEntity.ok(ApiResponse.ok("Product edit request submitted for approval", result));
     }
 }

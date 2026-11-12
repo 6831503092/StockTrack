@@ -99,7 +99,7 @@
                                 <th>Selling Price</th>
                                 <th>Current Stock</th>
                                 <th>Min Alert</th>
-                                <th style="width: 100px;">Action</th>
+                                <th style="width: 100px; text-align: center;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="products-table-body">
@@ -127,19 +127,51 @@
         </main>
     </div>
 
-    <!-- MODAL: Product Details Modal -->
-    <div class="modal-overlay" id="modal-product-detail">
-        <div class="modal-box" style="max-width: 520px;">
-            <div class="modal-header">
-                <h3>Product Details</h3>
-                <button type="button" class="btn-close-modal" onclick="closeProductDetailModal()">&times;</button>
-            </div>
-            <div class="modal-body" id="product-detail-modal-body">
-                <!-- Dynamically populated -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-secondary" onclick="closeProductDetailModal()">Close</button>
-            </div>
+    <!-- MODAL: Edit Product Modal (Matches Reference Mockup) -->
+    <div class="modal-overlay" id="modal-edit-product">
+        <div class="modal-box modal-edit-product-box">
+            <h2 class="edit-product-title">Edit Product</h2>
+
+            <form id="form-edit-product" onsubmit="handleProductEditSubmit(event)">
+                <div class="edit-product-grid">
+                    <!-- Column 1 (Readonly Fields) -->
+                    <div class="edit-product-col">
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-product-id">Product ID</label>
+                            <input type="text" id="edit-product-id" class="edit-input-readonly" readonly>
+                        </div>
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-default-cost">Default Cost</label>
+                            <input type="text" id="edit-default-cost" class="edit-input-readonly" readonly>
+                        </div>
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-min-stock-alert">Min Stock Alert</label>
+                            <input type="text" id="edit-min-stock-alert" class="edit-input-readonly" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 (Editable Fields) -->
+                    <div class="edit-product-col">
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-product-name">Product Name</label>
+                            <input type="text" id="edit-product-name" class="edit-input-editable" required>
+                        </div>
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-selling-price">Selling Price</label>
+                            <input type="number" step="0.01" min="0" id="edit-selling-price" class="edit-input-editable" required>
+                        </div>
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-current-stock">Current Stock</label>
+                            <input type="number" min="0" id="edit-current-stock" class="edit-input-editable" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="edit-product-actions">
+                    <button type="button" class="btn-edit-cancel" onclick="closeEditProductModal()">Cancel</button>
+                    <button type="submit" class="btn-edit-submit" id="btn-submit-edit-product">Sent Request</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -275,8 +307,14 @@
                             </span>
                         </td>
                         <td>${Number(p.minStockAlert || 20).toLocaleString()} Units</td>
-                        <td>
-                            <button type="button" class="btn-action-detail" onclick="viewProductDetail('${escapeHtml(String(p.id))}')">Detail</button>
+                        <td style="text-align: center;">
+                            <button type="button" class="btn-action-edit" onclick="openEditProductModal('${escapeHtml(String(p.id))}')">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                <span>Edit</span>
+                            </button>
                         </td>
                     </tr>
                 `;
@@ -325,64 +363,102 @@
         searchInput?.addEventListener('input', applyFilter);
         selectZone?.addEventListener('change', applyFilter);
 
-        function viewProductDetail(productId) {
+        let currentEditingProduct = null;
+
+        function openEditProductModal(productId) {
             const p = allProducts.find(item => String(item.id) === String(productId));
             if (!p) return;
 
-            const isLow = (Number(p.stock) || 0) <= (Number(p.minStockAlert) || 20);
-            const badgeClass = isLow ? 'badge-low-stock' : 'badge-in-stock';
-            const statusLabel = isLow ? 'Low Stock' : 'In Stock';
+            currentEditingProduct = p;
 
-            document.getElementById('product-detail-modal-body').innerHTML = `
-                <div class="detail-header-row" style="margin-bottom: 18px;">
-                    <div>
-                        <span class="detail-id-label">Product ID</span>
-                        <h4 class="detail-id-title">#${escapeHtml(String(p.id))}</h4>
-                    </div>
-                    <span class="badge-status ${badgeClass}">${statusLabel}</span>
-                </div>
+            document.getElementById('edit-product-id').value = p.id || '';
+            document.getElementById('edit-default-cost').value = AdminApp.formatMoney(p.defaultCost || 0);
+            document.getElementById('edit-min-stock-alert').value = p.minStockAlert != null ? p.minStockAlert : 20;
 
-                <div class="detail-meta-grid">
-                    <div class="detail-meta-item">
-                        <span>Product Name</span>
-                        <strong>${escapeHtml(p.name)}</strong>
-                    </div>
-                    <div class="detail-meta-item">
-                        <span>Warehouse Zone</span>
-                        <strong>${escapeHtml(p.zoneName || p.location || '-')}</strong>
-                    </div>
-                    <div class="detail-meta-item">
-                        <span>Default Cost</span>
-                        <strong>฿${formatMoney(p.defaultCost)}</strong>
-                    </div>
-                    <div class="detail-meta-item">
-                        <span>Selling Price</span>
-                        <strong>฿${formatMoney(p.sellingPrice)}</strong>
-                    </div>
-                    <div class="detail-meta-item">
-                        <span>Current Stock</span>
-                        <strong style="color: ${isLow ? '#b91c1c' : '#15803d'};">${Number(p.stock || 0).toLocaleString()} Units</strong>
-                    </div>
-                    <div class="detail-meta-item">
-                        <span>Min Stock Alert</span>
-                        <strong>${Number(p.minStockAlert || 20).toLocaleString()} Units</strong>
-                    </div>
-                    <div class="detail-meta-item">
-                        <span>PO Min / Max Qty</span>
-                        <strong>${p.poMinQty || 1} / ${p.poMaxQty != null ? p.poMaxQty : 'No Limit'}</strong>
-                    </div>
-                    <div class="detail-meta-item">
-                        <span>SO Min / Max Qty</span>
-                        <strong>${p.soMinQty || 1} / ${p.soMaxQty != null ? p.soMaxQty : 'No Limit'}</strong>
-                    </div>
-                </div>
-            `;
+            document.getElementById('edit-product-name').value = p.name || '';
+            document.getElementById('edit-selling-price').value = p.sellingPrice != null ? p.sellingPrice : (p.price != null ? p.price : '');
+            document.getElementById('edit-current-stock').value = p.stock != null ? p.stock : 0;
 
-            openModal('modal-product-detail');
+            openModal('modal-edit-product');
         }
 
-        function closeProductDetailModal() {
-            closeModal('modal-product-detail');
+        function closeEditProductModal() {
+            closeModal('modal-edit-product');
+            currentEditingProduct = null;
+        }
+
+        async function handleProductEditSubmit(e) {
+            e.preventDefault();
+            if (!currentEditingProduct) return;
+
+            const submitBtn = document.getElementById('btn-submit-edit-product');
+            const newName = document.getElementById('edit-product-name').value.trim();
+            const newPrice = parseFloat(document.getElementById('edit-selling-price').value);
+            const newStock = parseInt(document.getElementById('edit-current-stock').value, 10);
+
+            if (!newName) {
+                AdminApp.showCenterAlert({
+                    title: 'Name Required',
+                    message: 'Please enter a product name.',
+                    type: 'error'
+                });
+                return;
+            }
+
+            if (isNaN(newPrice) || newPrice < 0) {
+                AdminApp.showCenterAlert({
+                    title: 'Invalid Price',
+                    message: 'Please enter a valid selling price (>= 0).',
+                    type: 'error'
+                });
+                return;
+            }
+
+            if (isNaN(newStock) || newStock < 0) {
+                AdminApp.showCenterAlert({
+                    title: 'Invalid Stock',
+                    message: 'Please enter a valid current stock quantity (>= 0).',
+                    type: 'error'
+                });
+                return;
+            }
+
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const payload = {
+                    productId: currentEditingProduct.id,
+                    productName: newName,
+                    sellingPrice: newPrice,
+                    currentStock: newStock
+                };
+
+                if (window.api && typeof window.api.post === 'function') {
+                    await window.api.post('/api/requests/product-update', payload);
+                }
+
+                // Optimistically update local product data
+                currentEditingProduct.name = newName;
+                currentEditingProduct.sellingPrice = newPrice;
+                currentEditingProduct.stock = newStock;
+                applyFilter();
+
+                closeEditProductModal();
+
+                AdminApp.showCenterAlert({
+                    title: 'Request Sent!',
+                    message: `Product edit request for "${newName}" submitted for approval.`,
+                    type: 'success'
+                });
+            } catch (err) {
+                AdminApp.showCenterAlert({
+                    title: 'Submission Failed',
+                    message: err.message || 'Failed to submit product edit request.',
+                    type: 'error'
+                });
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
         }
 
         // Initialize on load

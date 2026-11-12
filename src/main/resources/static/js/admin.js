@@ -537,6 +537,52 @@
         });
     }
 
+    const PRODUCT_IMAGE_MAP = {
+        'officedesk': '../picture/zone1/OfficeDesk.webp',
+        'diningtable': '../picture/zone1/DiningTable.webp',
+        'coffeetable': '../picture/zone1/cofeetable.webp',
+        'computerdesk': '../picture/zone1/computer-desk.webp',
+        'meetingtable': '../picture/zone1/meetingtable.webp',
+        'officechair': '../picture/zone2/OfficeChair.webp',
+        'diningchair': '../picture/zone2/dinningchair.webp',
+        'gamingchair': '../picture/zone2/GamingChair.webp',
+        'foldingchair': '../picture/zone2/FoldingChair.webp',
+        'sofachair': '../picture/zone2/SofaChair.webp',
+        'singlebed': '../picture/zone3/SingleBed.webp',
+        'queenbed': '../picture/zone3/queenbed.webp',
+        'kingbed': '../picture/zone3/KingBed.webp',
+        'bunkbed': '../picture/zone3/BunkBed.webp',
+        'foldingbed': '../picture/zone3/FoldingBed.webp',
+        'wardrobe': '../picture/zone4/Wardrobe.webp',
+        'shoecabinet': '../picture/zone4/ShoeCabinet.webp',
+        'bookshelf': '../picture/zone4/bookshelf.webp',
+        'tvcabinet': '../picture/zone4/TVCabinet.webp',
+        'drawercabinet': '../picture/zone4/DrawerCabinet.webp'
+    };
+
+    function getProductImageUrl(productName, zoneCode) {
+        if (!productName) return '../picture/favicon/favicon.png';
+        const clean = String(productName).toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        if (PRODUCT_IMAGE_MAP[clean]) {
+            return PRODUCT_IMAGE_MAP[clean];
+        }
+
+        for (const k in PRODUCT_IMAGE_MAP) {
+            if (clean.includes(k) || k.includes(clean)) {
+                return PRODUCT_IMAGE_MAP[k];
+            }
+        }
+
+        const z = String(zoneCode || '').toUpperCase();
+        if (z === 'Z1') return '../picture/zone1/OfficeDesk.webp';
+        if (z === 'Z2') return '../picture/zone2/OfficeChair.webp';
+        if (z === 'Z3') return '../picture/zone3/SingleBed.webp';
+        if (z === 'Z4') return '../picture/zone4/bookshelf.webp';
+
+        return '../picture/favicon/favicon.png';
+    }
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initImageFallbacks);
     } else {
@@ -557,7 +603,8 @@
         matchesDateFilter,
         initCustomDatePicker,
         showToast,
-        showCenterAlert
+        showCenterAlert,
+        getProductImageUrl
     };
     window.showToast = showToast;
     window.showCenterAlert = showCenterAlert;

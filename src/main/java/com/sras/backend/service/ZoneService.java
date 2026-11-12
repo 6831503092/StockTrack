@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sras.backend.dto.ApprovalRequestDto;
 import com.sras.backend.dto.ProductDto;
 import com.sras.backend.dto.ProductMoveRequest;
+import com.sras.backend.dto.ProductUpdateRequest;
 import com.sras.backend.dto.ZoneDto;
 import com.sras.backend.dto.ZoneProductSummaryDto;
 import com.sras.backend.entity.ApprovalRequest;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -252,6 +254,59 @@ public class ZoneService {
         auditLogService.log(adminUser, "REQUEST_SUBMIT",
                 (isSwap ? "Requested swap between Zone " : "Requested move of Zone ")
                 + sourceZone.getZoneCode() + " and Zone " + targetZone.getZoneCode());
+
+        return ApprovalRequestDto.fromEntity(saved);
+    }
+
+    @Transactional
+    public ApprovalRequestDto submitProductUpdateRequest(ProductUpdateRequest req, User adminUser) {
+        if (req == null || req.productId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product edit request");
+        }
+
+        Product product = productRepository.findById(req.productId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found: " + req.productId()));
+
+        String newName = (req.productName() != null && !req.productName().isBlank())
+                ? req.productName().trim()
+                : product.getProductName();
+        BigDecimal newPrice = req.sellingPrice() != null ? req.sellingPrice() : product.getSellingPrice();
+        Integer newStock = req.currentStock() != null ? req.currentStock() : product.getCurrentStock();
+
+        Map<String, Object> payloadMap = new HashMap<>();
+        payloadMap.put("productId", product.getProductId());
+        payloadMap.put("productName", newName);
+        payloadMap.put("oldProductName", product.getProductName());
+        payloadMap.put("sellingPrice", newPrice);
+        payloadMap.put("oldSellingPrice", product.getSellingPrice());
+        payloadMap.put("currentStock", newStock);
+        payloadMap.put("oldCurrentStock", product.getCurrentStock());
+        payloadMap.put("defaultCost", product.getDefaultCost());
+        payloadMap.put("minStockAlert", product.getMinStockAlert());
+        payloadMap.put("zoneCode", product.getZone() != null ? product.getZone().getZoneCode() : "-");
+
+        String payloadJson;
+        try {
+            payloadJson = objectMapper.writeValueAsString(payloadMap);
+        } catch (JsonProcessingException e) {
+            payloadJson = "{}";
+        }
+
+        String detail = "Edit Product #" + product.getProductId() + " (" + newName + ")";
+
+        ApprovalRequest approvalRequest = ApprovalRequest.builder()
+                .requestType(RequestType.PRODUCT_UPDATE)
+                .targetType(TargetType.PRODUCT)
+                .targetId(product.getProductId())
+                .payload(payloadJson)
+                .detail(detail)
+                .status(ApprovalStatus.PENDING)
+                .requestedBy(adminUser)
+                .requestedDatetime(LocalDateTime.now())
+                .build();
+
+        ApprovalRequest saved = approvalRequestRepository.save(approvalRequest);
+        auditLogService.log(adminUser, "REQUEST_SUBMIT", "Requested edit for Product #" + product.getProductId() + " (" + newName + ")");
 
         return ApprovalRequestDto.fromEntity(saved);
     }

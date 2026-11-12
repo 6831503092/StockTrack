@@ -166,97 +166,356 @@
         </main>
     </div>
 
-    <!-- MODAL: Create Sales Order Modal (Wireframe Reference Match) -->
+    <!-- MODAL 1: Create Sales Order Modal (Wireframe Reference Match) -->
     <div class="modal-overlay" id="modal-create-so">
-        <div class="modal-box modal-po-wire">
-            <div class="po-wire-header">
-                <h2>Create Sales Order</h2>
-                <button type="button" class="btn-close-modal" aria-label="Close modal">&times;</button>
+        <div class="modal-box modal-po-wire" id="so-modal-box">
+            <!-- STEP 1: Form Input -->
+            <div id="so-create-step-1">
+                <div class="po-wire-header">
+                    <h2>Create Sales Order</h2>
+                    <button type="button" class="btn-close-modal" aria-label="Close modal">&times;</button>
+                </div>
+
+                <form id="form-create-so" onsubmit="handleSOStep1Next(event)">
+                    <!-- Row 1: Created by & UserID -->
+                    <div class="po-wire-grid-2">
+                        <div>
+                            <label for="new-so-created-by" class="po-wire-label">Created by</label>
+                            <input type="text" id="new-so-created-by" class="po-wire-input-readonly" readonly placeholder="User Name">
+                        </div>
+                        <div>
+                            <label for="new-so-user-id" class="po-wire-label">UserID</label>
+                            <input type="text" id="new-so-user-id" class="po-wire-input-readonly" readonly placeholder="User ID">
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Customer -->
+                    <div class="po-wire-group">
+                        <label for="new-so-customer" class="po-wire-label">Customer</label>
+                        <select id="new-so-customer" class="po-wire-select" required>
+                            <option value="" disabled selected>Select Customer</option>
+                            <option value="RWTcomp.">RWTcomp.</option>
+                            <option value="Office Pro Thailand">Office Pro Thailand</option>
+                            <option value="Bangkok Modern Living">Bangkok Modern Living</option>
+                            <option value="Siam Retail Group">Siam Retail Group</option>
+                        </select>
+                    </div>
+
+                    <!-- Row 3: Product Items Section -->
+                    <div class="po-wire-items-section">
+                        <div class="po-wire-items-header">
+                            <span>Product name</span>
+                            <span>Quantity</span>
+                            <span>Unit price</span>
+                            <span>Total price</span>
+                        </div>
+
+                        <div class="po-wire-items-list" id="so-items-container">
+                            <div class="po-wire-item-row">
+                                <select class="po-wire-select so-item-product" onchange="handleSOProductChange(this)">
+                                    <option value="" disabled selected>Select Product</option>
+                                </select>
+                                <input type="number" min="1" class="po-wire-input so-item-qty" placeholder="" oninput="handleSOQtyChange(this)">
+                                <input type="text" class="po-wire-input-readonly so-item-unit-price" readonly placeholder="">
+                                <input type="text" class="po-wire-input-readonly so-item-total-price" readonly placeholder="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: + Add Item / - Delete Item -->
+                    <div class="po-wire-item-actions">
+                        <button type="button" class="po-wire-btn-text" id="btn-add-so-item" onclick="addSOItemRow()">+ Add Item</button>
+                        <button type="button" class="po-wire-btn-text delete" id="btn-delete-so-item" onclick="deleteLastSOItemRow()">- Delete Item</button>
+                    </div>
+
+                    <!-- Row 5: Action Buttons (Changed Save to Next) -->
+                    <div class="po-wire-actions">
+                        <button type="button" class="po-wire-btn-cancel" data-close-modal>Cancel</button>
+                        <button type="submit" class="po-wire-btn-save" id="btn-so-step1-next">Next</button>
+                    </div>
+                </form>
             </div>
 
-            <form id="form-create-so" onsubmit="handleCreateSOSubmit(event)">
-                <!-- Row 1: Created by & UserID -->
-                <div class="po-wire-grid-2">
-                    <div>
-                        <label for="new-so-created-by" class="po-wire-label">Created by</label>
-                        <input type="text" id="new-so-created-by" class="po-wire-input-readonly" readonly placeholder="User Name">
-                    </div>
-                    <div>
-                        <label for="new-so-user-id" class="po-wire-label">UserID</label>
-                        <input type="text" id="new-so-user-id" class="po-wire-input-readonly" readonly placeholder="User ID">
-                    </div>
-                </div>
-
-                <!-- Row 2: Customer -->
-                <div class="po-wire-group">
-                    <label for="new-so-customer" class="po-wire-label">Customer</label>
-                    <select id="new-so-customer" class="po-wire-select">
-                        <option value="" disabled selected></option>
-                        <option value="RWTcomp.">RWTcomp.</option>
-                        <option value="Office Pro Thailand">Office Pro Thailand</option>
-                        <option value="Bangkok Modern Living">Bangkok Modern Living</option>
-                        <option value="Siam Retail Group">Siam Retail Group</option>
-                    </select>
-                </div>
-
-                <!-- Row 3: Product Items Section -->
-                <div class="po-wire-items-section">
-                    <div class="po-wire-items-header">
-                        <span>Product name</span>
-                        <span>Quantity</span>
-                        <span>Unit price</span>
-                        <span>Total price</span>
+            <!-- STEP 2: Detail Confirmation View (Matches Mockup Reference) -->
+            <div id="so-create-step-2" style="display: none; position: relative;">
+                <button type="button" class="btn-close-modal" data-close-modal aria-label="Close modal">&times;</button>
+                <div class="order-review-container">
+                    <div class="order-review-header">
+                        <h2>Sales Order Detail</h2>
+                        <div class="order-review-subtitle">
+                            <span>Date: <span id="so-step2-date">-</span></span>
+                            <span>•</span>
+                            <span>Status: <span class="status-tag">[ pending ]</span></span>
+                        </div>
                     </div>
 
-                    <div class="po-wire-items-list" id="so-items-container">
-                        <div class="po-wire-item-row">
-                            <select class="po-wire-select so-item-product" onchange="handleSOProductChange(this)">
-                                <option value="" disabled selected></option>
-                                <option value="Executive Chair" data-price="4500">Executive Chair</option>
-                                <option value="Wooden Desk" data-price="6200">Wooden Desk</option>
-                                <option value="L-Shape Sofa" data-price="16800">L-Shape Sofa</option>
-                                <option value="Storage Cabinet" data-price="3900">Storage Cabinet</option>
-                                <option value="Ergonomic Mesh Chair" data-price="3400">Ergonomic Mesh Chair</option>
-                                <option value="Steel Filing Cabinet" data-price="2750">Steel Filing Cabinet</option>
-                            </select>
-                            <input type="number" min="1" class="po-wire-input so-item-qty" placeholder="" oninput="handleSOQtyChange(this)">
-                            <input type="text" class="po-wire-input-readonly so-item-unit-price" readonly placeholder="">
-                            <input type="text" class="po-wire-input-readonly so-item-total-price" readonly placeholder="">
+                    <div class="order-info-card">
+                        <h4>Information</h4>
+                        <div class="order-info-grid">
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Created by:</span>
+                                    <span class="order-info-value" id="so-step2-created-by">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">User ID:</span>
+                                    <span class="order-info-value" id="so-step2-user-id">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Role:</span>
+                                    <span class="order-info-value" id="so-step2-role">Admin</span>
+                                </div>
+                            </div>
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Customer Name:</span>
+                                    <span class="order-info-value" id="so-step2-customer-name">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Customer ID:</span>
+                                    <span class="order-info-value" id="so-step2-customer-id">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-review-table-wrapper">
+                        <table class="order-review-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 38px; text-align: center;">#</th>
+                                    <th class="col-thumb" style="text-align: center;">Image</th>
+                                    <th>Product ID</th>
+                                    <th>Product name</th>
+                                    <th style="text-align: center;">Zone</th>
+                                    <th style="text-align: center;">Qty</th>
+                                    <th style="text-align: right;">Unit Price</th>
+                                    <th style="text-align: right;">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="so-step2-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="order-review-summary-card">
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Quantity:</span>
+                            <span class="order-summary-val" id="so-step2-total-qty">0 Units</span>
+                        </div>
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Price:</span>
+                            <span class="order-summary-val" id="so-step2-total-price">0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="order-review-bottom-bar">
+                        <div class="order-review-actions">
+                            <button type="button" class="po-wire-btn-cancel" onclick="goBackToSOStep1()">Cancel</button>
+                            <button type="button" class="po-wire-btn-save" id="btn-submit-final-so" onclick="submitFinalSO()">Create</button>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Row 4: + Add Item / - Delete Item -->
-                <div class="po-wire-item-actions">
-                    <button type="button" class="po-wire-btn-text" id="btn-add-so-item" onclick="addSOItemRow()">+ Add Item</button>
-                    <button type="button" class="po-wire-btn-text delete" id="btn-delete-so-item" onclick="deleteLastSOItemRow()">- Delete Item</button>
-                </div>
-
-                <!-- Row 5: Action Buttons -->
-                <div class="po-wire-actions">
-                    <button type="button" class="po-wire-btn-cancel" data-close-modal>Cancel</button>
-                    <button type="submit" class="po-wire-btn-save">Save</button>
-                </div>
-            </form>
+    <!-- MODAL 2: Sales Order Details Modal -->
+    <div class="modal-overlay" id="modal-so-detail">
+        <div class="modal-box modal-order-flow" id="so-detail-modal-box">
+            <button type="button" class="btn-close-modal" data-close-modal aria-label="Close modal">&times;</button>
+            <div id="detail-modal-body">
+                <!-- Dynamically filled by JS -->
+            </div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="../js/sidebar.js"></script>
+    <script src="../js/api.js"></script>
     <script src="../js/admin.js"></script>
     <script>
         AdminApp.checkAdminAccess();
 
+        let soData = [];
+        let availableProducts = [];
+        let availableCustomers = [];
+
+        const soTbody = document.getElementById('so-table-body');
+        const emptySOHtml = '';
         const formatMoney = AdminApp.formatMoney;
+        const escapeHtml = AdminApp.escapeHtml;
+
+        function formatReviewDateTime(date = new Date()) {
+            const pad = (n) => String(n).padStart(2, '0');
+            const d = date instanceof Date ? date : new Date(date);
+            if (isNaN(d.getTime())) return '-';
+            return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+
+        function getSOProductOptionsHtml() {
+            if (!availableProducts || availableProducts.length === 0) {
+                return `<option value="" disabled selected>No products available</option>`;
+            }
+
+            return `
+                <option value="" disabled selected>Select Product</option>
+                ${availableProducts.map(p => {
+                    const price = p.sellingPrice || p.price || 0;
+                    const stock = p.currentStock !== undefined ? p.currentStock : (p.stock || 0);
+                    const zone = p.location || p.zoneCode || '';
+                    return `<option value="${p.id}" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${price}" data-zone="${escapeHtml(zone)}" data-stock="${stock}">${escapeHtml(p.name)}</option>`;
+                }).join('')}
+            `;
+        }
+
+        function refreshSOProductSelects() {
+            const selects = document.querySelectorAll('.so-item-product');
+            const optionsHtml = getSOProductOptionsHtml();
+            selects.forEach(sel => {
+                sel.innerHTML = optionsHtml;
+            });
+        }
+
+        async function loadCustomers() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/customers');
+                    if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+                        availableCustomers = res.data;
+                        const selectCust = document.getElementById('new-so-customer');
+                        if (selectCust) {
+                            selectCust.innerHTML = `
+                                <option value="" disabled selected>Select Customer</option>
+                                ${availableCustomers.map(c => `
+                                    <option value="${escapeHtml(c.customerName)}" data-id="${c.customerId}">
+                                        ${escapeHtml(c.customerName)}
+                                    </option>
+                                `).join('')}
+                            `;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load customers:', err);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/zones/products');
+                    if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+                        availableProducts = res.data;
+                        refreshSOProductSelects();
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load products:', err);
+            }
+        }
+
+        async function loadSalesOrders() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/sales-orders');
+                    if (res && res.success && Array.isArray(res.data)) {
+                        soData = res.data;
+                        applyFilters();
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load sales orders:', err);
+            }
+            renderSOTable(soData);
+        }
+
+        function renderSOTable(data) {
+            const pageInfo = document.getElementById('so-pagination-info');
+
+            if (!data || data.length === 0) {
+                if (soTbody) soTbody.innerHTML = emptySOHtml;
+                if (pageInfo) pageInfo.textContent = 'Showing 0 of 0 entries';
+                updateKPIs([]);
+                return;
+            }
+
+            soTbody.innerHTML = data.map(so => {
+                const statusClass = AdminApp.getStatusBadgeClass(so.status);
+                const displayId = so.id || so.soId;
+                const displayDate = so.date || (so.orderDatetime ? AdminApp.formatDisplayDate(so.orderDatetime) : '-');
+                const customerName = so.customer || so.customerName || '-';
+                const totalQty = so.totalQty !== undefined ? so.totalQty : (so.totalQuantity || 0);
+                const totalPrice = so.totalPrice !== undefined ? so.totalPrice : (so.totalAmount || 0);
+
+                return `
+                    <tr>
+                        <td>${escapeHtml(displayDate)}</td>
+                        <td class="cell-id">#${escapeHtml(displayId)}</td>
+                        <td>${escapeHtml(customerName)}</td>
+                        <td>${escapeHtml(totalQty)}</td>
+                        <td>฿${formatMoney(totalPrice)}</td>
+                        <td>
+                            <span class="badge-status ${statusClass}">${escapeHtml(so.status)}</span>
+                        </td>
+                        <td>
+                            <button type="button" class="btn-action-detail" onclick="viewSODetail('${escapeHtml(displayId)}')">Detail</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (pageInfo) pageInfo.textContent = `Showing 1 to ${data.length} of ${data.length} entries`;
+            updateKPIs(data);
+        }
+
+        function updateKPIs(data) {
+            const list = Array.isArray(data) ? data : [];
+            const totalOrdersEl = document.getElementById('kpi-total-so');
+            const pendingOrdersEl = document.getElementById('kpi-pending-so');
+            const approvedOrdersEl = document.getElementById('kpi-approved-so');
+
+            if (totalOrdersEl) totalOrdersEl.textContent = list.length;
+            if (pendingOrdersEl) pendingOrdersEl.textContent = list.filter(d => String(d.status).toUpperCase() === 'PENDING').length;
+            if (approvedOrdersEl) approvedOrdersEl.textContent = list.filter(d => String(d.status).toUpperCase() === 'APPROVED').length;
+        }
+
+        function applyFilters() {
+            const searchTerm = (document.getElementById('so-search-input')?.value || '').toLowerCase().trim();
+            const selectedStatus = document.getElementById('so-status-filter')?.value || 'ALL';
+            const dateInput = document.getElementById('requests-date-input');
+            const selectedDate = dateInput ? dateInput.value : '';
+
+            const filtered = soData.filter(so => {
+                const displayId = String(so.id || so.soId || '');
+                const customer = String(so.customer || so.customerName || '');
+                const date = String(so.date || '');
+
+                const matchesSearch = displayId.toLowerCase().includes(searchTerm) ||
+                    customer.toLowerCase().includes(searchTerm) ||
+                    date.toLowerCase().includes(searchTerm);
+
+                const matchesStatus = (selectedStatus === 'ALL') ||
+                    (String(so.status).toUpperCase() === selectedStatus.toUpperCase());
+
+                const matchesDate = AdminApp.matchesDateFilter(so.date || so.orderDatetime, selectedDate);
+
+                return matchesSearch && matchesStatus && matchesDate;
+            });
+
+            renderSOTable(filtered);
+        }
 
         AdminApp.initCustomDatePicker({
             box: 'requests-date-box',
-            onChange: (dateVal) => {
-                // Ready for filtering when Backend API loads sales orders
-            }
+            onChange: applyFilters
         });
 
-        // --- Create SO Form Handlers (Wireframe UI Structure) ---
+        document.getElementById('so-search-input')?.addEventListener('input', applyFilters);
+        document.getElementById('so-status-filter')?.addEventListener('change', applyFilters);
+
+        // --- Create SO Form Handlers ---
         function handleSOProductChange(selectEl) {
             const row = selectEl.closest('.po-wire-item-row');
             if (!row) return;
@@ -271,7 +530,7 @@
             unitPriceInput.value = price > 0 ? formatMoney(price) : '';
             unitPriceInput.dataset.price = price;
 
-            if (!qtyInput.value) {
+            if (!qtyInput.value || parseInt(qtyInput.value, 10) <= 0) {
                 qtyInput.value = '1';
             }
 
@@ -295,19 +554,21 @@
 
         function addSOItemRow() {
             const container = document.getElementById('so-items-container');
-            const firstRow = container?.querySelector('.po-wire-item-row');
-            if (!container || !firstRow) return;
+            if (!container) return;
 
-            const newRow = firstRow.cloneNode(true);
-            newRow.querySelectorAll('input').forEach(input => input.value = '');
-            const select = newRow.querySelector('.so-item-product');
-            if (select) {
-                select.selectedIndex = 0;
-                select.focus();
-            }
-            const unitPriceInput = newRow.querySelector('.so-item-unit-price');
-            if (unitPriceInput) unitPriceInput.dataset.price = '0';
+            const newRow = document.createElement('div');
+            newRow.className = 'po-wire-item-row';
+            newRow.innerHTML = `
+                <select class="po-wire-select so-item-product" onchange="handleSOProductChange(this)">
+                    ${getSOProductOptionsHtml()}
+                </select>
+                <input type="number" min="1" class="po-wire-input so-item-qty" placeholder="" oninput="handleSOQtyChange(this)">
+                <input type="text" class="po-wire-input-readonly so-item-unit-price" readonly placeholder="">
+                <input type="text" class="po-wire-input-readonly so-item-total-price" readonly placeholder="">
+            `;
             container.appendChild(newRow);
+            const sel = newRow.querySelector('.so-item-product');
+            if (sel) sel.focus();
         }
 
         function deleteLastSOItemRow() {
@@ -336,23 +597,376 @@
             }
         }
 
+        function goBackToSOStep1() {
+            document.getElementById('so-modal-box')?.classList.remove('is-review-step');
+            const step1 = document.getElementById('so-create-step-1');
+            const step2 = document.getElementById('so-create-step-2');
+            if (step2) step2.style.display = 'none';
+            if (step1) step1.style.display = 'block';
+        }
+
         function openCreateSOModal() {
             syncUserInfo();
+            goBackToSOStep1();
+            const customerSelect = document.getElementById('new-so-customer');
+            if (customerSelect) customerSelect.selectedIndex = 0;
+            resetSOItemsForm();
             AdminApp.openModal('modal-create-so');
         }
 
         function closeCreateSOModal() {
+            document.getElementById('so-modal-box')?.classList.remove('is-review-step');
             AdminApp.closeModal('modal-create-so');
         }
 
         document.getElementById('btn-open-create-so-modal')?.addEventListener('click', openCreateSOModal);
 
-        function handleCreateSOSubmit(e) {
+        let pendingSOPayload = null;
+
+        function handleSOStep1Next(e) {
             e.preventDefault();
-            closeCreateSOModal();
+
+            const customerSelect = document.getElementById('new-so-customer');
+            const selectedCustomerName = customerSelect ? customerSelect.value : '';
+            const selectedCustomerOption = customerSelect?.options[customerSelect.selectedIndex];
+            const selectedCustomerId = selectedCustomerOption ? selectedCustomerOption.getAttribute('data-id') : null;
+
+            if (!selectedCustomerName) {
+                AdminApp.showCenterAlert({
+                    title: 'Customer Required',
+                    message: 'Please select a customer for the sales order.',
+                    type: 'error'
+                });
+                customerSelect?.focus();
+                return;
+            }
+
+            const rows = document.querySelectorAll('#so-items-container .po-wire-item-row');
+            const items = [];
+            const reviewItems = [];
+            let totalQty = 0;
+            let totalPrice = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const selectEl = row.querySelector('.so-item-product');
+                const qtyEl = row.querySelector('.so-item-qty');
+                const unitEl = row.querySelector('.so-item-unit-price');
+
+                const opt = selectEl?.options[selectEl.selectedIndex];
+                const prodVal = selectEl?.value;
+                if (!prodVal) {
+                    AdminApp.showCenterAlert({
+                        title: 'Product Required',
+                        message: `Please select a product for Item row #${i + 1}.`,
+                        type: 'error'
+                    });
+                    selectEl?.focus();
+                    return;
+                }
+
+                const qty = parseInt(qtyEl?.value, 10);
+                if (!qty || qty <= 0) {
+                    AdminApp.showCenterAlert({
+                        title: 'Invalid Quantity',
+                        message: `Please enter a valid quantity (> 0) for Item row #${i + 1}.`,
+                        type: 'error'
+                    });
+                    qtyEl?.focus();
+                    return;
+                }
+
+                const prodId = opt?.getAttribute('data-id') || prodVal;
+                const prodName = opt?.getAttribute('data-name') || opt?.text?.split(' (')[0] || prodVal;
+                const price = parseFloat(unitEl?.dataset?.price || opt?.getAttribute('data-price') || 0);
+                const stock = parseInt(opt?.getAttribute('data-stock') || '999', 10);
+                const subtotal = qty * price;
+
+                // Validate stock locally if available
+                if (stock !== undefined && !isNaN(stock) && qty > stock) {
+                    AdminApp.showCenterAlert({
+                        title: 'Insufficient Stock',
+                        message: `"${prodName}" has only ${stock} units in stock. You requested ${qty}.`,
+                        type: 'error'
+                    });
+                    qtyEl?.focus();
+                    return;
+                }
+
+                const foundProd = availableProducts.find(p => String(p.id) === String(prodId) || p.name === prodName);
+                const zoneCode = (foundProd && foundProd.location) ? foundProd.location : (opt?.getAttribute('data-zone') || '-');
+                const resolvedProdId = (foundProd && foundProd.id) ? foundProd.id : prodId;
+                const prodImg = (foundProd && foundProd.imageUrl) ? foundProd.imageUrl : AdminApp.getProductImageUrl(prodName, zoneCode);
+
+                items.push({
+                    productId: /^\d+$/.test(resolvedProdId) ? parseInt(resolvedProdId, 10) : null,
+                    productName: prodName,
+                    quantity: qty,
+                    unitPrice: price
+                });
+
+                reviewItems.push({
+                    productId: resolvedProdId,
+                    productName: prodName,
+                    zone: zoneCode,
+                    imageUrl: prodImg,
+                    quantity: qty,
+                    unitPrice: price,
+                    subtotal: subtotal
+                });
+
+                totalQty += qty;
+                totalPrice += subtotal;
+            }
+
+            if (items.length === 0) {
+                AdminApp.showCenterAlert({
+                    title: 'No Items',
+                    message: 'Please add at least one item to the sales order.',
+                    type: 'error'
+                });
+                return;
+            }
+
+            const currentUser = AdminApp.getCurrentUser() || {};
+            const createdByName = currentUser.fullName || 'Admin';
+            const currentUserId = currentUser.userId || '-';
+            const currentUserRole = currentUser.role || 'Admin';
+
+            pendingSOPayload = {
+                customerId: selectedCustomerId ? parseInt(selectedCustomerId, 10) : null,
+                customerName: selectedCustomerName,
+                items: items
+            };
+
+            // Populate Step 2 review fields
+            document.getElementById('so-step2-date').textContent = formatReviewDateTime(new Date());
+            document.getElementById('so-step2-created-by').textContent = createdByName;
+            document.getElementById('so-step2-user-id').textContent = currentUserId;
+            document.getElementById('so-step2-role').textContent = currentUserRole;
+            document.getElementById('so-step2-customer-name').textContent = selectedCustomerName;
+            document.getElementById('so-step2-customer-id').textContent = selectedCustomerId || '-';
+
+            // Populate review table rows
+            const tbody = document.getElementById('so-step2-table-body');
+            tbody.innerHTML = reviewItems.map((item, idx) => `
+                <tr>
+                    <td style="text-align: center;">${idx + 1}</td>
+                    <td class="col-thumb">
+                        <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.productName)}" class="order-product-thumb" onerror="this.src='../picture/favicon/favicon.png'">
+                    </td>
+                    <td>${escapeHtml(item.productId)}</td>
+                    <td class="cell-prod-name">${escapeHtml(item.productName)}</td>
+                    <td style="text-align: center;">${escapeHtml(item.zone)}</td>
+                    <td style="text-align: center;">${escapeHtml(item.quantity)}</td>
+                    <td style="text-align: right;">${formatMoney(item.unitPrice)}</td>
+                    <td style="text-align: right;">${formatMoney(item.subtotal)}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('so-step2-total-qty').textContent = `${totalQty} Units`;
+            document.getElementById('so-step2-total-price').textContent = formatMoney(totalPrice);
+
+            // Transition view
+            document.getElementById('so-modal-box')?.classList.add('is-review-step');
+            document.getElementById('so-create-step-1').style.display = 'none';
+            document.getElementById('so-create-step-2').style.display = 'block';
         }
 
+        async function submitFinalSO() {
+            if (!pendingSOPayload) return;
+
+            const submitBtn = document.getElementById('btn-submit-final-so');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const res = await window.api.post('/api/sales-orders', pendingSOPayload);
+                closeCreateSOModal();
+
+                // Reset form
+                document.getElementById('form-create-so')?.reset();
+                resetSOItemsForm();
+                goBackToSOStep1();
+                pendingSOPayload = null;
+
+                const soId = res?.data?.id || res?.data?.soId || '';
+                AdminApp.showCenterAlert({
+                    title: 'Sales Order Created!',
+                    message: `Sales Order #${soId} created and submitted for approval.`,
+                    type: 'success'
+                });
+
+                await loadSalesOrders();
+            } catch (err) {
+                AdminApp.showCenterAlert({
+                    title: 'Creation Failed',
+                    message: err.message || 'Failed to create sales order',
+                    type: 'error'
+                });
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        }
+
+        function resetSOItemsForm() {
+            const container = document.getElementById('so-items-container');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="po-wire-item-row">
+                    <select class="po-wire-select so-item-product" onchange="handleSOProductChange(this)">
+                        ${getSOProductOptionsHtml()}
+                    </select>
+                    <input type="number" min="1" class="po-wire-input so-item-qty" placeholder="" oninput="handleSOQtyChange(this)">
+                    <input type="text" class="po-wire-input-readonly so-item-unit-price" readonly placeholder="">
+                    <input type="text" class="po-wire-input-readonly so-item-total-price" readonly placeholder="">
+                </div>
+            `;
+            syncUserInfo();
+        }
+
+        async function viewSODetail(soId) {
+            let so = soData.find(item => String(item.id || item.soId) === String(soId));
+
+            if (!so || !so.items || so.items.length === 0) {
+                try {
+                    if (window.api && typeof window.api.get === 'function') {
+                        const res = await window.api.get(`/api/sales-orders/${soId}`);
+                        if (res && res.success && res.data) {
+                            so = res.data;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch SO details:', err);
+                }
+            }
+
+            if (!so) return;
+
+            const displayId = so.id || so.soId;
+            const displayDate = so.date || (so.orderDatetime ? AdminApp.formatDisplayDate(so.orderDatetime) : '-');
+            const customerName = so.customer || so.customerName || '-';
+            const customerId = so.customerId || '-';
+            const createdByName = so.createdBy || so.createdByName || 'Admin';
+            const userId = so.userId || so.createdByUserId || '-';
+            const userRole = so.role || 'Admin';
+            const totalQty = so.totalQty !== undefined ? so.totalQty : (so.totalQuantity || 0);
+            const totalPrice = so.totalPrice !== undefined ? so.totalPrice : (so.totalAmount || 0);
+            const items = so.items || [];
+            const statusUpper = String(so.status || 'PENDING').toUpperCase();
+            const statusColor = statusUpper === 'APPROVED' ? '#10b981' : (statusUpper === 'REJECTED' ? '#ef4444' : '#b45309');
+
+            document.getElementById('detail-modal-body').innerHTML = `
+                <div class="order-review-container">
+                    <div class="order-review-header">
+                        <h2>Sales Order Detail</h2>
+                        <div class="order-review-subtitle">
+                            <span>SO ID: #${escapeHtml(displayId)}</span>
+                            <span>•</span>
+                            <span>Date: ${escapeHtml(displayDate)}</span>
+                            <span>•</span>
+                            <span>Status: <span class="status-tag" style="color: ${statusColor};">[ ${escapeHtml(so.status).toLowerCase()} ]</span></span>
+                        </div>
+                    </div>
+
+                    <div class="order-info-card">
+                        <h4>Information</h4>
+                        <div class="order-info-grid">
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Created by:</span>
+                                    <span class="order-info-value">${escapeHtml(createdByName)}</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">User ID:</span>
+                                    <span class="order-info-value">${escapeHtml(userId)}</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Role:</span>
+                                    <span class="order-info-value">${escapeHtml(userRole)}</span>
+                                </div>
+                            </div>
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Customer Name:</span>
+                                    <span class="order-info-value">${escapeHtml(customerName)}</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Customer ID:</span>
+                                    <span class="order-info-value">${escapeHtml(customerId)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-review-table-wrapper">
+                        <table class="order-review-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 38px; text-align: center;">#</th>
+                                    <th class="col-thumb" style="text-align: center;">Image</th>
+                                    <th>Product ID</th>
+                                    <th>Product name</th>
+                                    <th style="text-align: center;">Zone</th>
+                                    <th style="text-align: center;">Qty</th>
+                                    <th style="text-align: right;">Unit Price</th>
+                                    <th style="text-align: right;">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${items.map((item, idx) => {
+                                    const pId = item.productId || item.id || '-';
+                                    const pName = item.productName || item.name || '-';
+                                    const zCode = item.zoneCode || '-';
+                                    const qty = item.quantity !== undefined ? item.quantity : (item.qty || 1);
+                                    const price = item.unitPrice !== undefined ? item.unitPrice : 0;
+                                    const subtotal = item.subtotal !== undefined ? item.subtotal : (qty * price);
+                                    const imgUrl = item.imageUrl || AdminApp.getProductImageUrl(pName, zCode);
+                                    return `
+                                        <tr>
+                                            <td style="text-align: center;">${idx + 1}</td>
+                                            <td class="col-thumb">
+                                                <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(pName)}" class="order-product-thumb" onerror="this.src='../picture/favicon/favicon.png'">
+                                            </td>
+                                            <td>${escapeHtml(pId)}</td>
+                                            <td class="cell-prod-name">${escapeHtml(pName)}</td>
+                                            <td style="text-align: center;">${escapeHtml(zCode)}</td>
+                                            <td style="text-align: center;">${escapeHtml(qty)}</td>
+                                            <td style="text-align: right;">${formatMoney(price)}</td>
+                                            <td style="text-align: right;">${formatMoney(subtotal)}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="order-review-summary-card">
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Quantity:</span>
+                            <span class="order-summary-val">${escapeHtml(totalQty)}&nbsp;Units</span>
+                        </div>
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Price:</span>
+                            <span class="order-summary-val">${formatMoney(totalPrice)}</span>
+                        </div>
+                    </div>
+
+                    <div class="order-review-bottom-bar">
+                        <div class="order-review-actions">
+                            <button type="button" class="po-wire-btn-cancel" data-close-modal>Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            AdminApp.openModal('modal-so-detail');
+        }
+
+        // Initialize: Load all data from API
         syncUserInfo();
+        loadCustomers();
+        loadProducts();
+        loadSalesOrders();
     </script>
 </body>
 
