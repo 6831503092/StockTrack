@@ -83,56 +83,8 @@
                         </div>
 
                         <select id="select-pm-zone" class="po-status-select zone-select-lg">
-                            <option value="ALL">Select Zone</option>
-                            <option value="ZONE_A">Zone A</option>
-                            <option value="ZONE_B">Zone B</option>
-                            <option value="ZONE_C">Zone C</option>
+                            <option value="ALL">All Zones</option>
                         </select>
-
-                        <div class="requests-date-box" id="requests-date-box" title="Click to filter by date">
-                            <span class="date-icon" id="date-picker-icon" title="Choose date">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                                </svg>
-                            </span>
-                            <input type="date" id="requests-date-input" aria-label="Filter by date">
-                            <button type="button" class="btn-clear-date" id="btn-clear-date" title="Clear date filter" style="display: none;">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-
-                            <!-- Custom Styled Date Picker Popup (StockTrack Mint Theme) -->
-                            <div class="custom-calendar-popup" id="custom-calendar-popup" style="display: none;">
-                                <div class="cal-header">
-                                    <button type="button" class="cal-nav-btn" id="cal-prev-month" title="Previous month">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="15 18 9 12 15 6"></polyline>
-                                        </svg>
-                                    </button>
-                                    <span class="cal-month-title" id="cal-month-title">November 2026</span>
-                                    <button type="button" class="cal-nav-btn" id="cal-next-month" title="Next month">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="9 18 15 12 9 6"></polyline>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="cal-weekdays">
-                                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-                                </div>
-                                <div class="cal-days-grid" id="cal-days-grid"></div>
-                                <div class="cal-footer">
-                                    <button type="button" class="cal-quick-btn" id="cal-btn-today">Today</button>
-                                    <button type="button" class="cal-quick-btn cal-quick-clear" id="cal-btn-clear">Clear</button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -141,17 +93,21 @@
                     <table class="po-table">
                         <thead>
                             <tr>
-                                <th>Product ID</th>
+                                <th style="width: 110px;">Product ID</th>
                                 <th>Product Name</th>
                                 <th>Default Cost</th>
                                 <th>Selling Price</th>
                                 <th>Current Stock</th>
                                 <th>Min Alert</th>
-                                <th>Action</th>
+                                <th style="width: 100px;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="products-table-body">
-                            
+                            <tr>
+                                <td colspan="7" class="table-empty-state">
+                                    <p class="empty-title">Loading products...</p>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -159,9 +115,11 @@
                 <!-- Table Footer / Pagination -->
                 <div class="po-pagination">
                     <span id="product-pagination-info">Showing 0 of 0 entries</span>
-                    <div class="pagination-controls">
+                    <div class="pagination-controls" id="pm-pagination-controls">
                         <button type="button" class="btn-page" id="btn-prev-page" disabled>&lt;</button>
-                        <button type="button" class="btn-page active">1</button>
+                        <span id="pagination-pages" style="display: inline-flex; gap: 4px;">
+                            <button type="button" class="btn-page active">1</button>
+                        </span>
                         <button type="button" class="btn-page" id="btn-next-page" disabled>&gt;</button>
                     </div>
                 </div>
@@ -169,18 +127,269 @@
         </main>
     </div>
 
+    <!-- MODAL: Product Details Modal -->
+    <div class="modal-overlay" id="modal-product-detail">
+        <div class="modal-box" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3>Product Details</h3>
+                <button type="button" class="btn-close-modal" onclick="closeProductDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="product-detail-modal-body">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeProductDetailModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="../js/sidebar.js"></script>
+    <script src="../js/api.js"></script>
     <script src="../js/admin.js"></script>
     <script>
         AdminApp.checkAdminAccess();
 
-        AdminApp.initCustomDatePicker({
-            box: 'requests-date-box',
-            onChange: (dateVal) => {
-                // Hooked up for filtering when Backend API loads products
+        const { escapeHtml, formatMoney, openModal, closeModal } = AdminApp;
+
+        let allProducts = [];
+        let filteredProducts = [];
+        let currentPage = 1;
+        const pageSize = 10;
+
+        const tbody = document.getElementById('products-table-body');
+        const searchInput = document.getElementById('search-products');
+        const selectZone = document.getElementById('select-pm-zone');
+        const pageInfo = document.getElementById('product-pagination-info');
+        const prevBtn = document.getElementById('btn-prev-page');
+        const nextBtn = document.getElementById('btn-next-page');
+        const pagesContainer = document.getElementById('pagination-pages');
+
+        async function loadZones() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/zones');
+                    if (res && res.success && Array.isArray(res.data)) {
+                        selectZone.innerHTML = `
+                            <option value="ALL">All Zones</option>
+                            ${res.data.map(z => `<option value="${escapeHtml(z.zoneCode)}">${escapeHtml(z.zoneName)}</option>`).join('')}
+                        `;
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load zones:', err);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/zones/products');
+                    if (res && res.success && Array.isArray(res.data)) {
+                        allProducts = res.data;
+                    } else if (Array.isArray(res)) {
+                        allProducts = res;
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load products from API:', err);
+            } finally {
+                applyFilter();
+            }
+        }
+
+        function updateKPIs(data) {
+            const list = Array.isArray(data) ? data : [];
+            const total = list.length;
+            const units = list.reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
+            const lowStock = list.filter(p => (Number(p.stock) || 0) <= (Number(p.minStockAlert) || 20)).length;
+
+            document.getElementById('kpi-pm-total').textContent = total;
+            document.getElementById('kpi-pm-units').textContent = units.toLocaleString('en-US');
+            document.getElementById('kpi-pm-low-stock').textContent = lowStock;
+        }
+
+        function applyFilter() {
+            const query = (searchInput?.value || '').toLowerCase().trim();
+            const selectedZone = selectZone?.value || 'ALL';
+
+            filteredProducts = allProducts.filter(p => {
+                const matchZone = selectedZone === 'ALL' ||
+                    String(p.location || '').toUpperCase() === selectedZone.toUpperCase() ||
+                    String(p.zoneName || '').toUpperCase() === selectedZone.toUpperCase();
+
+                const matchQuery = !query ||
+                    String(p.id || '').includes(query) ||
+                    String(p.name || '').toLowerCase().includes(query) ||
+                    String(p.location || '').toLowerCase().includes(query) ||
+                    String(p.zoneName || '').toLowerCase().includes(query);
+
+                return matchZone && matchQuery;
+            });
+
+            currentPage = 1;
+            renderTable();
+            updateKPIs(filteredProducts);
+        }
+
+        function renderTable() {
+            if (!filteredProducts || filteredProducts.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="table-empty-state">
+                            <p class="empty-title">No products found</p>
+                            <p class="empty-subtitle">Try adjusting your search keyword or selected warehouse zone</p>
+                        </td>
+                    </tr>
+                `;
+                pageInfo.textContent = 'Showing 0 of 0 entries';
+                renderPagination(0);
+                return;
+            }
+
+            const total = filteredProducts.length;
+            const totalPages = Math.ceil(total / pageSize);
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIdx = (currentPage - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, total);
+            const pageItems = filteredProducts.slice(startIdx, endIdx);
+
+            tbody.innerHTML = pageItems.map(p => {
+                const isLow = (Number(p.stock) || 0) <= (Number(p.minStockAlert) || 20);
+                const badgeClass = isLow ? 'badge-low-stock' : 'badge-in-stock';
+
+                return `
+                    <tr>
+                        <td class="cell-id">#${escapeHtml(String(p.id))}</td>
+                        <td>
+                            <div style="font-weight: 600; color: #0f172a;">${escapeHtml(p.name)}</div>
+                            <div class="cell-subtext">${escapeHtml(p.zoneName || p.location || '-')}</div>
+                        </td>
+                        <td>฿${formatMoney(p.defaultCost)}</td>
+                        <td>฿${formatMoney(p.sellingPrice)}</td>
+                        <td>
+                            <span class="badge-status ${badgeClass}">
+                                ${Number(p.stock || 0).toLocaleString()} Units
+                            </span>
+                        </td>
+                        <td>${Number(p.minStockAlert || 20).toLocaleString()} Units</td>
+                        <td>
+                            <button type="button" class="btn-action-detail" onclick="viewProductDetail('${escapeHtml(String(p.id))}')">Detail</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            pageInfo.textContent = `Showing ${startIdx + 1} to ${endIdx} of ${total} entries`;
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages || totalPages === 0;
+
+            if (totalPages <= 1) {
+                pagesContainer.innerHTML = `<button type="button" class="btn-page active">1</button>`;
+                return;
+            }
+
+            let html = '';
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<button type="button" class="btn-page ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            pagesContainer.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderTable();
+        }
+
+        prevBtn?.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
             }
         });
+
+        nextBtn?.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredProducts.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        });
+
+        searchInput?.addEventListener('input', applyFilter);
+        selectZone?.addEventListener('change', applyFilter);
+
+        function viewProductDetail(productId) {
+            const p = allProducts.find(item => String(item.id) === String(productId));
+            if (!p) return;
+
+            const isLow = (Number(p.stock) || 0) <= (Number(p.minStockAlert) || 20);
+            const badgeClass = isLow ? 'badge-low-stock' : 'badge-in-stock';
+            const statusLabel = isLow ? 'Low Stock' : 'In Stock';
+
+            document.getElementById('product-detail-modal-body').innerHTML = `
+                <div class="detail-header-row" style="margin-bottom: 18px;">
+                    <div>
+                        <span class="detail-id-label">Product ID</span>
+                        <h4 class="detail-id-title">#${escapeHtml(String(p.id))}</h4>
+                    </div>
+                    <span class="badge-status ${badgeClass}">${statusLabel}</span>
+                </div>
+
+                <div class="detail-meta-grid">
+                    <div class="detail-meta-item">
+                        <span>Product Name</span>
+                        <strong>${escapeHtml(p.name)}</strong>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span>Warehouse Zone</span>
+                        <strong>${escapeHtml(p.zoneName || p.location || '-')}</strong>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span>Default Cost</span>
+                        <strong>฿${formatMoney(p.defaultCost)}</strong>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span>Selling Price</span>
+                        <strong>฿${formatMoney(p.sellingPrice)}</strong>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span>Current Stock</span>
+                        <strong style="color: ${isLow ? '#b91c1c' : '#15803d'};">${Number(p.stock || 0).toLocaleString()} Units</strong>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span>Min Stock Alert</span>
+                        <strong>${Number(p.minStockAlert || 20).toLocaleString()} Units</strong>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span>PO Min / Max Qty</span>
+                        <strong>${p.poMinQty || 1} / ${p.poMaxQty != null ? p.poMaxQty : 'No Limit'}</strong>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span>SO Min / Max Qty</span>
+                        <strong>${p.soMinQty || 1} / ${p.soMaxQty != null ? p.soMaxQty : 'No Limit'}</strong>
+                    </div>
+                </div>
+            `;
+
+            openModal('modal-product-detail');
+        }
+
+        function closeProductDetailModal() {
+            closeModal('modal-product-detail');
+        }
+
+        // Initialize on load
+        (async () => {
+            await loadZones();
+            await loadProducts();
+        })();
     </script>
 </body>
 

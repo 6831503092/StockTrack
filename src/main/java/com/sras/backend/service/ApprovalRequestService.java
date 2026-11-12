@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,7 +79,14 @@ public class ApprovalRequestService {
             return false;
         }
         try {
-            LocalDate filterDate = LocalDate.parse(dateStr.trim());
+            String trimmed = dateStr.trim();
+            LocalDate filterDate;
+            if (trimmed.contains("/")) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d/M/yyyy");
+                filterDate = LocalDate.parse(trimmed, dtf);
+            } else {
+                filterDate = LocalDate.parse(trimmed);
+            }
             return request.getRequestedDatetime().toLocalDate().isEqual(filterDate);
         } catch (DateTimeParseException e) {
             return true;

@@ -165,7 +165,7 @@
 
     <!-- MODAL: Request Details Modal -->
     <div class="modal-overlay" id="modal-req-detail">
-        <div class="modal-box">
+        <div class="modal-box modal-transfer-box">
             <div class="modal-header">
                 <h3>Request Details</h3>
                 <button type="button" class="btn-close-modal">&times;</button>
@@ -263,7 +263,7 @@
                             <span class="badge-status ${badgeClass}">${escapeHtml(displayStatus)}</span>
                         </td>
                         <td>
-                            <button type="button" class="btn-action-detail" onclick="viewRequestDetail('${escapeHtml(detailId)}')">[Detail]</button>
+                            <button type="button" class="btn-action-detail" onclick="viewRequestDetail('${escapeHtml(detailId)}')">Detail</button>
                         </td>
                     </tr>
                 `;
@@ -374,6 +374,239 @@
                 `;
             }
 
+            // Parse payload if present
+            let payload = null;
+            if (req.payload) {
+                try {
+                    payload = typeof req.payload === 'string' ? JSON.parse(req.payload) : req.payload;
+                } catch (e) {
+                    payload = null;
+                }
+            }
+
+            const typeUpper = String(reqType).toUpperCase();
+            let extraGridHtml = '';
+            let productTablesHtml = '';
+            let reasonText = '';
+
+            if (typeUpper === 'USER_CREATE') {
+                let targetFullName = payload?.fullName;
+                let targetUserId = payload?.userId || payload?.numericUserId || req.targetId;
+                let targetRole = payload?.role;
+                reasonText = payload?.reason;
+
+                // Fallback parsing from detailText: "Create new user: shoe bean (503334, Role: STAFF). Reason: he is new staff in warehouse"
+                if (!targetFullName || !reasonText) {
+                    const match = detailText.match(/Create new user:\s*(.*?)\s*\((?:ID:\s*)?(\d+),\s*Role:\s*([A-Za-z0-9_]+)\)\.\s*(?:Reason:\s*(.*))?/i);
+                    if (match) {
+                        targetFullName = targetFullName || match[1];
+                        targetUserId = targetUserId || match[2];
+                        targetRole = targetRole || match[3];
+                        reasonText = reasonText || match[4];
+                    }
+                }
+
+                if (!reasonText && detailText.includes('Reason:')) {
+                    reasonText = detailText.split(/Reason:\s*/i)[1];
+                }
+                if (!reasonText) {
+                    reasonText = 'Account creation request';
+                }
+
+                const roleClass = targetRole ? `role-${targetRole.toLowerCase()}` : '';
+                extraGridHtml = `
+                    <div>
+                        <span>Assigned Role</span>
+                        <strong>${targetRole ? `<span class="badge-role ${roleClass}">${escapeHtml(targetRole)}</span>` : '-'}</strong>
+                    </div>
+                    <div>
+                        <span>New User Name</span>
+                        <strong>${escapeHtml(targetFullName || '-')}</strong>
+                    </div>
+                    <div>
+                        <span>Assigned User ID</span>
+                        <strong>${escapeHtml(String(targetUserId || '-'))}</strong>
+                    </div>
+                `;
+            } else if (typeUpper === 'ROLE_CHANGE') {
+                let targetFullName = payload?.fullName;
+                let targetUserId = payload?.userId || req.targetId;
+                let currentRole = payload?.currentRole;
+                let newRole = payload?.newRole;
+                reasonText = payload?.reason;
+
+                if (!targetFullName || !newRole) {
+                    const match = detailText.match(/Change role:\s*(.*?)\s*\(([A-Za-z0-9_]+)\s*->\s*([A-Za-z0-9_]+)\)/i);
+                    if (match) {
+                        targetFullName = targetFullName || match[1];
+                        currentRole = currentRole || match[2];
+                        newRole = newRole || match[3];
+                    }
+                }
+
+                if (!reasonText && detailText.includes('Reason:')) {
+                    reasonText = detailText.split(/Reason:\s*/i)[1];
+                }
+                if (!reasonText) {
+                    reasonText = 'Role change request';
+                }
+
+                extraGridHtml = `
+                    <div>
+                        <span>Target User</span>
+                        <strong>${escapeHtml(targetFullName || '-')} ${targetUserId ? `(#${escapeHtml(String(targetUserId))})` : ''}</strong>
+                    </div>
+                    <div>
+                        <span>Current Role</span>
+                        <strong>${currentRole ? `<span class="badge-role role-${currentRole.toLowerCase()}">${escapeHtml(currentRole)}</span>` : '-'}</strong>
+                    </div>
+                    <div>
+                        <span>New Role</span>
+                        <strong>${newRole ? `<span class="badge-role role-${newRole.toLowerCase()}">${escapeHtml(newRole)}</span>` : '-'}</strong>
+                    </div>
+                `;
+            } else if (typeUpper === 'PRODUCT_MOVE') {
+                let sourceZoneCode = payload?.sourceZoneCode || payload?.sourceZone || '';
+                let targetZoneCode = payload?.targetZoneCode || payload?.targetZone || '';
+                let sourceZoneName = payload?.sourceZoneName || '';
+                let targetZoneName = payload?.targetZoneName || '';
+
+                if (!sourceZoneCode || !targetZoneCode) {
+                    const match = detailText.match(/Zone\s*([A-Za-z0-9_]+).*?(?:<->|->)\s*Zone\s*([A-Za-z0-9_]+)/i);
+                    if (match) {
+                        sourceZoneCode = sourceZoneCode || match[1];
+                        targetZoneCode = targetZoneCode || match[2];
+                    }
+                }
+
+                if (!sourceZoneCode) sourceZoneCode = 'Z1';
+                if (!targetZoneCode) targetZoneCode = 'Z2';
+
+                function formatZoneDisplay(code, name) {
+                    if (name && name.startsWith('Zone')) return name;
+                    if (code && /^Z\d+/i.test(code)) return `Zone ${code.replace(/^Z/i, '')}`;
+                    return name || code || 'Zone 1';
+                }
+
+                const srcDisplay = formatZoneDisplay(sourceZoneCode, sourceZoneName);
+                const tgtDisplay = formatZoneDisplay(targetZoneCode, targetZoneName);
+
+                const isSwap = payload?.operation === 'ZONE_SWAP' ||
+                               Boolean(payload?.targetProducts && payload.targetProducts.length > 0) ||
+                               detailText.includes('<->');
+
+                const transferTypeLabel = isSwap
+                    ? `Zone Swap (${srcDisplay} to ${tgtDisplay})`
+                    : `Zone Move (${srcDisplay} to ${tgtDisplay})`;
+
+                extraGridHtml = `
+                    <div>
+                        <span>Transfer Type</span>
+                        <strong>${escapeHtml(transferTypeLabel)}</strong>
+                    </div>
+                `;
+
+                const sourceProducts = Array.isArray(payload?.sourceProducts) ? payload.sourceProducts : (Array.isArray(payload?.products) ? payload.products : []);
+                const targetProducts = Array.isArray(payload?.targetProducts) ? payload.targetProducts : [];
+
+                if (sourceProducts.length > 0) {
+                    productTablesHtml += `
+                        <div style="margin-top: 18px;">
+                            <div style="margin-bottom: 8px; font-size: 0.85rem; font-weight: 600; color: #334155;">
+                                Products to be transferred (${sourceProducts.length} items):
+                            </div>
+                            <div class="modal-transfer-table-wrapper" style="max-height: 180px; overflow-y: auto;">
+                                <table class="modal-transfer-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 80px;">Product ID</th>
+                                            <th class="text-left">Product Name</th>
+                                            <th style="width: 90px;">Location</th>
+                                            <th style="width: 100px;">Move to</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${sourceProducts.map(p => `
+                                            <tr>
+                                                <td class="font-medium">${escapeHtml(String(p.productId || p.id))}</td>
+                                                <td class="text-left font-medium">${escapeHtml(p.productName || p.name)}</td>
+                                                <td>${escapeHtml(p.fromZoneCode || sourceZoneCode)}</td>
+                                                <td class="transfer-dest-cell" style="font-weight: 600; color: #0d9488;">${escapeHtml(p.toZoneCode || targetZoneCode)}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (targetProducts.length > 0) {
+                    productTablesHtml += `
+                        <div style="margin-top: 14px;">
+                            <div style="margin-bottom: 8px; font-size: 0.85rem; font-weight: 600; color: #334155;">
+                                Products swapped to ${escapeHtml(sourceZoneName)} (${targetProducts.length} items):
+                            </div>
+                            <div class="modal-transfer-table-wrapper" style="max-height: 180px; overflow-y: auto;">
+                                <table class="modal-transfer-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 80px;">Product ID</th>
+                                            <th class="text-left">Product Name</th>
+                                            <th style="width: 90px;">Location</th>
+                                            <th style="width: 100px;">Swap to</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${targetProducts.map(p => `
+                                            <tr>
+                                                <td class="font-medium">${escapeHtml(String(p.productId || p.id))}</td>
+                                                <td class="text-left font-medium">${escapeHtml(p.productName || p.name)}</td>
+                                                <td>${escapeHtml(p.fromZoneCode || targetZoneCode)}</td>
+                                                <td class="transfer-dest-cell" style="font-weight: 600; color: #0d9488;">${escapeHtml(p.toZoneCode || sourceZoneCode)}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const rawReason = payload?.reason || '';
+                const isDefaultReason = rawReason.startsWith('Swap zones') || rawReason.startsWith('Transfer entire Zone');
+                if (rawReason && !isDefaultReason) {
+                    reasonText = rawReason;
+                } else {
+                    reasonText = '';
+                }
+            } else {
+                reasonText = detailText.includes('Reason:')
+                    ? detailText.split(/Reason:\s*/i)[1]
+                    : detailText;
+            }
+
+            const cleanReason = (reasonText || '').replace(/^Reason:\s*/i, '').trim();
+
+            let noteBoxHtml = '';
+            if (productTablesHtml) {
+                if (cleanReason) {
+                    noteBoxHtml = `
+                        <div class="detail-note-box" style="margin-top: 14px;">
+                            <span>Reason:</span>
+                            <p>${escapeHtml(cleanReason)}</p>
+                        </div>
+                    `;
+                }
+            } else {
+                noteBoxHtml = `
+                    <div class="detail-note-box">
+                        <span>Reason:</span>
+                        <p>${escapeHtml(cleanReason || 'No reason specified.')}</p>
+                    </div>
+                `;
+            }
+
             document.getElementById('req-detail-modal-body').innerHTML = `
                 <div class="detail-header-row">
                     <div>
@@ -396,12 +629,11 @@
                         <span>Requested By</span>
                         <strong>${escapeHtml(requestedBy)} (${escapeHtml(role)})</strong>
                     </div>
+                    ${extraGridHtml}
                 </div>
 
-                <div class="detail-note-box">
-                    <span>Request Details:</span>
-                    <p>${escapeHtml(detailText)}</p>
-                </div>
+                ${productTablesHtml}
+                ${noteBoxHtml}
                 ${decisionInfo}
             `;
 

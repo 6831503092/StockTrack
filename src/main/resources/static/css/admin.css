@@ -286,6 +286,27 @@
   color: #27c690;
 }
 
+.requests-date-box .date-display-label {
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #94a3b8;
+  padding: 0;
+  margin: 0;
+  height: 40px;
+  line-height: 40px;
+  width: 95px;
+  text-align: left;
+  user-select: none;
+  cursor: pointer;
+  display: inline-block;
+  letter-spacing: 0.02em;
+}
+
+.requests-date-box.has-date .date-display-label {
+  color: #27c690;
+}
+
 .requests-date-box input[type="date"] {
   border: none;
   outline: none;
@@ -826,13 +847,8 @@
 .requests-table-wrapper {
   overflow-x: auto;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 280px;
-}
-
-.requests-table-wrapper {
-  min-height: 320px;
+  width: 100%;
+  display: block;
 }
 
 .po-table,
@@ -841,10 +857,7 @@
   border-collapse: separate;
   border-spacing: 0;
   text-align: left;
-}
-
-.requests-table {
-  height: 100%;
+  height: auto;
 }
 
 .po-table thead th,
@@ -952,6 +965,16 @@
   color: #9f1239;
 }
 
+.badge-in-stock {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-low-stock {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
 .badge-role {
   display: inline-flex;
   align-items: center;
@@ -981,20 +1004,42 @@
 
 /* Table Row Actions */
 .btn-action-detail {
-  background: none;
-  border: none;
-  color: #1e293b;
-  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 5px 14px;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  line-height: 1.35;
+  font-family: inherit;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
 }
 
 .btn-action-detail:hover {
-  color: #27c690;
-  background-color: #edf8f3;
+  background-color: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+  box-shadow: 0 2px 4px rgba(21, 128, 61, 0.08);
+  transform: translateY(-1px);
+}
+
+.btn-action-detail:active {
+  background-color: #dcfce7;
+  border-color: #4ade80;
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-action-detail:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(39, 198, 144, 0.35);
 }
 
 .btn-change-role-action {

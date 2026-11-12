@@ -69,11 +69,46 @@
     function formatDisplayDate(dateVal) {
         if (!dateVal) return '-';
         try {
-            const str = String(dateVal).trim();
-            const d = new Date(str);
-            if (isNaN(d.getTime())) return str;
+            let year, month, day;
             const pad = (n) => String(n).padStart(2, '0');
-            return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+
+            if (Array.isArray(dateVal)) {
+                year = dateVal[0];
+                month = dateVal[1];
+                day = dateVal[2];
+            } else if (typeof dateVal === 'string') {
+                const str = dateVal.trim();
+                // Check if already in dd/mm/yyyy format (day/month/year)
+                const dmyMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+                if (dmyMatch) {
+                    day = parseInt(dmyMatch[1], 10);
+                    month = parseInt(dmyMatch[2], 10);
+                    year = parseInt(dmyMatch[3], 10);
+                } else {
+                    // Check ISO format: yyyy-mm-dd or yyyy-mm-ddTHH:mm:ss
+                    const isoMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+                    if (isoMatch) {
+                        year = parseInt(isoMatch[1], 10);
+                        month = parseInt(isoMatch[2], 10);
+                        day = parseInt(isoMatch[3], 10);
+                    } else {
+                        const d = new Date(str);
+                        if (isNaN(d.getTime())) return str;
+                        year = d.getFullYear();
+                        month = d.getMonth() + 1;
+                        day = d.getDate();
+                    }
+                }
+            } else if (dateVal instanceof Date) {
+                if (isNaN(dateVal.getTime())) return '-';
+                year = dateVal.getFullYear();
+                month = dateVal.getMonth() + 1;
+                day = dateVal.getDate();
+            } else {
+                return String(dateVal);
+            }
+
+            return `${pad(day)}/${pad(month)}/${year}`;
         } catch {
             return String(dateVal);
         }
@@ -153,26 +188,31 @@
         if (!selectedIsoDate) return true;
         if (!itemDateStr) return false;
 
-        const str = String(itemDateStr).trim();
-        if (str.startsWith(selectedIsoDate) || str.includes(selectedIsoDate)) return true;
+        const pad = (n) => String(n).padStart(2, '0');
+        let itemIso = '';
 
-        const parts = selectedIsoDate.split('-');
-        if (parts.length === 3) {
-            const [y, m, d] = parts;
-            const ddmmyyyy = `${d}/${m}/${y}`;
-            const dm = `${parseInt(d, 10)}/${parseInt(m, 10)}/${y}`;
-            if (str.includes(ddmmyyyy) || str.includes(dm)) return true;
+        if (Array.isArray(itemDateStr)) {
+            itemIso = `${itemDateStr[0]}-${pad(itemDateStr[1])}-${pad(itemDateStr[2])}`;
+        } else if (typeof itemDateStr === 'string') {
+            const str = itemDateStr.trim();
+            const dmyMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+            if (dmyMatch) {
+                itemIso = `${dmyMatch[3]}-${pad(dmyMatch[2])}-${pad(dmyMatch[1])}`;
+            } else {
+                const isoMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+                if (isoMatch) {
+                    itemIso = `${isoMatch[1]}-${pad(isoMatch[2])}-${pad(isoMatch[3])}`;
+                }
+            }
+        } else if (itemDateStr instanceof Date && !isNaN(itemDateStr.getTime())) {
+            itemIso = `${itemDateStr.getFullYear()}-${pad(itemDateStr.getMonth() + 1)}-${pad(itemDateStr.getDate())}`;
         }
 
-        const parsed = new Date(str);
-        if (!isNaN(parsed.getTime())) {
-            const y = parsed.getFullYear();
-            const m = String(parsed.getMonth() + 1).padStart(2, '0');
-            const d = String(parsed.getDate()).padStart(2, '0');
-            if (`${y}-${m}-${d}` === selectedIsoDate) return true;
+        if (itemIso) {
+            return itemIso === selectedIsoDate;
         }
 
-        return false;
+        return String(itemDateStr).includes(selectedIsoDate);
     }
 
     const CAL_MONTHS = [
@@ -195,6 +235,26 @@
         const nextBtn = box.querySelector('#cal-next-month, .cal-nav-btn:last-of-type');
         const todayBtn = box.querySelector('#cal-btn-today, .cal-quick-btn:not(.cal-quick-clear)');
         const calClearBtn = box.querySelector('#cal-btn-clear, .cal-quick-clear');
+
+        // Elegant dd/mm/yyyy display label instead of native browser locale-dependent text
+        let label = box.querySelector('.date-display-label');
+        if (!label && input) {
+            label = document.createElement('span');
+            label.className = 'date-display-label';
+            label.textContent = input.value ? formatDisplayDate(input.value) : 'dd/mm/yyyy';
+            input.parentNode.insertBefore(label, input);
+            input.style.display = 'none';
+        }
+
+        function updateDisplayLabel() {
+            if (label) {
+                if (input && input.value) {
+                    label.textContent = formatDisplayDate(input.value);
+                } else {
+                    label.textContent = 'dd/mm/yyyy';
+                }
+            }
+        }
 
         let viewDate = new Date();
 
@@ -281,6 +341,7 @@
 
         if (input) {
             input.addEventListener('change', () => {
+                updateDisplayLabel();
                 if (input.value) {
                     if (clearBtn) clearBtn.style.display = 'inline-flex';
                     box.classList.add('has-date');
@@ -295,6 +356,7 @@
                     renderCalendar();
                 }
             });
+            updateDisplayLabel();
         }
 
         if (daysGrid) {

@@ -43,15 +43,15 @@
             <section class="po-stats-grid">
                 <div class="po-stat-card">
                     <div class="po-stat-info">
-                        <span class="stat-label">Active Zone</span>
-                        <span class="stat-value mint" id="kpi-pm-total">0</span>
+                        <span class="stat-label" id="kpi-capacity-label">Zone Capacity - Zone 1</span>
+                        <span class="stat-value mint" id="kpi-capacity-val">500 Units</span>
                     </div>
                 </div>
 
                 <div class="po-stat-card">
                     <div class="po-stat-info">
-                        <span class="stat-label">Stored Units</span>
-                        <span class="stat-value blue" id="kpi-pm-units">0</span>
+                        <span class="stat-label" id="kpi-stored-units-label">Stored Units - Zone 1</span>
+                        <span class="stat-value blue" id="kpi-pm-units">0 Units</span>
                     </div>
                 </div>
             </section>
@@ -74,57 +74,12 @@
                         </div>
 
                         <select id="select-zone" class="po-status-select zone-select-lg">
+                            <option value="Z1" selected>Zone 1</option>
+                            <option value="Z2">Zone 2</option>
+                            <option value="Z3">Zone 3</option>
+                            <option value="Z4">Zone 4</option>
                             <option value="ALL">All Zones</option>
-                            <option value="Z1">Zone 1 (Z1)</option>
-                            <option value="Z2">Zone 2 (Z2)</option>
-                            <option value="Z3">Zone 3 (Z3)</option>
-                            <option value="Z4">Zone 4 (Z4)</option>
                         </select>
-
-                        <div class="requests-date-box" id="requests-date-box" title="Click to filter by date">
-                            <span class="date-icon" id="date-picker-icon" title="Choose date">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                                </svg>
-                            </span>
-                            <input type="date" id="requests-date-input" aria-label="Filter by date">
-                            <button type="button" class="btn-clear-date" id="btn-clear-date" title="Clear date filter" style="display: none;">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-
-                            <!-- Custom Styled Date Picker Popup (StockTrack Mint Theme) -->
-                            <div class="custom-calendar-popup" id="custom-calendar-popup" style="display: none;">
-                                <div class="cal-header">
-                                    <button type="button" class="cal-nav-btn" id="cal-prev-month" title="Previous month">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="15 18 9 12 15 6"></polyline>
-                                        </svg>
-                                    </button>
-                                    <span class="cal-month-title" id="cal-month-title">November 2026</span>
-                                    <button type="button" class="cal-nav-btn" id="cal-next-month" title="Next month">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="9 18 15 12 9 6"></polyline>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="cal-weekdays">
-                                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-                                </div>
-                                <div class="cal-days-grid" id="cal-days-grid"></div>
-                                <div class="cal-footer">
-                                    <button type="button" class="cal-quick-btn" id="cal-btn-today">Today</button>
-                                    <button type="button" class="cal-quick-btn cal-quick-clear" id="cal-btn-clear">Clear</button>
-                                </div>
-                            </div>
-                        </div>
 
                         <button type="button" class="btn-create-po" id="btn-open-move-modal">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -133,7 +88,7 @@
                                 <polyline points="7 23 3 19 7 15"></polyline>
                                 <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
                             </svg>
-                            Move Product
+                            Move Zone
                         </button>
                     </div>
                 </div>
@@ -143,9 +98,7 @@
                     <table class="po-table">
                         <thead>
                             <tr>
-                                <th class="th-checkbox">
-                                    <input type="checkbox" id="check-all-zone-products" class="table-checkbox" title="Select all products">
-                                </th>
+                                <th style="width: 50px; text-align: center;">#</th>
                                 <th>Product ID</th>
                                 <th>Product Name</th>
                                 <th>Location</th>
@@ -172,38 +125,95 @@
         </main>
     </div>
 
-    <!-- MODAL: Request Product Transfer (Matching Reference Design) -->
+    <!-- MODAL: Request Zone Transfer -->
     <div class="modal-overlay" id="modal-move-product">
-        <div class="modal-box modal-transfer-box">
+        <div class="modal-box modal-transfer-box" style="max-width: 680px;">
             <div class="modal-header">
-                <h3>Request Product Transfer</h3>
-                <div class="modal-header-actions">
-                    <select id="modal-transfer-zone-select" class="modal-zone-select" aria-label="Select target zone" onchange="handleTargetZoneChange(this.value)">
-                        <option value="">Select move to zone</option>
-                        <option value="Z1">Zone 1 (Z1)</option>
-                        <option value="Z2">Zone 2 (Z2)</option>
-                        <option value="Z3">Zone 3 (Z3)</option>
-                        <option value="Z4">Zone 4 (Z4)</option>
-                    </select>
-                    <button type="button" class="btn-close-modal">&times;</button>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.25rem;">Request Zone Transfer</h3>
+                    <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">
+                        Transfer or swap products between warehouse zones (1 category per zone policy)
+                    </p>
                 </div>
+                <button type="button" class="btn-close-modal">&times;</button>
             </div>
             <form id="form-move-product" onsubmit="handleMoveSubmit(event)">
-                <div class="modal-body">
-                    <div class="modal-transfer-table-wrapper">
+                <div class="modal-body" style="padding: 20px 24px;">
+                    <!-- Zone Selector Row -->
+                    <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px; background: #f8fafc; padding: 14px 18px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                        <div style="flex: 1;">
+                            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 6px;">
+                                FROM ZONE
+                            </label>
+                            <select id="modal-source-zone-select" class="po-status-select" style="width: 100%; font-weight: 600;" onchange="handleSourceZoneChange(this.value)">
+                                <option value="Z1">Zone 1</option>
+                                <option value="Z2">Zone 2</option>
+                                <option value="Z3">Zone 3</option>
+                                <option value="Z4">Zone 4</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: center; padding-top: 18px; color: #0d9488;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12h14"></path>
+                                <path d="m12 5 7 7-7 7"></path>
+                            </svg>
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 6px;">
+                                TO ZONE
+                            </label>
+                            <select id="modal-transfer-zone-select" class="po-status-select" style="width: 100%; font-weight: 600;" onchange="handleTargetZoneChange(this.value)" required>
+                                <option value="">Select target zone</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Notice Banner for Zone Swap / Move -->
+                    <div id="modal-zone-swap-notice" style="display: none; margin-bottom: 16px; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #0d9488; border-radius: 6px; font-size: 0.875rem; color: #334155; line-height: 1.5;">
+                    </div>
+
+                    <!-- Products Preview Table (Source Zone) -->
+                    <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: #334155;">
+                            Products to be transferred (<span id="modal-source-item-count">0</span> items):
+                        </span>
+                    </div>
+
+                    <div class="modal-transfer-table-wrapper" style="max-height: 200px; overflow-y: auto;">
                         <table class="modal-transfer-table">
                             <thead>
                                 <tr>
-                                    <th>Product ID</th>
+                                    <th style="width: 80px;">Product ID</th>
                                     <th class="text-left">Product Name</th>
-                                    <th>Location</th>
-                                    <th>Move to zone</th>
+                                    <th style="width: 90px;">Location</th>
+                                    <th style="width: 100px;">Move to</th>
                                 </tr>
                             </thead>
                             <tbody id="modal-transfer-tbody">
-                                <!-- Populated dynamically from selected products -->
+                                <!-- Populated dynamically from source zone products -->
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Target Zone Items Swapping Back (if swap) -->
+                    <div id="modal-target-swap-container" style="display: none; margin-top: 16px;">
+                        <div style="margin-bottom: 8px; font-size: 0.85rem; font-weight: 600; color: #334155;">
+                            Products swapped to <span id="modal-target-swap-name">Zone 1</span> (<span id="modal-target-item-count">0</span> items):
+                        </div>
+                        <div class="modal-transfer-table-wrapper" style="max-height: 160px; overflow-y: auto;">
+                            <table class="modal-transfer-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 80px;">Product ID</th>
+                                        <th class="text-left">Product Name</th>
+                                        <th style="width: 90px;">Location</th>
+                                        <th style="width: 100px;">Swap to</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modal-target-transfer-tbody">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -221,24 +231,79 @@
     <script>
         AdminApp.checkAdminAccess();
 
-        // Available Warehouse Zones
-        const ALL_ZONES = [
-            { code: 'Z1', name: 'Zone 1 (Z1)' },
-            { code: 'Z2', name: 'Zone 2 (Z2)' },
-            { code: 'Z3', name: 'Zone 3 (Z3)' },
-            { code: 'Z4', name: 'Zone 4 (Z4)' }
+        const { escapeHtml, openModal, closeModal, showCenterAlert } = AdminApp;
+
+        // Available Warehouse Zones (dynamically loaded from Backend API)
+        let ALL_ZONES = [
+            { code: 'Z1', name: 'Zone 1' },
+            { code: 'Z2', name: 'Zone 2' },
+            { code: 'Z3', name: 'Zone 3' },
+            { code: 'Z4', name: 'Zone 4' }
         ];
 
-        // Warehouse Products Data (Loaded directly from Backend API, No mockups)
-        const zoneProductsData = [];
+        // Warehouse Products Data (Loaded directly from Backend API)
+        let zoneProductsData = [];
 
         const tbody = document.getElementById('zone-products-table-body');
-        const checkAll = document.getElementById('check-all-zone-products');
         const searchInput = document.getElementById('search-zone-products');
         const selectZone = document.getElementById('select-zone');
         const paginationInfo = document.getElementById('zone-pagination-info');
-        const modalTransferTbody = document.getElementById('modal-transfer-tbody');
+
+        const modalSourceZoneSelect = document.getElementById('modal-source-zone-select');
         const modalTargetZoneSelect = document.getElementById('modal-transfer-zone-select');
+        const modalTransferTbody = document.getElementById('modal-transfer-tbody');
+        const modalTargetSwapContainer = document.getElementById('modal-target-swap-container');
+        const modalTargetTransferTbody = document.getElementById('modal-target-transfer-tbody');
+        const modalZoneSwapNotice = document.getElementById('modal-zone-swap-notice');
+        const modalSourceItemCount = document.getElementById('modal-source-item-count');
+        const modalTargetItemCount = document.getElementById('modal-target-item-count');
+        const modalTargetSwapName = document.getElementById('modal-target-swap-name');
+
+        // Set initial default value to Z1
+        if (selectZone) {
+            selectZone.value = 'Z1';
+        }
+
+        async function loadWarehouseZones() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/zones');
+                    if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+                        ALL_ZONES = res.data.map(z => ({
+                            id: z.zoneId,
+                            code: z.zoneCode,
+                            name: z.zoneName,
+                            capacity: z.capacity || 500
+                        }));
+
+                        // Populate select-zone dropdown, preserving current selection or defaulting to Z1
+                        const currentVal = selectZone.value || 'Z1';
+                        selectZone.innerHTML = `
+                            ${ALL_ZONES.map(z => `<option value="${escapeHtml(z.code)}">${escapeHtml(z.name)}</option>`).join('')}
+                            <option value="ALL">All Zones</option>
+                        `;
+                        selectZone.value = ALL_ZONES.some(z => z.code === currentVal) ? currentVal : (currentVal === 'ALL' ? 'ALL' : 'Z1');
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load zones from API, using defaults:', err);
+            }
+        }
+
+        async function loadWarehouseProducts() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/zones/products');
+                    if (res && res.success && Array.isArray(res.data)) {
+                        zoneProductsData = res.data;
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load products from API:', err);
+            } finally {
+                filterProducts();
+            }
+        }
 
         function renderProducts(list) {
             if (!list || list.length === 0) {
@@ -255,165 +320,268 @@
                                         <line x1="12" y1="22.08" x2="12" y2="12"></line>
                                     </svg>
                                 </div>
-                                <p>ยังไม่มีรายการสินค้าในโซนนี้</p>
-                                <span class="empty-subtitle">ตารางนี้พร้อมสำหรับแสดงผลสินค้าตามโซนคลังสินค้า</span>
+                                <p>No products found matching the criteria</p>
+                                <span class="empty-subtitle">Try selecting another zone or clear search to view all products</span>
                             </div>
                         </td>
                     </tr>
                 `;
                 paginationInfo.textContent = 'Showing 0 of 0 entries';
+                updateKPIs(list);
                 return;
             }
 
-            tbody.innerHTML = list.map(item => `
-                <tr class="zone-product-row" data-id="${item.id}" data-name="${item.name}" data-location="${item.location}">
-                    <td class="th-checkbox">
-                        <input type="checkbox" class="table-checkbox zone-product-checkbox"
-                            data-product-id="${item.id}"
-                            data-product-name="${item.name}"
-                            data-location="${item.location}"
-                            onchange="updateSelectionState()">
-                    </td>
-                    <td class="font-medium">${item.id}</td>
-                    <td>${item.name}</td>
-                    <td>${item.location}</td>
-                    <td>${item.stock} units</td>
-                    <td>
-                        <span class="badge-status ${item.status === 'In Stock' ? 'badge-approved' : 'badge-pending'}">
-                            ${item.status}
-                        </span>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = list.map((item, index) => {
+                const isLowStock = item.status === 'Low Stock' || (item.stock <= (item.minStockAlert || 20));
+                const badgeClass = isLowStock ? 'badge-low-stock' : 'badge-in-stock';
+                const statusLabel = isLowStock ? 'Low Stock' : 'In Stock';
+
+                return `
+                    <tr class="zone-product-row" data-id="${item.id}" data-name="${escapeHtml(item.name)}" data-location="${escapeHtml(item.location)}">
+                        <td style="text-align: center; color: #64748b; font-weight: 600;">${index + 1}</td>
+                        <td class="font-medium">${item.id}</td>
+                        <td>${escapeHtml(item.name)}</td>
+                        <td>${escapeHtml(item.location)}</td>
+                        <td>${item.stock} units</td>
+                        <td>
+                            <span class="badge-status ${badgeClass}">
+                                ${escapeHtml(statusLabel)}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
 
             paginationInfo.textContent = `Showing 1 to ${list.length} of ${list.length} entries`;
             updateKPIs(list);
-            updateSelectionState();
         }
 
         function updateKPIs(list) {
-            const activeZoneEl = document.getElementById('kpi-pm-total');
+            const capacityValEl = document.getElementById('kpi-capacity-val') || document.getElementById('kpi-pm-total');
+            const capacityLabelEl = document.getElementById('kpi-capacity-label');
             const storedUnitsEl = document.getElementById('kpi-pm-units');
-            if (activeZoneEl) activeZoneEl.textContent = list.length > 0 ? '1' : '0';
+            const storedUnitsLabelEl = document.getElementById('kpi-stored-units-label');
+            const currentZone = selectZone?.value || 'Z1';
+
+            if (currentZone === 'ALL') {
+                const totalCap = ALL_ZONES.reduce((sum, z) => sum + (Number(z.capacity) || 500), 0) || 2000;
+                if (capacityLabelEl) capacityLabelEl.textContent = 'Warehouse Capacity - All Zones';
+                if (capacityValEl) capacityValEl.textContent = `${totalCap.toLocaleString()} Units`;
+                if (storedUnitsLabelEl) storedUnitsLabelEl.textContent = 'Stored Units - All Zones';
+            } else {
+                const found = ALL_ZONES.find(z => z.code === currentZone);
+                const zName = found ? found.name : `Zone ${currentZone.replace(/^Z/i, '')}`;
+                const zCap = (found && found.capacity) ? found.capacity : 500;
+                if (capacityLabelEl) capacityLabelEl.textContent = `Zone Capacity - ${zName}`;
+                if (capacityValEl) capacityValEl.textContent = `${zCap.toLocaleString()} Units`;
+                if (storedUnitsLabelEl) storedUnitsLabelEl.textContent = `Stored Units - ${zName}`;
+            }
+
             if (storedUnitsEl) {
-                const totalUnits = list.reduce((sum, item) => sum + (item.stock || 0), 0);
-                storedUnitsEl.textContent = totalUnits.toLocaleString();
+                // Reference currently selected zone
+                const zoneProducts = (currentZone === 'ALL')
+                    ? zoneProductsData
+                    : zoneProductsData.filter(item => item.location === currentZone);
+                const totalUnits = zoneProducts.reduce((sum, item) => sum + (item.stock || 0), 0);
+                storedUnitsEl.textContent = `${totalUnits.toLocaleString()} Units`;
             }
         }
 
-        // Selection Management
-        checkAll?.addEventListener('change', (e) => {
-            const isChecked = e.target.checked;
-            document.querySelectorAll('.zone-product-checkbox').forEach(cb => {
-                cb.checked = isChecked;
-            });
-            updateSelectionState();
-        });
-
-        function updateSelectionState() {
-            const checkboxes = Array.from(document.querySelectorAll('.zone-product-checkbox'));
-            const checked = checkboxes.filter(cb => cb.checked);
-            if (checkAll) {
-                checkAll.checked = checkboxes.length > 0 && checked.length === checkboxes.length;
-                checkAll.indeterminate = checked.length > 0 && checked.length < checkboxes.length;
+        // --- Whole Zone Move / Swap Modal Management ---
+        function openMoveModal() {
+            let activeZone = selectZone.value;
+            if (!activeZone || activeZone === 'ALL') {
+                activeZone = 'Z1';
             }
+
+            // Populate source zone dropdown
+            if (modalSourceZoneSelect) {
+                modalSourceZoneSelect.innerHTML = ALL_ZONES.map(z =>
+                    `<option value="${escapeHtml(z.code)}" ${z.code === activeZone ? 'selected' : ''}>${escapeHtml(z.name)}</option>`
+                ).join('');
+                modalSourceZoneSelect.value = activeZone;
+            }
+
+            updateModalForSourceZone(activeZone);
+            AdminApp.openModal('modal-move-product');
         }
 
-        function getSelectedProducts() {
-            const checkedBoxes = Array.from(document.querySelectorAll('.zone-product-checkbox:checked'));
-            return checkedBoxes.map(cb => ({
-                id: cb.getAttribute('data-product-id'),
-                name: cb.getAttribute('data-product-name'),
-                location: cb.getAttribute('data-location')
-            }));
-        }
-
-        // Populate Target Zones (Excluding the origin zone of selected products)
-        function populateTargetZoneOptions(selectedItems) {
-            if (!modalTargetZoneSelect) return;
-
-            // Collect all unique current locations of selected items
-            const currentLocations = new Set(selectedItems.map(p => p.location));
-
-            // Exclude current zones so user cannot select the same zone
-            const availableZones = ALL_ZONES.filter(z => !currentLocations.has(z.code) && !currentLocations.has(z.name));
-
+        function updateModalForSourceZone(sourceCode) {
+            // Populate Target Zone dropdown (all zones except source)
+            const availableTargetZones = ALL_ZONES.filter(z => z.code !== sourceCode);
             modalTargetZoneSelect.innerHTML = `
-                <option value="">Select move to zone</option>
-                ${availableZones.map(z => `<option value="${z.code}">${z.name}</option>`).join('')}
+                <option value="">Select target zone</option>
+                ${availableTargetZones.map(z => `<option value="${escapeHtml(z.code)}">${escapeHtml(z.name)}</option>`).join('')}
             `;
             modalTargetZoneSelect.value = '';
-            modalTargetZoneSelect.disabled = selectedItems.length === 0;
-        }
 
-        // Modal Transfer Population
-        function openMoveModal() {
-            const selected = getSelectedProducts();
-            populateTargetZoneOptions(selected);
+            // Get all products in source zone
+            const sourceProducts = zoneProductsData.filter(p => p.location === sourceCode);
+            modalSourceItemCount.textContent = sourceProducts.length;
 
-            if (selected.length === 0) {
+            const sourceZoneObj = ALL_ZONES.find(z => z.code === sourceCode);
+            const sourceName = sourceZoneObj ? sourceZoneObj.name : sourceCode;
+
+            if (sourceProducts.length === 0) {
                 modalTransferTbody.innerHTML = `
                     <tr>
-                        <td colspan="4" class="modal-transfer-empty">
-                            <p style="font-weight: 600; color: #475569; margin-bottom: 4px;">ยังไม่ได้เลือกรายการสินค้า</p>
-                            <span style="font-size: 0.85rem; color: #94a3b8;">กรุณาติ๊กเครื่องหมายถูกหน้าสินค้าที่ต้องการย้ายในตารางคลังสินค้า</span>
+                        <td colspan="4" class="modal-transfer-empty" style="text-align: center; padding: 20px; color: #94a3b8;">
+                            No active products found in ${escapeHtml(sourceName)}
                         </td>
                     </tr>
                 `;
             } else {
-                modalTransferTbody.innerHTML = selected.map(p => `
+                modalTransferTbody.innerHTML = sourceProducts.map(p => `
                     <tr>
-                        <td class="font-medium">${p.id}</td>
-                        <td class="text-left font-medium">${p.name}</td>
-                        <td>${p.location}</td>
-                        <td class="transfer-dest-cell empty-dest">-</td>
+                        <td class="font-medium">${escapeHtml(p.id)}</td>
+                        <td class="text-left font-medium">${escapeHtml(p.name)}</td>
+                        <td>${escapeHtml(p.location)}</td>
+                        <td class="transfer-dest-cell empty-dest" style="font-weight: 600; color: #0d9488;">-</td>
                     </tr>
                 `).join('');
             }
 
-            AdminApp.openModal('modal-move-product');
+            // Hide swap notice and target swap container until target is picked
+            modalZoneSwapNotice.style.display = 'none';
+            modalTargetSwapContainer.style.display = 'none';
         }
 
-        function closeMoveModal() {
-            AdminApp.closeModal('modal-move-product');
+        function handleSourceZoneChange(sourceZoneCode) {
+            updateModalForSourceZone(sourceZoneCode);
         }
 
-        function handleTargetZoneChange(zoneCode) {
+        function handleTargetZoneChange(targetZoneCode) {
             const destCells = modalTransferTbody.querySelectorAll('.transfer-dest-cell');
             destCells.forEach(cell => {
-                if (zoneCode) {
-                    cell.textContent = zoneCode;
+                if (targetZoneCode) {
+                    cell.textContent = targetZoneCode;
                     cell.classList.remove('empty-dest');
                 } else {
                     cell.textContent = '-';
                     cell.classList.add('empty-dest');
                 }
             });
-        }
 
-        function handleMoveSubmit(e) {
-            e.preventDefault();
-            const selected = getSelectedProducts();
-            if (selected.length === 0) {
-                alert('กรุณาเลือกรายการสินค้าที่ต้องการย้ายอย่างน้อย 1 รายการ');
+            if (!targetZoneCode) {
+                modalZoneSwapNotice.style.display = 'none';
+                modalTargetSwapContainer.style.display = 'none';
                 return;
             }
 
+            const sourceZoneCode = modalSourceZoneSelect.value;
+            const sourceZoneObj = ALL_ZONES.find(z => z.code === sourceZoneCode);
+            const targetZoneObj = ALL_ZONES.find(z => z.code === targetZoneCode);
+            const sourceZoneName = sourceZoneObj ? sourceZoneObj.name : sourceZoneCode;
+            const targetZoneName = targetZoneObj ? targetZoneObj.name : targetZoneCode;
+
+            const targetProducts = zoneProductsData.filter(p => p.location === targetZoneCode);
+
+            if (targetProducts.length > 0) {
+                // Zone Swap required
+                modalZoneSwapNotice.style.display = 'block';
+                modalZoneSwapNotice.style.background = '#f8fafc';
+                modalZoneSwapNotice.style.border = '1px solid #e2e8f0';
+                modalZoneSwapNotice.style.borderLeft = '4px solid #0d9488';
+                modalZoneSwapNotice.style.color = '#334155';
+                modalZoneSwapNotice.innerHTML = `
+                    <strong>Zone Swap:</strong> Destination zone <strong>${escapeHtml(targetZoneName)}</strong> currently contains ${targetProducts.length} items. All products between <strong>${escapeHtml(sourceZoneName)}</strong> and <strong>${escapeHtml(targetZoneName)}</strong> will be swapped to maintain 1 product category per zone.
+                `;
+
+                // Render target items that will swap back to sourceZoneCode
+                modalTargetSwapContainer.style.display = 'block';
+                modalTargetSwapName.textContent = sourceZoneName;
+                modalTargetItemCount.textContent = targetProducts.length;
+
+                modalTargetTransferTbody.innerHTML = targetProducts.map(p => `
+                    <tr>
+                        <td class="font-medium">${escapeHtml(p.id)}</td>
+                        <td class="text-left font-medium">${escapeHtml(p.name)}</td>
+                        <td>${escapeHtml(p.location)}</td>
+                        <td style="font-weight: 600; color: #0d9488;">${escapeHtml(sourceZoneCode)}</td>
+                    </tr>
+                `).join('');
+            } else {
+                // Pure Move to empty zone
+                modalZoneSwapNotice.style.display = 'block';
+                modalZoneSwapNotice.style.background = '#f8fafc';
+                modalZoneSwapNotice.style.border = '1px solid #e2e8f0';
+                modalZoneSwapNotice.style.borderLeft = '4px solid #3b82f6';
+                modalZoneSwapNotice.style.color = '#334155';
+                modalZoneSwapNotice.innerHTML = `
+                    <strong>Zone Transfer:</strong> Move all products from <strong>${escapeHtml(sourceZoneName)}</strong> to <strong>${escapeHtml(targetZoneName)}</strong> (destination zone is empty).
+                `;
+                modalTargetSwapContainer.style.display = 'none';
+            }
+        }
+
+        async function handleMoveSubmit(e) {
+            e.preventDefault();
+            const sourceZone = modalSourceZoneSelect.value;
             const targetZone = modalTargetZoneSelect.value;
+
             if (!targetZone) {
-                alert('กรุณาเลือกโซนปลายทาง (Select move to zone) ที่ต้องการย้าย');
+                AdminApp.showCenterAlert({
+                    title: 'Select Destination',
+                    message: 'Please select a destination zone (TO ZONE).',
+                    type: 'error'
+                });
                 modalTargetZoneSelect.focus();
                 return;
             }
 
-            alert(`ส่งคำขอย้ายสินค้าจำนวน ${selected.length} รายการ ไปยังโซน ${targetZone} เรียบร้อยแล้ว`);
-            closeMoveModal();
+            if (sourceZone === targetZone) {
+                AdminApp.showCenterAlert({
+                    title: 'Invalid Zone',
+                    message: 'Source and destination zones cannot be the same.',
+                    type: 'error'
+                });
+                return;
+            }
 
-            // Reset checkboxes
-            document.querySelectorAll('.zone-product-checkbox').forEach(cb => cb.checked = false);
-            if (checkAll) {
-                checkAll.checked = false;
-                checkAll.indeterminate = false;
+            const sourceZoneObj = ALL_ZONES.find(z => z.code === sourceZone);
+            const targetZoneObj = ALL_ZONES.find(z => z.code === targetZone);
+            const sourceZoneName = sourceZoneObj ? sourceZoneObj.name : sourceZone;
+            const targetZoneName = targetZoneObj ? targetZoneObj.name : targetZone;
+
+            const sourceProducts = zoneProductsData.filter(p => p.location === sourceZone);
+            if (sourceProducts.length === 0) {
+                AdminApp.showCenterAlert({
+                    title: 'Zone Empty',
+                    message: `No active products found in ${sourceZoneName} to transfer.`,
+                    type: 'error'
+                });
+                return;
+            }
+
+            const targetProducts = zoneProductsData.filter(p => p.location === targetZone);
+            const isSwap = targetProducts.length > 0;
+
+            try {
+                const res = await window.api.post('/api/requests/product-move', {
+                    sourceZoneCode: sourceZone,
+                    targetZoneCode: targetZone,
+                    reason: isSwap
+                        ? `Swap entire ${sourceZoneName} (${sourceProducts.length} items) and ${targetZoneName} (${targetProducts.length} items)`
+                        : `Move entire ${sourceZoneName} (${sourceProducts.length} items) to ${targetZoneName}`
+                });
+
+                AdminApp.closeModal('modal-move-product');
+
+                AdminApp.showCenterAlert({
+                    title: 'Transfer Request Submitted!',
+                    message: isSwap
+                        ? `Zone swap request between ${sourceZoneName} and ${targetZoneName} submitted successfully (Pending Manager approval).`
+                        : `Zone transfer request from ${sourceZoneName} to ${targetZoneName} submitted successfully (Pending Manager approval).`,
+                    type: 'success'
+                });
+
+                loadWarehouseProducts();
+            } catch (err) {
+                AdminApp.showCenterAlert({
+                    title: 'Transfer Failed',
+                    message: err.message || 'Failed to submit zone move request',
+                    type: 'error'
+                });
             }
         }
 
@@ -422,7 +590,7 @@
         // Search & Filter
         function filterProducts() {
             const query = (searchInput?.value || '').toLowerCase().trim();
-            const zone = selectZone?.value || 'ALL';
+            const zone = selectZone?.value || 'Z1';
 
             const filtered = zoneProductsData.filter(item => {
                 const matchQuery = !query || String(item.id).includes(query) || item.name.toLowerCase().includes(query);
@@ -436,15 +604,9 @@
         searchInput?.addEventListener('input', filterProducts);
         selectZone?.addEventListener('change', filterProducts);
 
-        AdminApp.initCustomDatePicker({
-            box: 'requests-date-box',
-            onChange: (dateVal) => {
-                filterProducts();
-            }
-        });
-
-        // Initialize table
-        renderProducts(zoneProductsData);
+        // Initialize: Load zones and products from Backend (Defaulting to Z1)
+        loadWarehouseZones();
+        loadWarehouseProducts();
     </script>
 </body>
 
