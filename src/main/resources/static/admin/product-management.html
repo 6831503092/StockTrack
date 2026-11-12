@@ -99,11 +99,10 @@
                                 <th>Selling Price</th>
                                 <th>Current Stock</th>
                                 <th>Min Alert</th>
-                                <th style="width: 100px; text-align: center;">Action</th>
+                                <th style="width: 100px;">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="products-table-body">
-                        </tbody>
+                        <tbody id="products-table-body"></tbody>
                     </table>
                 </div>
 
@@ -194,14 +193,12 @@
 
         async function loadZones() {
             try {
-                if (window.api && typeof window.api.get === 'function') {
-                    const res = await window.api.get('/api/zones');
-                    if (res && res.success && Array.isArray(res.data)) {
-                        selectZone.innerHTML = `
-                            <option value="ALL">All Zones</option>
-                            ${res.data.map(z => `<option value="${escapeHtml(z.zoneCode)}">${escapeHtml(z.zoneName)}</option>`).join('')}
-                        `;
-                    }
+                const res = await window.api?.get('/api/zones');
+                if (res?.success && Array.isArray(res.data)) {
+                    selectZone.innerHTML = `
+                        <option value="ALL">All Zones</option>
+                        ${res.data.map(z => `<option value="${escapeHtml(z.zoneCode)}">${escapeHtml(z.zoneName)}</option>`).join('')}
+                    `;
                 }
             } catch (err) {
                 console.error('Failed to load zones:', err);
@@ -210,13 +207,11 @@
 
         async function loadProducts() {
             try {
-                if (window.api && typeof window.api.get === 'function') {
-                    const res = await window.api.get('/api/zones/products');
-                    if (res && res.success && Array.isArray(res.data)) {
-                        allProducts = res.data;
-                    } else if (Array.isArray(res)) {
-                        allProducts = res;
-                    }
+                const res = await window.api?.get('/api/zones/products');
+                if (res?.success && Array.isArray(res.data)) {
+                    allProducts = res.data;
+                } else if (Array.isArray(res)) {
+                    allProducts = res;
                 }
             } catch (err) {
                 console.error('Failed to load products from API:', err);
@@ -227,29 +222,30 @@
 
         function updateKPIs(data) {
             const list = Array.isArray(data) ? data : [];
-            const total = list.length;
             const units = list.reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
             const lowStock = list.filter(p => (Number(p.stock) || 0) <= (Number(p.minStockAlert) || 20)).length;
 
-            document.getElementById('kpi-pm-total').textContent = total;
+            document.getElementById('kpi-pm-total').textContent = list.length;
             document.getElementById('kpi-pm-units').textContent = units.toLocaleString('en-US');
             document.getElementById('kpi-pm-low-stock').textContent = lowStock;
         }
 
         function applyFilter() {
             const query = (searchInput?.value || '').toLowerCase().trim();
-            const selectedZone = selectZone?.value || 'ALL';
+            const selectedZone = (selectZone?.value || 'ALL').toUpperCase();
 
             filteredProducts = allProducts.filter(p => {
+                const loc = String(p.location || '');
+                const zName = String(p.zoneName || '');
                 const matchZone = selectedZone === 'ALL' ||
-                    String(p.location || '').toUpperCase() === selectedZone.toUpperCase() ||
-                    String(p.zoneName || '').toUpperCase() === selectedZone.toUpperCase();
+                    loc.toUpperCase() === selectedZone ||
+                    zName.toUpperCase() === selectedZone;
 
                 const matchQuery = !query ||
                     String(p.id || '').includes(query) ||
                     String(p.name || '').toLowerCase().includes(query) ||
-                    String(p.location || '').toLowerCase().includes(query) ||
-                    String(p.zoneName || '').toLowerCase().includes(query);
+                    loc.toLowerCase().includes(query) ||
+                    zName.toLowerCase().includes(query);
 
                 return matchZone && matchQuery;
             });
@@ -260,7 +256,7 @@
         }
 
         function renderTable() {
-            if (!filteredProducts || filteredProducts.length === 0) {
+            if (!filteredProducts?.length) {
                 tbody.innerHTML = '';
                 pageInfo.textContent = 'Showing 0 of 0 entries';
                 renderPagination(0);
@@ -269,8 +265,7 @@
 
             const total = filteredProducts.length;
             const totalPages = Math.ceil(total / pageSize);
-            if (currentPage > totalPages) currentPage = totalPages;
-            if (currentPage < 1) currentPage = 1;
+            currentPage = Math.max(1, Math.min(currentPage, totalPages));
 
             const startIdx = (currentPage - 1) * pageSize;
             const endIdx = Math.min(startIdx + pageSize, total);
@@ -295,7 +290,7 @@
                             </span>
                         </td>
                         <td>${Number(p.minStockAlert || 20).toLocaleString()} Units</td>
-                        <td style="text-align: center;">
+                        <td>
                             <button type="button" class="btn-action-edit" onclick="openEditProductModal('${escapeHtml(String(p.id))}')">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -321,11 +316,10 @@
                 return;
             }
 
-            let html = '';
-            for (let i = 1; i <= totalPages; i++) {
-                html += `<button type="button" class="btn-page ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
-            }
-            pagesContainer.innerHTML = html;
+            pagesContainer.innerHTML = Array.from({ length: totalPages }, (_, idx) => {
+                const page = idx + 1;
+                return `<button type="button" class="btn-page ${page === currentPage ? 'active' : ''}" onclick="goToPage(${page})">${page}</button>`;
+            }).join('');
         }
 
         function goToPage(page) {
@@ -334,24 +328,84 @@
         }
 
         prevBtn?.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable();
-            }
+            if (currentPage > 1) goToPage(currentPage - 1);
         });
 
         nextBtn?.addEventListener('click', () => {
             const totalPages = Math.ceil(filteredProducts.length / pageSize);
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderTable();
-            }
+            if (currentPage < totalPages) goToPage(currentPage + 1);
         });
 
         searchInput?.addEventListener('input', applyFilter);
         selectZone?.addEventListener('change', applyFilter);
 
         let currentEditingProduct = null;
+
+        function getEditProductChanges() {
+            if (!currentEditingProduct) {
+                return { hasChanges: false, newName: '', newPrice: 0, newStock: 0 };
+            }
+
+            const origName = (currentEditingProduct.name || '').trim();
+            const origPrice = Number(currentEditingProduct.sellingPrice ?? currentEditingProduct.price ?? 0);
+            const origStock = Number(currentEditingProduct.stock ?? 0);
+
+            const nameInput = document.getElementById('edit-product-name');
+            const priceInput = document.getElementById('edit-selling-price');
+            const stockInput = document.getElementById('edit-current-stock');
+
+            const rawName = nameInput ? nameInput.value : '';
+            const rawPrice = priceInput ? priceInput.value.trim() : '';
+            const rawStock = stockInput ? stockInput.value.trim() : '';
+
+            const newName = rawName.trim();
+            const newPrice = parseFloat(rawPrice);
+            const newStock = parseInt(rawStock, 10);
+
+            const isNameChanged = newName !== origName;
+            const isPriceChanged = rawPrice !== '' && !isNaN(newPrice)
+                ? Math.abs(newPrice - origPrice) > 0.0001
+                : rawPrice !== String(origPrice);
+            const isStockChanged = rawStock !== '' && !isNaN(newStock)
+                ? newStock !== origStock
+                : rawStock !== String(origStock);
+
+            const hasChanges = isNameChanged || isPriceChanged || isStockChanged;
+
+            return {
+                hasChanges,
+                newName,
+                newPrice,
+                newStock,
+                isNameChanged,
+                isPriceChanged,
+                isStockChanged,
+                origName,
+                origPrice,
+                origStock
+            };
+        }
+
+        function checkEditProductChanges() {
+            const submitBtn = document.getElementById('btn-submit-edit-product');
+            if (!submitBtn) return;
+
+            const { hasChanges } = getEditProductChanges();
+            submitBtn.disabled = !hasChanges;
+            if (!hasChanges) {
+                submitBtn.setAttribute('title', 'Please modify at least one field before sending a request.');
+            } else {
+                submitBtn.removeAttribute('title');
+            }
+        }
+
+        ['edit-product-name', 'edit-selling-price', 'edit-current-stock'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', checkEditProductChanges);
+                el.addEventListener('change', checkEditProductChanges);
+            }
+        });
 
         function openEditProductModal(productId) {
             const p = allProducts.find(item => String(item.id) === String(productId));
@@ -360,19 +414,25 @@
             currentEditingProduct = p;
 
             document.getElementById('edit-product-id').value = p.id || '';
-            document.getElementById('edit-default-cost').value = AdminApp.formatMoney(p.defaultCost || 0);
-            document.getElementById('edit-min-stock-alert').value = p.minStockAlert != null ? p.minStockAlert : 20;
+            document.getElementById('edit-default-cost').value = formatMoney(p.defaultCost || 0);
+            document.getElementById('edit-min-stock-alert').value = p.minStockAlert ?? 20;
 
             document.getElementById('edit-product-name').value = p.name || '';
-            document.getElementById('edit-selling-price').value = p.sellingPrice != null ? p.sellingPrice : (p.price != null ? p.price : '');
-            document.getElementById('edit-current-stock').value = p.stock != null ? p.stock : 0;
+            document.getElementById('edit-selling-price').value = p.sellingPrice ?? p.price ?? '';
+            document.getElementById('edit-current-stock').value = p.stock ?? 0;
 
+            checkEditProductChanges();
             openModal('modal-edit-product');
         }
 
         function closeEditProductModal() {
             closeModal('modal-edit-product');
             currentEditingProduct = null;
+            const submitBtn = document.getElementById('btn-submit-edit-product');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.removeAttribute('title');
+            }
         }
 
         async function handleProductEditSubmit(e) {
@@ -380,57 +440,40 @@
             if (!currentEditingProduct) return;
 
             const submitBtn = document.getElementById('btn-submit-edit-product');
-            const newName = document.getElementById('edit-product-name').value.trim();
-            const newPrice = parseFloat(document.getElementById('edit-selling-price').value);
-            const newStock = parseInt(document.getElementById('edit-current-stock').value, 10);
+            const { hasChanges, newName, newPrice, newStock } = getEditProductChanges();
 
             if (!newName) {
-                AdminApp.showCenterAlert({
-                    title: 'Name Required',
-                    message: 'Please enter a product name.',
-                    type: 'error'
-                });
-                return;
+                return AdminApp.showCenterAlert({ title: 'Name Required', message: 'Please enter a product name.', type: 'error' });
             }
-
             if (isNaN(newPrice) || newPrice < 0) {
-                AdminApp.showCenterAlert({
-                    title: 'Invalid Price',
-                    message: 'Please enter a valid selling price (>= 0).',
-                    type: 'error'
-                });
-                return;
+                return AdminApp.showCenterAlert({ title: 'Invalid Price', message: 'Please enter a valid selling price (>= 0).', type: 'error' });
+            }
+            if (isNaN(newStock) || newStock < 0) {
+                return AdminApp.showCenterAlert({ title: 'Invalid Stock', message: 'Please enter a valid current stock quantity (>= 0).', type: 'error' });
             }
 
-            if (isNaN(newStock) || newStock < 0) {
-                AdminApp.showCenterAlert({
-                    title: 'Invalid Stock',
-                    message: 'Please enter a valid current stock quantity (>= 0).',
-                    type: 'error'
+            if (!hasChanges) {
+                return AdminApp.showCenterAlert({
+                    title: 'No Changes Detected',
+                    message: 'No changes were made to the product. Please modify at least one field before sending a request.',
+                    type: 'warning'
                 });
-                return;
             }
 
             if (submitBtn) submitBtn.disabled = true;
 
             try {
-                const payload = {
+                await window.api?.post('/api/requests/product-update', {
                     productId: currentEditingProduct.id,
                     productName: newName,
                     sellingPrice: newPrice,
                     currentStock: newStock
-                };
+                });
 
-                if (window.api && typeof window.api.post === 'function') {
-                    await window.api.post('/api/requests/product-update', payload);
-                }
-
-                // Optimistically update local product data
                 currentEditingProduct.name = newName;
                 currentEditingProduct.sellingPrice = newPrice;
                 currentEditingProduct.stock = newStock;
                 applyFilter();
-
                 closeEditProductModal();
 
                 AdminApp.showCenterAlert({
@@ -445,11 +488,14 @@
                     type: 'error'
                 });
             } finally {
-                if (submitBtn) submitBtn.disabled = false;
+                if (currentEditingProduct) {
+                    checkEditProductChanges();
+                } else if (submitBtn) {
+                    submitBtn.disabled = false;
+                }
             }
         }
 
-        // Initialize on load
         (async () => {
             await loadZones();
             await loadProducts();

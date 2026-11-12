@@ -98,15 +98,13 @@
 
         async function loadSummaryStats() {
             try {
-                if (window.api && typeof window.api.get === 'function') {
-                    const res = await window.api.get('/api/zones/summary');
-                    if (res && res.success && res.data) {
-                        const data = res.data;
-                        document.getElementById('zp-stat-active-zones').textContent = data.activeZonesCount || 0;
-                        document.getElementById('zp-stat-stored-units').textContent = (data.storedUnits || 0).toLocaleString();
-                        document.getElementById('zp-stat-total-products').textContent = data.totalProducts || 0;
-                        document.getElementById('zp-stat-low-stock').textContent = data.lowStockCount || 0;
-                    }
+                const res = await window.api?.get('/api/zones/summary');
+                const data = res?.data;
+                if (res?.success && data) {
+                    document.getElementById('zp-stat-active-zones').textContent = data.activeZonesCount || 0;
+                    document.getElementById('zp-stat-stored-units').textContent = (data.storedUnits || 0).toLocaleString();
+                    document.getElementById('zp-stat-total-products').textContent = data.totalProducts || 0;
+                    document.getElementById('zp-stat-low-stock').textContent = data.lowStockCount || 0;
                 }
             } catch (err) {
                 console.error('Failed to load summary stats:', err);

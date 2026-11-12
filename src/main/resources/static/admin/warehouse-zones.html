@@ -40,6 +40,7 @@
                     </a>
                 </div>
             </header>
+
             <section class="po-stats-grid" id="zone-stats-grid">
                 <div class="po-stat-card">
                     <div class="po-stat-info">
@@ -98,19 +99,17 @@
                     <table class="po-table">
                         <thead>
                             <tr>
-                                <th style="width: 50px; text-align: center;">#</th>
-                                <th style="width: 80px; text-align: center;">Image</th>
+                                <th style="width: 50px;">#</th>
+                                <th style="width: 80px;">Image</th>
                                 <th>Product ID</th>
                                 <th>Product Name</th>
                                 <th>Location</th>
                                 <th>Current Stock</th>
                                 <th>Status</th>
-                                <th style="width: 90px; text-align: center;">Detail</th>
+                                <th style="width: 90px;">Detail</th>
                             </tr>
                         </thead>
-                        <tbody id="zone-products-table-body">
-                            <!-- Populated dynamically via JS / Backend API -->
-                        </tbody>
+                        <tbody id="zone-products-table-body"></tbody>
                     </table>
                 </div>
 
@@ -241,16 +240,14 @@
                         <table class="modal-transfer-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 60px; text-align: center;">Image</th>
-                                    <th style="width: 80px; text-align: center;">Product ID</th>
-                                    <th style="text-align: center;">Product Name</th>
-                                    <th style="width: 90px; text-align: center;">Location</th>
-                                    <th style="width: 100px; text-align: center;">Move to</th>
+                                    <th style="width: 60px;">Image</th>
+                                    <th style="width: 80px;">Product ID</th>
+                                    <th>Product Name</th>
+                                    <th style="width: 90px;">Location</th>
+                                    <th style="width: 100px;">Move to</th>
                                 </tr>
                             </thead>
-                            <tbody id="modal-transfer-tbody">
-                                <!-- Populated dynamically from source zone products -->
-                            </tbody>
+                            <tbody id="modal-transfer-tbody"></tbody>
                         </table>
                     </div>
 
@@ -263,15 +260,14 @@
                             <table class="modal-transfer-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 60px; text-align: center;">Image</th>
-                                        <th style="width: 80px; text-align: center;">Product ID</th>
-                                        <th style="text-align: center;">Product Name</th>
-                                        <th style="width: 90px; text-align: center;">Location</th>
-                                        <th style="width: 100px; text-align: center;">Swap to</th>
+                                        <th style="width: 60px;">Image</th>
+                                        <th style="width: 80px;">Product ID</th>
+                                        <th>Product Name</th>
+                                        <th style="width: 90px;">Location</th>
+                                        <th style="width: 100px;">Swap to</th>
                                     </tr>
                                 </thead>
-                                <tbody id="modal-target-transfer-tbody">
-                                </tbody>
+                                <tbody id="modal-target-transfer-tbody"></tbody>
                             </table>
                         </div>
                     </div>
@@ -291,9 +287,8 @@
     <script>
         AdminApp.checkAdminAccess();
 
-        const { escapeHtml, openModal, closeModal, showCenterAlert } = AdminApp;
+        const { escapeHtml, formatMoney, getProductImageUrl, openModal, closeModal, showCenterAlert } = AdminApp;
 
-        // Available Warehouse Zones (dynamically loaded from Backend API)
         let ALL_ZONES = [
             { code: 'Z1', name: 'Zone 1' },
             { code: 'Z2', name: 'Zone 2' },
@@ -301,7 +296,6 @@
             { code: 'Z4', name: 'Zone 4' }
         ];
 
-        // Warehouse Products Data (Loaded directly from Backend API)
         let zoneProductsData = [];
 
         const tbody = document.getElementById('zone-products-table-body');
@@ -319,31 +313,32 @@
         const modalTargetItemCount = document.getElementById('modal-target-item-count');
         const modalTargetSwapName = document.getElementById('modal-target-swap-name');
 
-        // Set initial default value to ALL
-        if (selectZone) {
-            selectZone.value = 'ALL';
+        if (selectZone) selectZone.value = 'ALL';
+
+        function getZoneName(code) {
+            const found = ALL_ZONES.find(z => z.code === code);
+            if (found) return found.name;
+            if (code && /^Z\d+/i.test(code)) return `Zone ${code.replace(/^Z/i, '')}`;
+            return code || '-';
         }
 
         async function loadWarehouseZones() {
             try {
-                if (window.api && typeof window.api.get === 'function') {
-                    const res = await window.api.get('/api/zones');
-                    if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
-                        ALL_ZONES = res.data.map(z => ({
-                            id: z.zoneId,
-                            code: z.zoneCode,
-                            name: z.zoneName,
-                            capacity: z.capacity || 500
-                        }));
+                const res = await window.api?.get('/api/zones');
+                if (res?.success && Array.isArray(res.data) && res.data.length > 0) {
+                    ALL_ZONES = res.data.map(z => ({
+                        id: z.zoneId,
+                        code: z.zoneCode,
+                        name: z.zoneName,
+                        capacity: z.capacity || 500
+                    }));
 
-                        // Populate select-zone dropdown, placing "All Zones" at top and defaulting to ALL
-                        const currentVal = selectZone.value || 'ALL';
-                        selectZone.innerHTML = `
-                            <option value="ALL">All Zones</option>
-                            ${ALL_ZONES.map(z => `<option value="${escapeHtml(z.code)}">${escapeHtml(z.name)}</option>`).join('')}
-                        `;
-                        selectZone.value = (currentVal === 'ALL' || ALL_ZONES.some(z => z.code === currentVal)) ? currentVal : 'ALL';
-                    }
+                    const currentVal = selectZone.value || 'ALL';
+                    selectZone.innerHTML = `
+                        <option value="ALL">All Zones</option>
+                        ${ALL_ZONES.map(z => `<option value="${escapeHtml(z.code)}">${escapeHtml(z.name)}</option>`).join('')}
+                    `;
+                    selectZone.value = (currentVal === 'ALL' || ALL_ZONES.some(z => z.code === currentVal)) ? currentVal : 'ALL';
                 }
             } catch (err) {
                 console.warn('Failed to load zones from API, using defaults:', err);
@@ -352,11 +347,9 @@
 
         async function loadWarehouseProducts() {
             try {
-                if (window.api && typeof window.api.get === 'function') {
-                    const res = await window.api.get('/api/zones/products');
-                    if (res && res.success && Array.isArray(res.data)) {
-                        zoneProductsData = res.data;
-                    }
+                const res = await window.api?.get('/api/zones/products');
+                if (res?.success && Array.isArray(res.data)) {
+                    zoneProductsData = res.data;
                 }
             } catch (err) {
                 console.error('Failed to load products from API:', err);
@@ -366,7 +359,7 @@
         }
 
         function renderProducts(list) {
-            if (!list || list.length === 0) {
+            if (!list?.length) {
                 tbody.innerHTML = '';
                 paginationInfo.textContent = 'Showing 0 of 0 entries';
                 updateKPIs(list);
@@ -377,24 +370,20 @@
                 const isLowStock = item.status === 'Low Stock' || (item.stock <= (item.minStockAlert || 20));
                 const badgeClass = isLowStock ? 'badge-low-stock' : 'badge-in-stock';
                 const statusLabel = isLowStock ? 'Low Stock' : 'In Stock';
-                const imgUrl = item.imageUrl || (window.AdminApp && AdminApp.getProductImageUrl ? AdminApp.getProductImageUrl(item.name, item.location) : '../picture/favicon/favicon.png');
+                const imgUrl = item.imageUrl || getProductImageUrl(item.name, item.location);
 
                 return `
                     <tr class="zone-product-row" data-id="${item.id}" data-name="${escapeHtml(item.name)}" data-location="${escapeHtml(item.location)}">
-                        <td style="text-align: center; color: #64748b; font-weight: 600;">${index + 1}</td>
-                        <td style="text-align: center; padding: 6px 8px; vertical-align: middle;">
+                        <td style="color: #64748b; font-weight: 600;">${index + 1}</td>
+                        <td style="padding: 6px 8px;">
                             <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.name)}" class="zone-product-thumb" onerror="this.src='../picture/favicon/favicon.png'">
                         </td>
                         <td class="font-medium">${item.id}</td>
                         <td class="cell-prod-name">${escapeHtml(item.name)}</td>
                         <td>${escapeHtml(item.location)}</td>
                         <td>${item.stock} units</td>
+                        <td><span class="badge-status ${badgeClass}">${escapeHtml(statusLabel)}</span></td>
                         <td>
-                            <span class="badge-status ${badgeClass}">
-                                ${escapeHtml(statusLabel)}
-                            </span>
-                        </td>
-                        <td style="text-align: center;">
                             <button type="button" class="btn-action-detail" onclick="showProductZoneDetail('${item.id}')">Detail</button>
                         </td>
                     </tr>
@@ -405,7 +394,7 @@
             updateKPIs(list);
         }
 
-        function updateKPIs(list) {
+        function updateKPIs() {
             const capacityValEl = document.getElementById('kpi-capacity-val') || document.getElementById('kpi-pm-total');
             const capacityLabelEl = document.getElementById('kpi-capacity-label');
             const storedUnitsEl = document.getElementById('kpi-pm-units');
@@ -419,16 +408,15 @@
                 if (storedUnitsLabelEl) storedUnitsLabelEl.textContent = 'Stored Units - All Zones';
             } else {
                 const found = ALL_ZONES.find(z => z.code === currentZone);
-                const zName = found ? found.name : `Zone ${currentZone.replace(/^Z/i, '')}`;
-                const zCap = (found && found.capacity) ? found.capacity : 500;
+                const zName = getZoneName(currentZone);
+                const zCap = found?.capacity || 500;
                 if (capacityLabelEl) capacityLabelEl.textContent = `Zone Capacity - ${zName}`;
                 if (capacityValEl) capacityValEl.textContent = `${zCap.toLocaleString()} Units`;
                 if (storedUnitsLabelEl) storedUnitsLabelEl.textContent = `Stored Units - ${zName}`;
             }
 
             if (storedUnitsEl) {
-                // Reference currently selected zone
-                const zoneProducts = (currentZone === 'ALL')
+                const zoneProducts = currentZone === 'ALL'
                     ? zoneProductsData
                     : zoneProductsData.filter(item => item.location === currentZone);
                 const totalUnits = zoneProducts.reduce((sum, item) => sum + (item.stock || 0), 0);
@@ -436,14 +424,27 @@
             }
         }
 
-        // --- Whole Zone Move / Swap Modal Management ---
-        function openMoveModal() {
-            let activeZone = selectZone.value;
-            if (!activeZone || activeZone === 'ALL') {
-                activeZone = 'Z1';
-            }
+        function renderTransferRows(products, destText, isSourceTable = false) {
+            return products.map(p => {
+                const imgUrl = p.imageUrl || getProductImageUrl(p.name, p.location);
+                const destClass = isSourceTable ? `transfer-dest-cell ${destText === '-' ? 'empty-dest' : ''}` : '';
+                return `
+                    <tr>
+                        <td style="width: 60px; padding: 4px;">
+                            <img src="${escapeHtml(imgUrl)}" class="transfer-thumb-img" onerror="this.src='../picture/favicon/favicon.png'">
+                        </td>
+                        <td class="font-medium">${escapeHtml(p.id)}</td>
+                        <td class="font-medium">${escapeHtml(p.name)}</td>
+                        <td>${escapeHtml(p.location)}</td>
+                        <td class="${destClass}" style="font-weight: 600; color: #0d9488;">${escapeHtml(destText)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
 
-            // Populate source zone dropdown
+        function openMoveModal() {
+            const activeZone = (!selectZone.value || selectZone.value === 'ALL') ? 'Z1' : selectZone.value;
+
             if (modalSourceZoneSelect) {
                 modalSourceZoneSelect.innerHTML = ALL_ZONES.map(z =>
                     `<option value="${escapeHtml(z.code)}" ${z.code === activeZone ? 'selected' : ''}>${escapeHtml(z.name)}</option>`
@@ -452,11 +453,10 @@
             }
 
             updateModalForSourceZone(activeZone);
-            AdminApp.openModal('modal-move-product');
+            openModal('modal-move-product');
         }
 
         function updateModalForSourceZone(sourceCode) {
-            // Populate Target Zone dropdown (all zones except source)
             const availableTargetZones = ALL_ZONES.filter(z => z.code !== sourceCode);
             modalTargetZoneSelect.innerHTML = `
                 <option value="">Select target zone</option>
@@ -464,33 +464,10 @@
             `;
             modalTargetZoneSelect.value = '';
 
-            // Get all products in source zone
             const sourceProducts = zoneProductsData.filter(p => p.location === sourceCode);
             modalSourceItemCount.textContent = sourceProducts.length;
+            modalTransferTbody.innerHTML = renderTransferRows(sourceProducts, '-', true);
 
-            const sourceZoneObj = ALL_ZONES.find(z => z.code === sourceCode);
-            const sourceName = sourceZoneObj ? sourceZoneObj.name : sourceCode;
-
-            if (sourceProducts.length === 0) {
-                modalTransferTbody.innerHTML = '';
-            } else {
-                modalTransferTbody.innerHTML = sourceProducts.map(p => {
-                    const imgUrl = p.imageUrl || AdminApp.getProductImageUrl(p.name, p.location);
-                    return `
-                        <tr>
-                            <td style="width: 60px; text-align: center; padding: 4px;">
-                                <img src="${escapeHtml(imgUrl)}" style="width: 38px; height: 30px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
-                            </td>
-                            <td class="font-medium">${escapeHtml(p.id)}</td>
-                            <td class="font-medium">${escapeHtml(p.name)}</td>
-                            <td>${escapeHtml(p.location)}</td>
-                            <td class="transfer-dest-cell empty-dest" style="font-weight: 600; color: #0d9488;">-</td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-
-            // Hide swap notice and target swap container until target is picked
             modalZoneSwapNotice.style.display = 'none';
             modalTargetSwapContainer.style.display = 'none';
         }
@@ -500,15 +477,9 @@
         }
 
         function handleTargetZoneChange(targetZoneCode) {
-            const destCells = modalTransferTbody.querySelectorAll('.transfer-dest-cell');
-            destCells.forEach(cell => {
-                if (targetZoneCode) {
-                    cell.textContent = targetZoneCode;
-                    cell.classList.remove('empty-dest');
-                } else {
-                    cell.textContent = '-';
-                    cell.classList.add('empty-dest');
-                }
+            modalTransferTbody.querySelectorAll('.transfer-dest-cell').forEach(cell => {
+                cell.textContent = targetZoneCode || '-';
+                cell.classList.toggle('empty-dest', !targetZoneCode);
             });
 
             if (!targetZoneCode) {
@@ -518,50 +489,24 @@
             }
 
             const sourceZoneCode = modalSourceZoneSelect.value;
-            const sourceZoneObj = ALL_ZONES.find(z => z.code === sourceZoneCode);
-            const targetZoneObj = ALL_ZONES.find(z => z.code === targetZoneCode);
-            const sourceZoneName = sourceZoneObj ? sourceZoneObj.name : sourceZoneCode;
-            const targetZoneName = targetZoneObj ? targetZoneObj.name : targetZoneCode;
-
+            const sourceZoneName = getZoneName(sourceZoneCode);
+            const targetZoneName = getZoneName(targetZoneCode);
             const targetProducts = zoneProductsData.filter(p => p.location === targetZoneCode);
 
+            modalZoneSwapNotice.style.display = 'block';
+
             if (targetProducts.length > 0) {
-                // Zone Swap required
-                modalZoneSwapNotice.style.display = 'block';
-                modalZoneSwapNotice.style.background = '#f8fafc';
-                modalZoneSwapNotice.style.border = '1px solid #e2e8f0';
                 modalZoneSwapNotice.style.borderLeft = '4px solid #0d9488';
-                modalZoneSwapNotice.style.color = '#334155';
                 modalZoneSwapNotice.innerHTML = `
                     <strong>Zone Swap:</strong> Destination zone <strong>${escapeHtml(targetZoneName)}</strong> currently contains ${targetProducts.length} items. All products between <strong>${escapeHtml(sourceZoneName)}</strong> and <strong>${escapeHtml(targetZoneName)}</strong> will be swapped to maintain 1 product category per zone.
                 `;
 
-                // Render target items that will swap back to sourceZoneCode
                 modalTargetSwapContainer.style.display = 'block';
                 modalTargetSwapName.textContent = sourceZoneName;
                 modalTargetItemCount.textContent = targetProducts.length;
-
-                modalTargetTransferTbody.innerHTML = targetProducts.map(p => {
-                    const imgUrl = p.imageUrl || AdminApp.getProductImageUrl(p.name, p.location);
-                    return `
-                        <tr>
-                            <td style="width: 60px; text-align: center; padding: 4px;">
-                                <img src="${escapeHtml(imgUrl)}" style="width: 38px; height: 30px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
-                            </td>
-                            <td class="font-medium">${escapeHtml(p.id)}</td>
-                            <td class="font-medium">${escapeHtml(p.name)}</td>
-                            <td>${escapeHtml(p.location)}</td>
-                            <td style="font-weight: 600; color: #0d9488;">${escapeHtml(sourceZoneCode)}</td>
-                        </tr>
-                    `;
-                }).join('');
+                modalTargetTransferTbody.innerHTML = renderTransferRows(targetProducts, sourceZoneCode, false);
             } else {
-                // Pure Move to empty zone
-                modalZoneSwapNotice.style.display = 'block';
-                modalZoneSwapNotice.style.background = '#f8fafc';
-                modalZoneSwapNotice.style.border = '1px solid #e2e8f0';
                 modalZoneSwapNotice.style.borderLeft = '4px solid #3b82f6';
-                modalZoneSwapNotice.style.color = '#334155';
                 modalZoneSwapNotice.innerHTML = `
                     <strong>Zone Transfer:</strong> Move all products from <strong>${escapeHtml(sourceZoneName)}</strong> to <strong>${escapeHtml(targetZoneName)}</strong> (destination zone is empty).
                 `;
@@ -575,44 +520,28 @@
             const targetZone = modalTargetZoneSelect.value;
 
             if (!targetZone) {
-                AdminApp.showCenterAlert({
-                    title: 'Select Destination',
-                    message: 'Please select a destination zone (TO ZONE).',
-                    type: 'error'
-                });
+                showCenterAlert({ title: 'Select Destination', message: 'Please select a destination zone (TO ZONE).', type: 'error' });
                 modalTargetZoneSelect.focus();
                 return;
             }
 
             if (sourceZone === targetZone) {
-                AdminApp.showCenterAlert({
-                    title: 'Invalid Zone',
-                    message: 'Source and destination zones cannot be the same.',
-                    type: 'error'
-                });
-                return;
+                return showCenterAlert({ title: 'Invalid Zone', message: 'Source and destination zones cannot be the same.', type: 'error' });
             }
 
-            const sourceZoneObj = ALL_ZONES.find(z => z.code === sourceZone);
-            const targetZoneObj = ALL_ZONES.find(z => z.code === targetZone);
-            const sourceZoneName = sourceZoneObj ? sourceZoneObj.name : sourceZone;
-            const targetZoneName = targetZoneObj ? targetZoneObj.name : targetZone;
-
+            const sourceZoneName = getZoneName(sourceZone);
+            const targetZoneName = getZoneName(targetZone);
             const sourceProducts = zoneProductsData.filter(p => p.location === sourceZone);
+
             if (sourceProducts.length === 0) {
-                AdminApp.showCenterAlert({
-                    title: 'Zone Empty',
-                    message: `No active products found in ${sourceZoneName} to transfer.`,
-                    type: 'error'
-                });
-                return;
+                return showCenterAlert({ title: 'Zone Empty', message: `No active products found in ${sourceZoneName} to transfer.`, type: 'error' });
             }
 
             const targetProducts = zoneProductsData.filter(p => p.location === targetZone);
             const isSwap = targetProducts.length > 0;
 
             try {
-                const res = await window.api.post('/api/requests/product-move', {
+                await window.api.post('/api/requests/product-move', {
                     sourceZoneCode: sourceZone,
                     targetZoneCode: targetZone,
                     reason: isSwap
@@ -620,9 +549,9 @@
                         : `Move entire ${sourceZoneName} (${sourceProducts.length} items) to ${targetZoneName}`
                 });
 
-                AdminApp.closeModal('modal-move-product');
+                closeModal('modal-move-product');
 
-                AdminApp.showCenterAlert({
+                showCenterAlert({
                     title: 'Transfer Request Submitted!',
                     message: isSwap
                         ? `Zone swap request between ${sourceZoneName} and ${targetZoneName} submitted successfully (Pending Manager approval).`
@@ -632,7 +561,7 @@
 
                 loadWarehouseProducts();
             } catch (err) {
-                AdminApp.showCenterAlert({
+                showCenterAlert({
                     title: 'Transfer Failed',
                     message: err.message || 'Failed to submit zone move request',
                     type: 'error'
@@ -642,7 +571,6 @@
 
         document.getElementById('btn-open-move-modal')?.addEventListener('click', openMoveModal);
 
-        // Product in Zone Details Screen (Matching Reference Mockup)
         function showProductZoneDetail(productId) {
             const p = zoneProductsData.find(item => String(item.id) === String(productId));
             if (!p) return;
@@ -650,20 +578,20 @@
             const cost = Number(p.defaultCost || 0);
             const price = Number(p.sellingPrice || p.price || 0);
             const margin = Math.max(0, price - cost);
-            const locName = p.zoneName || (p.location === 'Z1' ? 'Zone 1' : p.location === 'Z2' ? 'Zone 2' : p.location === 'Z3' ? 'Zone 3' : p.location === 'Z4' ? 'Zone 4' : (p.location || '-'));
-            const poMin = (p.poMinQty !== undefined && p.poMinQty !== null) ? p.poMinQty : 10;
-            const poMax = (p.poMaxQty !== undefined && p.poMaxQty !== null) ? p.poMaxQty : 100;
-            const soMin = (p.soMinQty !== undefined && p.soMinQty !== null) ? p.soMinQty : 10;
-            const soMax = (p.soMaxQty !== undefined && p.soMaxQty !== null) ? p.soMaxQty : 100;
-            const imgUrl = p.imageUrl || (window.AdminApp && AdminApp.getProductImageUrl ? AdminApp.getProductImageUrl(p.name, p.location) : '../picture/favicon/favicon.png');
+            const locName = p.zoneName || getZoneName(p.location);
+            const poMin = p.poMinQty ?? 10;
+            const poMax = p.poMaxQty ?? 100;
+            const soMin = p.soMinQty ?? 10;
+            const soMax = p.soMaxQty ?? 100;
+            const imgUrl = p.imageUrl || getProductImageUrl(p.name, p.location);
 
             document.getElementById('zone-detail-title').textContent = `Product Details: ${p.name || '-'}`;
             document.getElementById('zd-product-id').textContent = p.id || '-';
             document.getElementById('zd-product-name').textContent = p.name || '-';
             document.getElementById('zd-location').textContent = locName;
-            document.getElementById('zd-default-cost').textContent = AdminApp.formatMoney(cost);
-            document.getElementById('zd-selling-price').textContent = AdminApp.formatMoney(price);
-            document.getElementById('zd-profit-margin').textContent = AdminApp.formatMoney(margin);
+            document.getElementById('zd-default-cost').textContent = formatMoney(cost);
+            document.getElementById('zd-selling-price').textContent = formatMoney(price);
+            document.getElementById('zd-profit-margin').textContent = formatMoney(margin);
             document.getElementById('zd-current-stock').textContent = `${Number(p.stock || 0).toLocaleString()} Units`;
             document.getElementById('zd-min-alert').textContent = `${Number(p.minStockAlert || 20).toLocaleString()} Units`;
             document.getElementById('zd-po-limits').textContent = `${poMin}/${poMax} Min / Max`;
@@ -675,29 +603,19 @@
                 imgEl.alt = p.name || 'Product Image';
             }
 
-            // Hide stats grid & table card, show detail card (matching reference mockup)
-            const statsGrid = document.getElementById('zone-stats-grid');
-            const tableCard = document.getElementById('zone-table-card');
-            const detailCard = document.getElementById('zone-product-detail-card');
-
-            if (statsGrid) statsGrid.style.display = 'none';
-            if (tableCard) tableCard.style.display = 'none';
-            if (detailCard) detailCard.style.display = 'block';
+            document.getElementById('zone-stats-grid').style.display = 'none';
+            document.getElementById('zone-table-card').style.display = 'none';
+            document.getElementById('zone-product-detail-card').style.display = 'block';
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function hideProductZoneDetail() {
-            const statsGrid = document.getElementById('zone-stats-grid');
-            const tableCard = document.getElementById('zone-table-card');
-            const detailCard = document.getElementById('zone-product-detail-card');
-
-            if (statsGrid) statsGrid.style.display = 'grid';
-            if (tableCard) tableCard.style.display = 'block';
-            if (detailCard) detailCard.style.display = 'none';
+            document.getElementById('zone-stats-grid').style.display = 'grid';
+            document.getElementById('zone-table-card').style.display = 'block';
+            document.getElementById('zone-product-detail-card').style.display = 'none';
         }
 
-        // Search & Filter
         function filterProducts() {
             hideProductZoneDetail();
             const query = (searchInput?.value || '').toLowerCase().trim();
@@ -715,7 +633,6 @@
         searchInput?.addEventListener('input', filterProducts);
         selectZone?.addEventListener('change', filterProducts);
 
-        // Initialize: Load zones and products from Backend (Defaulting to ALL)
         loadWarehouseZones();
         loadWarehouseProducts();
     </script>

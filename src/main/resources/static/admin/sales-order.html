@@ -41,48 +41,7 @@
                         </button>
 
                         <div class="requests-date-box" id="requests-date-box" title="Click to filter by date">
-                            <span class="date-icon" id="date-picker-icon" title="Choose date">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                                </svg>
-                            </span>
                             <input type="date" id="requests-date-input" aria-label="Filter by date">
-                            <button type="button" class="btn-clear-date" id="btn-clear-date" title="Clear date filter" style="display: none;">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-
-                            <!-- Custom Styled Date Picker Popup (StockTrack Mint Theme) -->
-                            <div class="custom-calendar-popup" id="custom-calendar-popup" style="display: none;">
-                                <div class="cal-header">
-                                    <button type="button" class="cal-nav-btn" id="cal-prev-month" title="Previous month">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="15 18 9 12 15 6"></polyline>
-                                        </svg>
-                                    </button>
-                                    <span class="cal-month-title" id="cal-month-title">November 2026</span>
-                                    <button type="button" class="cal-nav-btn" id="cal-next-month" title="Next month">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="9 18 15 12 9 6"></polyline>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="cal-weekdays">
-                                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-                                </div>
-                                <div class="cal-days-grid" id="cal-days-grid"></div>
-                                <div class="cal-footer">
-                                    <button type="button" class="cal-quick-btn" id="cal-btn-today">Today</button>
-                                    <button type="button" class="cal-quick-btn cal-quick-clear" id="cal-btn-clear">Clear</button>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -283,14 +242,14 @@
                         <table class="order-review-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 38px; text-align: center;">#</th>
-                                    <th class="col-thumb" style="text-align: center;">Image</th>
-                                    <th style="text-align: center;">Product ID</th>
-                                    <th style="text-align: center;">Product name</th>
-                                    <th style="text-align: center;">Zone</th>
-                                    <th style="text-align: center;">Qty</th>
-                                    <th style="text-align: center;">Unit Price</th>
-                                    <th style="text-align: center;">Subtotal</th>
+                                    <th style="width: 38px;">#</th>
+                                    <th class="col-thumb">Image</th>
+                                    <th>Product ID</th>
+                                    <th>Product name</th>
+                                    <th>Zone</th>
+                                    <th>Qty</th>
+                                    <th>Unit Price</th>
+                                    <th>Subtotal</th>
                                 </tr>
                             </thead>
                             <tbody id="so-step2-table-body">
@@ -345,13 +304,6 @@
         const emptySOHtml = '';
         const formatMoney = AdminApp.formatMoney;
         const escapeHtml = AdminApp.escapeHtml;
-
-        function formatReviewDateTime(date = new Date()) {
-            const pad = (n) => String(n).padStart(2, '0');
-            const d = date instanceof Date ? date : new Date(date);
-            if (isNaN(d.getTime())) return '-';
-            return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-        }
 
         function getSOProductOptionsHtml() {
             if (!availableProducts || availableProducts.length === 0) {
@@ -552,13 +504,8 @@
             totalPriceInput.value = total > 0 ? formatMoney(total) : '';
         }
 
-        function addSOItemRow() {
-            const container = document.getElementById('so-items-container');
-            if (!container) return;
-
-            const newRow = document.createElement('div');
-            newRow.className = 'po-wire-item-row';
-            newRow.innerHTML = `
+        function getSOItemRowInnerHtml() {
+            return `
                 <select class="po-wire-select so-item-product" onchange="handleSOProductChange(this)">
                     ${getSOProductOptionsHtml()}
                 </select>
@@ -566,9 +513,17 @@
                 <input type="text" class="po-wire-input-readonly so-item-unit-price" readonly placeholder="">
                 <input type="text" class="po-wire-input-readonly so-item-total-price" readonly placeholder="">
             `;
+        }
+
+        function addSOItemRow() {
+            const container = document.getElementById('so-items-container');
+            if (!container) return;
+
+            const newRow = document.createElement('div');
+            newRow.className = 'po-wire-item-row';
+            newRow.innerHTML = getSOItemRowInnerHtml();
             container.appendChild(newRow);
-            const sel = newRow.querySelector('.so-item-product');
-            if (sel) sel.focus();
+            newRow.querySelector('.so-item-product')?.focus();
         }
 
         function deleteLastSOItemRow() {
@@ -740,7 +695,7 @@
             };
 
             // Populate Step 2 review fields
-            document.getElementById('so-step2-date').textContent = formatReviewDateTime(new Date());
+            document.getElementById('so-step2-date').textContent = AdminApp.formatReviewDateTime(new Date());
             document.getElementById('so-step2-created-by').textContent = createdByName;
             document.getElementById('so-step2-user-id').textContent = currentUserId;
             document.getElementById('so-step2-role').textContent = currentUserRole;
@@ -748,22 +703,7 @@
             document.getElementById('so-step2-customer-id').textContent = selectedCustomerId || '-';
 
             // Populate review table rows
-            const tbody = document.getElementById('so-step2-table-body');
-            tbody.innerHTML = reviewItems.map((item, idx) => `
-                <tr>
-                    <td style="text-align: center;">${idx + 1}</td>
-                    <td class="col-thumb" style="text-align: center;">
-                        <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.productName)}" class="order-product-thumb" onerror="this.src='../picture/favicon/favicon.png'">
-                    </td>
-                    <td style="text-align: center;">${escapeHtml(item.productId)}</td>
-                    <td class="cell-prod-name" style="text-align: center;">${escapeHtml(item.productName)}</td>
-                    <td style="text-align: center;">${escapeHtml(item.zone)}</td>
-                    <td style="text-align: center;">${escapeHtml(item.quantity)}</td>
-                    <td style="text-align: center;">${formatMoney(item.unitPrice)}</td>
-                    <td style="text-align: center;">${formatMoney(item.subtotal)}</td>
-                </tr>
-            `).join('');
-
+            document.getElementById('so-step2-table-body').innerHTML = AdminApp.renderOrderReviewRows(reviewItems);
             document.getElementById('so-step2-total-qty').textContent = `${totalQty} Units`;
             document.getElementById('so-step2-total-price').textContent = formatMoney(totalPrice);
 
@@ -811,16 +751,7 @@
         function resetSOItemsForm() {
             const container = document.getElementById('so-items-container');
             if (!container) return;
-            container.innerHTML = `
-                <div class="po-wire-item-row">
-                    <select class="po-wire-select so-item-product" onchange="handleSOProductChange(this)">
-                        ${getSOProductOptionsHtml()}
-                    </select>
-                    <input type="number" min="1" class="po-wire-input so-item-qty" placeholder="" oninput="handleSOQtyChange(this)">
-                    <input type="text" class="po-wire-input-readonly so-item-unit-price" readonly placeholder="">
-                    <input type="text" class="po-wire-input-readonly so-item-total-price" readonly placeholder="">
-                </div>
-            `;
+            container.innerHTML = `<div class="po-wire-item-row">${getSOItemRowInnerHtml()}</div>`;
             syncUserInfo();
         }
 
@@ -842,122 +773,24 @@
 
             if (!so) return;
 
-            const displayId = so.id || so.soId;
-            const displayDate = so.date || (so.orderDatetime ? AdminApp.formatDisplayDate(so.orderDatetime) : '-');
-            const customerName = so.customer || so.customerName || '-';
-            const customerId = so.customerId || '-';
-            const createdByName = so.createdBy || so.createdByName || 'Admin';
-            const userId = so.userId || so.createdByUserId || '-';
-            const userRole = so.role || 'Admin';
-            const totalQty = so.totalQty !== undefined ? so.totalQty : (so.totalQuantity || 0);
-            const totalPrice = so.totalPrice !== undefined ? so.totalPrice : (so.totalAmount || 0);
-            const items = so.items || [];
-            const statusUpper = String(so.status || 'PENDING').toUpperCase();
-            const statusColor = statusUpper === 'APPROVED' ? '#10b981' : (statusUpper === 'REJECTED' ? '#ef4444' : '#b45309');
-
-            document.getElementById('detail-modal-body').innerHTML = `
-                <div class="order-review-container">
-                    <div class="order-review-header">
-                        <h2>Sales Order Detail</h2>
-                        <div class="order-review-subtitle">
-                            <span>SO ID: #${escapeHtml(displayId)}</span>
-                            <span>•</span>
-                            <span>Date: ${escapeHtml(displayDate)}</span>
-                            <span>•</span>
-                            <span>Status: <span class="status-tag" style="color: ${statusColor};">[ ${escapeHtml(so.status).toLowerCase()} ]</span></span>
-                        </div>
-                    </div>
-
-                    <div class="order-info-card">
-                        <h4>Information</h4>
-                        <div class="order-info-grid">
-                            <div class="order-info-col">
-                                <div class="order-info-row">
-                                    <span class="order-info-label">Created by:</span>
-                                    <span class="order-info-value">${escapeHtml(createdByName)}</span>
-                                </div>
-                                <div class="order-info-row">
-                                    <span class="order-info-label">User ID:</span>
-                                    <span class="order-info-value">${escapeHtml(userId)}</span>
-                                </div>
-                                <div class="order-info-row">
-                                    <span class="order-info-label">Role:</span>
-                                    <span class="order-info-value">${escapeHtml(userRole)}</span>
-                                </div>
-                            </div>
-                            <div class="order-info-col">
-                                <div class="order-info-row">
-                                    <span class="order-info-label">Customer Name:</span>
-                                    <span class="order-info-value">${escapeHtml(customerName)}</span>
-                                </div>
-                                <div class="order-info-row">
-                                    <span class="order-info-label">Customer ID:</span>
-                                    <span class="order-info-value">${escapeHtml(customerId)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="order-review-table-wrapper">
-                        <table class="order-review-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 38px; text-align: center;">#</th>
-                                    <th class="col-thumb" style="text-align: center;">Image</th>
-                                    <th style="text-align: center;">Product ID</th>
-                                    <th style="text-align: center;">Product name</th>
-                                    <th style="text-align: center;">Zone</th>
-                                    <th style="text-align: center;">Qty</th>
-                                    <th style="text-align: center;">Unit Price</th>
-                                    <th style="text-align: center;">Subtotal</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${items.map((item, idx) => {
-                                    const pId = item.productId || item.id || '-';
-                                    const pName = item.productName || item.name || '-';
-                                    const zCode = item.zoneCode || '-';
-                                    const qty = item.quantity !== undefined ? item.quantity : (item.qty || 1);
-                                    const price = item.unitPrice !== undefined ? item.unitPrice : 0;
-                                    const subtotal = item.subtotal !== undefined ? item.subtotal : (qty * price);
-                                    const imgUrl = item.imageUrl || AdminApp.getProductImageUrl(pName, zCode);
-                                    return `
-                                        <tr>
-                                            <td style="text-align: center;">${idx + 1}</td>
-                                            <td class="col-thumb" style="text-align: center;">
-                                                <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(pName)}" class="order-product-thumb" onerror="this.src='../picture/favicon/favicon.png'">
-                                            </td>
-                                            <td style="text-align: center;">${escapeHtml(pId)}</td>
-                                            <td class="cell-prod-name" style="text-align: center;">${escapeHtml(pName)}</td>
-                                            <td style="text-align: center;">${escapeHtml(zCode)}</td>
-                                            <td style="text-align: center;">${escapeHtml(qty)}</td>
-                                            <td style="text-align: center;">${formatMoney(price)}</td>
-                                            <td style="text-align: center;">${formatMoney(subtotal)}</td>
-                                        </tr>
-                                    `;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="order-review-summary-card">
-                        <div class="order-summary-row">
-                            <span class="order-summary-label">Total Quantity:</span>
-                            <span class="order-summary-val">${escapeHtml(totalQty)}&nbsp;Units</span>
-                        </div>
-                        <div class="order-summary-row">
-                            <span class="order-summary-label">Total Price:</span>
-                            <span class="order-summary-val">${formatMoney(totalPrice)}</span>
-                        </div>
-                    </div>
-
-                    <div class="order-review-bottom-bar">
-                        <div class="order-review-actions">
-                            <button type="button" class="po-wire-btn-cancel" data-close-modal>Close</button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            document.getElementById('detail-modal-body').innerHTML = AdminApp.renderOrderDetailModal({
+                title: 'Sales Order Detail',
+                idLabel: 'SO ID',
+                displayId: so.id || so.soId,
+                displayDate: so.date || (so.orderDatetime ? AdminApp.formatDisplayDate(so.orderDatetime) : '-'),
+                status: so.status,
+                createdByName: so.createdBy || so.createdByName || 'Admin',
+                userId: so.userId || so.createdByUserId || '-',
+                userRole: so.role || 'Admin',
+                partnerNameLabel: 'Customer Name:',
+                partnerName: so.customer || so.customerName || '-',
+                partnerIdLabel: 'Customer ID:',
+                partnerId: so.customerId || '-',
+                unitColumnLabel: 'Unit Price',
+                items: so.items || [],
+                totalQty: so.totalQty !== undefined ? so.totalQty : (so.totalQuantity || 0),
+                totalPrice: so.totalPrice !== undefined ? so.totalPrice : (so.totalAmount || 0)
+            });
 
             AdminApp.openModal('modal-so-detail');
         }
