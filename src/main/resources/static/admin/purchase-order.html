@@ -285,12 +285,12 @@
                                 <tr>
                                     <th style="width: 38px; text-align: center;">#</th>
                                     <th class="col-thumb" style="text-align: center;">Image</th>
-                                    <th>Product ID</th>
-                                    <th>Product name</th>
+                                    <th style="text-align: center;">Product ID</th>
+                                    <th style="text-align: center;">Product name</th>
                                     <th style="text-align: center;">Zone</th>
                                     <th style="text-align: center;">Qty</th>
-                                    <th style="text-align: right;">Unit Cost</th>
-                                    <th style="text-align: right;">Subtotal</th>
+                                    <th style="text-align: center;">Unit Cost</th>
+                                    <th style="text-align: center;">Subtotal</th>
                                 </tr>
                             </thead>
                             <tbody id="po-step2-table-body">
@@ -785,15 +785,15 @@
             tbody.innerHTML = reviewItems.map((item, idx) => `
                 <tr>
                     <td style="text-align: center;">${idx + 1}</td>
-                    <td class="col-thumb">
+                    <td class="col-thumb" style="text-align: center;">
                         <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.productName)}" class="order-product-thumb" onerror="this.src='../picture/favicon/favicon.png'">
                     </td>
-                    <td>${escapeHtml(item.productId)}</td>
-                    <td class="cell-prod-name">${escapeHtml(item.productName)}</td>
+                    <td style="text-align: center;">${escapeHtml(item.productId)}</td>
+                    <td class="cell-prod-name" style="text-align: center;">${escapeHtml(item.productName)}</td>
                     <td style="text-align: center;">${escapeHtml(item.zone)}</td>
                     <td style="text-align: center;">${escapeHtml(item.quantity)}</td>
-                    <td style="text-align: right;">${formatMoney(item.unitCost)}</td>
-                    <td style="text-align: right;">${formatMoney(item.subtotal)}</td>
+                    <td style="text-align: center;">${formatMoney(item.unitCost)}</td>
+                    <td style="text-align: center;">${formatMoney(item.subtotal)}</td>
                 </tr>
             `).join('');
 
@@ -938,12 +938,12 @@
                                 <tr>
                                     <th style="width: 38px; text-align: center;">#</th>
                                     <th class="col-thumb" style="text-align: center;">Image</th>
-                                    <th>Product ID</th>
-                                    <th>Product name</th>
+                                    <th style="text-align: center;">Product ID</th>
+                                    <th style="text-align: center;">Product name</th>
                                     <th style="text-align: center;">Zone</th>
                                     <th style="text-align: center;">Qty</th>
-                                    <th style="text-align: right;">Unit Cost</th>
-                                    <th style="text-align: right;">Subtotal</th>
+                                    <th style="text-align: center;">Unit Cost</th>
+                                    <th style="text-align: center;">Subtotal</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -958,15 +958,15 @@
                                     return `
                                         <tr>
                                             <td style="text-align: center;">${idx + 1}</td>
-                                            <td class="col-thumb">
+                                            <td class="col-thumb" style="text-align: center;">
                                                 <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(pName)}" class="order-product-thumb" onerror="this.src='../picture/favicon/favicon.png'">
                                             </td>
-                                            <td>${escapeHtml(pId)}</td>
-                                            <td class="cell-prod-name">${escapeHtml(pName)}</td>
+                                            <td style="text-align: center;">${escapeHtml(pId)}</td>
+                                            <td class="cell-prod-name" style="text-align: center;">${escapeHtml(pName)}</td>
                                             <td style="text-align: center;">${escapeHtml(zCode)}</td>
                                             <td style="text-align: center;">${escapeHtml(qty)}</td>
-                                            <td style="text-align: right;">${formatMoney(cost)}</td>
-                                            <td style="text-align: right;">${formatMoney(subtotal)}</td>
+                                            <td style="text-align: center;">${formatMoney(cost)}</td>
+                                            <td style="text-align: center;">${formatMoney(subtotal)}</td>
                                         </tr>
                                     `;
                                 }).join('')}

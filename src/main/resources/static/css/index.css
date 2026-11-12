@@ -478,6 +478,7 @@
 .form-group {
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .form-group label {
@@ -567,4 +568,114 @@
     .form-header h1 {
         font-size: 1.95rem;
     }
+}
+
+/* ==========================================================================
+   Login Page: Inline Error Banner & Input Error State
+   ========================================================================== */
+.login-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background-color: #fef2f2;
+    border: 1.5px solid #fecaca;
+    border-radius: 10px;
+    color: #ef4444;
+    font-size: 0.885rem;
+    font-weight: 500;
+    line-height: 1.4;
+    animation: shakeError 0.35s ease-in-out;
+}
+
+.login-error-banner svg {
+    flex-shrink: 0;
+    stroke: #ef4444;
+}
+
+@keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+.form-group input.input-error {
+    border-color: #ef4444 !important;
+    background-color: #fffafb;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.form-group input.input-warning {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16) !important;
+}
+
+/* ==========================================================================
+   Custom Modern Validation Tooltip (Replaces default browser bubble)
+   ========================================================================== */
+.custom-validation-tooltip {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 8px;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    filter: drop-shadow(0 8px 18px rgba(15, 23, 42, 0.12));
+}
+
+.custom-validation-tooltip.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tooltip-arrow {
+    width: 10px;
+    height: 10px;
+    background: #ffffff;
+    border-top: 1.5px solid #cbd5e1;
+    border-left: 1.5px solid #cbd5e1;
+    transform: rotate(45deg);
+    margin-left: 20px;
+    margin-bottom: -5px;
+    position: relative;
+    z-index: 2;
+}
+
+.tooltip-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 9px;
+    padding: 8px 14px 8px 10px;
+    color: #1e293b;
+    font-family: var(--font-family, 'Plus Jakarta Sans', sans-serif);
+    font-size: 0.88rem;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    position: relative;
+    z-index: 1;
+    white-space: nowrap;
+}
+
+.tooltip-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: #ea580c;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tooltip-text {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #0f172a;
+    line-height: 1.3;
 }

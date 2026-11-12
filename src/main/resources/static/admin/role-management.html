@@ -291,16 +291,7 @@
                 renderUserTable(currentUsers);
             } catch (err) {
                 console.error('Failed to load users:', err);
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="table-empty-state">
-                            <div class="empty-state-wrap">
-                                <p style="color: #ef4444;">Failed to load user list</p>
-                                <span class="empty-subtitle">${AdminApp.escapeHtml(err.message || 'Please check your connection and login.')}</span>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                tableBody.innerHTML = '';
                 paginationInfo.textContent = 'Showing 0 of 0 entries';
             }
         }
@@ -322,16 +313,7 @@
             const visibleUsers = (users || []).filter(u => (u.role || '').toUpperCase() !== 'OWNER');
 
             if (!visibleUsers.length) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="table-empty-state">
-                            <div class="empty-state-wrap">
-                                <p>No users found</p>
-                                <span class="empty-subtitle">Use the "Create New User" button to submit a user creation request.</span>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                tableBody.innerHTML = '';
                 paginationInfo.textContent = 'Showing 0 of 0 entries';
                 return;
             }

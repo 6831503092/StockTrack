@@ -200,7 +200,7 @@
         let currentFilterStatus = 'ALL';
 
         const requestsTbody = document.getElementById('requests-table-body');
-        const emptyRequestsHtml = requestsTbody.innerHTML;
+        const emptyRequestsHtml = '';
         const dateInput = document.getElementById('requests-date-input');
         const searchInput = document.getElementById('requests-search-input');
 
@@ -208,32 +208,7 @@
             const pageInfo = document.getElementById('requests-pagination-info');
 
             if (!items || items.length === 0) {
-                const hasFilters = currentFilterStatus !== 'ALL' ||
-                    (searchInput?.value.trim() !== '') ||
-                    (dateInput?.value !== '');
-
-                if (hasFilters && requestsData.length > 0) {
-                    requestsTbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="table-empty-state">
-                                <div class="empty-state-wrap">
-                                    <div class="empty-state-icon-circle">
-                                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <circle cx="11" cy="11" r="8"></circle>
-                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                        </svg>
-                                    </div>
-                                    <p>ไม่พบข้อมูลคำขอตามเงื่อนไขหรือวันที่ที่เลือก</p>
-                                    <span class="empty-subtitle">ลองเลือกวันที่อื่น หรือกดปุ่มกากบาทเพื่อดูประวัติคำขอทั้งหมด</span>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                } else {
-                    requestsTbody.innerHTML = emptyRequestsHtml;
-                }
+                requestsTbody.innerHTML = '';
                 pageInfo.textContent = 'Showing 0 of 0 entries';
                 updateKPIs(requestsData);
                 return;
@@ -520,10 +495,10 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 50px; text-align: center;">Image</th>
-                                            <th style="width: 80px;">Product ID</th>
-                                            <th class="text-left">Product Name</th>
-                                            <th style="width: 90px;">Location</th>
-                                            <th style="width: 100px;">Move to</th>
+                                            <th style="width: 80px; text-align: center;">Product ID</th>
+                                            <th style="text-align: center;">Product Name</th>
+                                            <th style="width: 90px; text-align: center;">Location</th>
+                                            <th style="width: 100px; text-align: center;">Move to</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -536,7 +511,7 @@
                                                         <img src="${escapeHtml(imgUrl)}" style="width: 38px; height: 30px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
                                                     </td>
                                                     <td class="font-medium">${escapeHtml(String(p.productId || p.id))}</td>
-                                                    <td class="text-left font-medium">${escapeHtml(pName)}</td>
+                                                    <td class="font-medium" style="text-align: center;">${escapeHtml(pName)}</td>
                                                     <td>${escapeHtml(p.fromZoneCode || sourceZoneCode)}</td>
                                                     <td class="transfer-dest-cell" style="font-weight: 600; color: #0d9488;">${escapeHtml(p.toZoneCode || targetZoneCode)}</td>
                                                 </tr>
@@ -560,10 +535,10 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 50px; text-align: center;">Image</th>
-                                            <th style="width: 80px;">Product ID</th>
-                                            <th class="text-left">Product Name</th>
-                                            <th style="width: 90px;">Location</th>
-                                            <th style="width: 100px;">Swap to</th>
+                                            <th style="width: 80px; text-align: center;">Product ID</th>
+                                            <th style="text-align: center;">Product Name</th>
+                                            <th style="width: 90px; text-align: center;">Location</th>
+                                            <th style="width: 100px; text-align: center;">Swap to</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -576,7 +551,7 @@
                                                         <img src="${escapeHtml(imgUrl)}" style="width: 38px; height: 30px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
                                                     </td>
                                                     <td class="font-medium">${escapeHtml(String(p.productId || p.id))}</td>
-                                                    <td class="text-left font-medium">${escapeHtml(pName)}</td>
+                                                    <td class="font-medium" style="text-align: center;">${escapeHtml(pName)}</td>
                                                     <td>${escapeHtml(p.fromZoneCode || targetZoneCode)}</td>
                                                     <td class="transfer-dest-cell" style="font-weight: 600; color: #0d9488;">${escapeHtml(p.toZoneCode || sourceZoneCode)}</td>
                                                 </tr>
@@ -629,11 +604,11 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 50px; text-align: center;">Image</th>
-                                            <th style="width: 80px;">Product ID</th>
-                                            <th class="text-left">Product Name</th>
+                                            <th style="width: 80px; text-align: center;">Product ID</th>
+                                            <th style="text-align: center;">Product Name</th>
                                             <th style="width: 70px; text-align: center;">Qty</th>
-                                            <th style="width: 100px; text-align: right;">Unit Cost</th>
-                                            <th style="width: 110px; text-align: right;">Subtotal</th>
+                                            <th style="width: 100px; text-align: center;">Unit Cost</th>
+                                            <th style="width: 110px; text-align: center;">Subtotal</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -645,11 +620,11 @@
                                                     <td style="width: 50px; text-align: center; padding: 4px;">
                                                         <img src="${escapeHtml(imgUrl)}" style="width: 38px; height: 30px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
                                                     </td>
-                                                    <td class="font-medium">${escapeHtml(String(it.productId || '-'))}</td>
-                                                    <td class="text-left font-medium">${escapeHtml(pName)}</td>
+                                                    <td class="font-medium" style="text-align: center;">${escapeHtml(String(it.productId || '-'))}</td>
+                                                    <td class="font-medium" style="text-align: center;">${escapeHtml(pName)}</td>
                                                     <td style="text-align: center;">${it.quantity || it.qty || 1}</td>
-                                                    <td style="text-align: right;">฿${AdminApp.formatMoney(it.unitCost || it.unitPrice || 0)}</td>
-                                                    <td style="text-align: right; font-weight: 600; color: #0d9488;">฿${AdminApp.formatMoney(it.subtotal || ((it.quantity || 1) * (it.unitCost || 0)))}</td>
+                                                    <td style="text-align: center;">฿${AdminApp.formatMoney(it.unitCost || it.unitPrice || 0)}</td>
+                                                    <td style="text-align: center; font-weight: 600; color: #0d9488;">฿${AdminApp.formatMoney(it.subtotal || ((it.quantity || 1) * (it.unitCost || 0)))}</td>
                                                 </tr>
                                             `;
                                         }).join('')}
@@ -693,11 +668,11 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 50px; text-align: center;">Image</th>
-                                            <th style="width: 80px;">Product ID</th>
-                                            <th class="text-left">Product Name</th>
+                                            <th style="width: 80px; text-align: center;">Product ID</th>
+                                            <th style="text-align: center;">Product Name</th>
                                             <th style="width: 70px; text-align: center;">Qty</th>
-                                            <th style="width: 100px; text-align: right;">Unit Price</th>
-                                            <th style="width: 110px; text-align: right;">Subtotal</th>
+                                            <th style="width: 100px; text-align: center;">Unit Price</th>
+                                            <th style="width: 110px; text-align: center;">Subtotal</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -709,11 +684,11 @@
                                                     <td style="width: 50px; text-align: center; padding: 4px;">
                                                         <img src="${escapeHtml(imgUrl)}" style="width: 38px; height: 30px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
                                                     </td>
-                                                    <td class="font-medium">${escapeHtml(String(it.productId || '-'))}</td>
-                                                    <td class="text-left font-medium">${escapeHtml(pName)}</td>
+                                                    <td class="font-medium" style="text-align: center;">${escapeHtml(String(it.productId || '-'))}</td>
+                                                    <td class="font-medium" style="text-align: center;">${escapeHtml(pName)}</td>
                                                     <td style="text-align: center;">${it.quantity || it.qty || 1}</td>
-                                                    <td style="text-align: right;">฿${AdminApp.formatMoney(it.unitPrice || 0)}</td>
-                                                    <td style="text-align: right; font-weight: 600; color: #0d9488;">฿${AdminApp.formatMoney(it.subtotal || ((it.quantity || 1) * (it.unitPrice || 0)))}</td>
+                                                    <td style="text-align: center;">฿${AdminApp.formatMoney(it.unitPrice || 0)}</td>
+                                                    <td style="text-align: center; font-weight: 600; color: #0d9488;">฿${AdminApp.formatMoney(it.subtotal || ((it.quantity || 1) * (it.unitPrice || 0)))}</td>
                                                 </tr>
                                             `;
                                         }).join('')}

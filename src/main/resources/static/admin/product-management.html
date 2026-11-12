@@ -103,11 +103,6 @@
                             </tr>
                         </thead>
                         <tbody id="products-table-body">
-                            <tr>
-                                <td colspan="7" class="table-empty-state">
-                                    <p class="empty-title">Loading products...</p>
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -266,14 +261,7 @@
 
         function renderTable() {
             if (!filteredProducts || filteredProducts.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="table-empty-state">
-                            <p class="empty-title">No products found</p>
-                            <p class="empty-subtitle">Try adjusting your search keyword or selected warehouse zone</p>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML = '';
                 pageInfo.textContent = 'Showing 0 of 0 entries';
                 renderPagination(0);
                 return;

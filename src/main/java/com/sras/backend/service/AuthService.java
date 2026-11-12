@@ -27,7 +27,7 @@ public class AuthService {
 
     public UserDto login(LoginRequest req, HttpSession session) {
         if (req == null || req.getIdentifier().isBlank() || req.password() == null || req.password().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "กรุณากรอกข้อมูลให้ครบถ้วน");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please fill in all required fields.");
         }
 
         User user = findMatchingUser(req.getIdentifier())

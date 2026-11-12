@@ -856,7 +856,7 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  text-align: left;
+  text-align: center;
   height: auto;
 }
 
@@ -869,6 +869,7 @@
   padding: 14px 18px;
   border: none;
   white-space: nowrap;
+  text-align: center;
 }
 
 .po-table thead th:first-child,
@@ -901,6 +902,7 @@
   color: #1e293b;
   border-bottom: 1px solid #f8fafc;
   vertical-align: middle;
+  text-align: center;
 }
 
 .requests-table tbody td {
@@ -911,6 +913,7 @@
 .requests-table tbody td.cell-id {
   font-weight: 600;
   color: #0f172a;
+  text-align: center;
 }
 
 .requests-table tbody td.cell-medium {
@@ -1060,11 +1063,10 @@
   text-decoration: underline;
 }
 
-/* Empty State Placeholder */
-.table-empty-state {
-  text-align: center;
-  padding: 60px 20px !important;
-  height: 100%;
+/* Empty State Placeholder (Hidden per request - tables remain clean and empty) */
+.table-empty-state,
+.modal-transfer-empty {
+  display: none !important;
 }
 
 .empty-state-wrap {
@@ -1263,8 +1265,9 @@
   border-bottom-right-radius: 8px;
 }
 
-.modal-transfer-table thead th.text-left {
-  text-align: left;
+.modal-transfer-table thead th.text-left,
+.modal-transfer-table thead th.text-center {
+  text-align: center;
 }
 
 .modal-transfer-table tbody td {
@@ -1273,10 +1276,12 @@
   color: #1e293b;
   text-align: center;
   border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
 }
 
-.modal-transfer-table tbody td.text-left {
-  text-align: left;
+.modal-transfer-table tbody td.text-left,
+.modal-transfer-table tbody td.text-center {
+  text-align: center;
 }
 
 .modal-transfer-table tbody tr:last-child td {
@@ -2424,6 +2429,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
+  text-align: center;
 }
 
 .order-review-table th {
@@ -2431,7 +2437,7 @@
   color: #334155;
   font-weight: 600;
   padding: 12px 16px;
-  text-align: left;
+  text-align: center;
   border-bottom: 1.5px solid #e2e8f0;
   font-size: 0.88rem;
 }
@@ -2441,6 +2447,7 @@
   border-bottom: 1px solid #f1f5f9;
   color: #334155;
   vertical-align: middle;
+  text-align: center;
 }
 
 .order-review-table tbody tr:last-child td {
@@ -2478,13 +2485,10 @@
 }
 
 .order-review-table th.text-center,
-.order-review-table td.text-center {
-  text-align: center;
-}
-
+.order-review-table td.text-center,
 .order-review-table th.text-right,
 .order-review-table td.text-right {
-  text-align: right;
+  text-align: center;
 }
 
 .order-review-table th.col-thumb,
@@ -2812,3 +2816,40 @@
 .btn-action-edit:hover svg {
   transform: rotate(-8deg) scale(1.1);
 }
+
+/* ==========================================
+   Admin Tables: Universal Centered Alignment
+   Aligns all headers (<th>) and data cells (<td>)
+   directly in the center under their column headers
+   ========================================== */
+.po-table th,
+.po-table td,
+.requests-table th,
+.requests-table td,
+.order-review-table th,
+.order-review-table td,
+.modal-transfer-table th,
+.modal-transfer-table td {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+.po-table td > div,
+.requests-table td > div,
+.order-review-table td > div,
+.modal-transfer-table td > div {
+  text-align: center;
+}
+
+.po-table td .badge-status,
+.requests-table td .badge-status,
+.po-table td .badge-role,
+.po-table td .btn-action-detail,
+.po-table td .btn-action-edit,
+.requests-table td .btn-action-detail,
+.po-table td .btn-change-role-action {
+  display: inline-flex;
+  margin-left: auto;
+  margin-right: auto;
+}
+
