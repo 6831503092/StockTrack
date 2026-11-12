@@ -25,9 +25,6 @@ public class User {
     @Column(name = "user_id")
     private Integer userId;
 
-    @Column(name = "username", length = 30, nullable = false, unique = true)
-    private String username;
-
     @Column(name = "full_name", length = 50, nullable = false)
     private String fullName;
 
@@ -41,4 +38,3 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 }
-

@@ -93,8 +93,8 @@ public class AuthService {
                 return byId;
             }
         } catch (NumberFormatException ignored) {
-            // Identifier is a username string, proceed to username lookup
+            // Identifier is not a numeric User ID, proceed to full name lookup
         }
-        return userRepository.findByUsernameAndIsActiveTrue(identifier);
+        return userRepository.findByFullNameIgnoreCaseAndIsActiveTrue(identifier.trim());
     }
 }

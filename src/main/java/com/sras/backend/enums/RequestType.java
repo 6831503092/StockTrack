@@ -14,6 +14,7 @@ public enum RequestType {
     ZONE_UPDATE,
     PRODUCT_MOVE,
     ROLE_CHANGE,
+    USER_CREATE,
     PO_CREATE,
     SO_CREATE
 }

@@ -326,8 +326,8 @@
         }
 
         // Populate user details (User ID & Full Name)
-        const currentUserId = (storedUser && (storedUser.userId || storedUser.username))
-            ? String(storedUser.userId || storedUser.username)
+        const currentUserId = (storedUser && storedUser.userId)
+            ? String(storedUser.userId)
             : roleConfig.defaultUserId;
 
         const currentFullName = (storedUser && storedUser.fullName)

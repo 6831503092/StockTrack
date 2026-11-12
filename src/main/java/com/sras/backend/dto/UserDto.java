@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserDto {
     private Integer userId;
-    private String username;
     private String fullName;
     private String role;
+    private Boolean isActive;
 
     public static UserDto fromEntity(User user) {
         if (user == null) {
@@ -22,9 +22,9 @@ public class UserDto {
         }
         return UserDto.builder()
                 .userId(user.getUserId())
-                .username(user.getUsername())
                 .fullName(user.getFullName())
                 .role(user.getRole() != null ? user.getRole().name() : null)
+                .isActive(user.getIsActive())
                 .build();
     }
 }

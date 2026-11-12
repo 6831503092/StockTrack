@@ -414,8 +414,8 @@
             if (user) {
                 const createdByEl = document.getElementById('new-po-created-by');
                 const userIdEl = document.getElementById('new-po-user-id');
-                if (createdByEl) createdByEl.value = user.fullName || user.username || '';
-                if (userIdEl) userIdEl.value = user.userId || user.username || '';
+                if (createdByEl) createdByEl.value = user.fullName || '';
+                if (userIdEl) userIdEl.value = user.userId || '';
             }
         }
 

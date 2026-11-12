@@ -90,7 +90,7 @@
 
                     <div class="po-header-filters-row">
                         <div class="po-search-box">
-                            <input type="text" id="role-search-input" placeholder="Search by user name or ID...">
+                            <input type="text" id="role-search-input" placeholder="Search by Full Name or ID...">
                             <span class="search-icon">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -148,7 +148,7 @@
                         <thead>
                             <tr>
                                 <th>User ID</th>
-                                <th>User Name</th>
+                                <th>Full Name</th>
                                 <th>Current Role</th>
                                 <th>Created At</th>
                                 <th>Action</th>
@@ -183,11 +183,6 @@
             <form id="form-create-user" onsubmit="handleCreateUserSubmit(event)">
                 <div class="modal-body">
                     <div class="modal-field-mb">
-                        <label for="new-username">Username</label>
-                        <input type="text" id="new-username" class="modal-input" required autocomplete="off">
-                    </div>
-
-                    <div class="modal-field-mb">
                         <label for="new-fullname">Full Name</label>
                         <input type="text" id="new-fullname" class="modal-input" required>
                     </div>
@@ -203,8 +198,13 @@
                         </div>
                         <div>
                             <label for="new-password">Password</label>
-                            <input type="password" id="new-password" class="modal-input" required autocomplete="new-password">
+                            <input type="password" id="new-password" name="new-user-password" class="modal-input" required autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" spellcheck="false">
                         </div>
+                    </div>
+
+                    <div class="modal-field-mb">
+                        <label for="new-reason">Reason</label>
+                        <textarea id="new-reason" class="modal-textarea" rows="2" ></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -272,6 +272,8 @@
         const searchInput = document.getElementById('role-search-input');
         const roleFilterSelect = document.getElementById('role-filter-select');
         const paginationInfo = document.getElementById('role-pagination-info');
+        const tableBody = document.getElementById('role-table-body');
+        let currentUsers = [];
 
         AdminApp.initCustomDatePicker({
             box: 'requests-date-box',
@@ -280,8 +282,113 @@
             }
         });
 
+        // Load users from backend
+        async function loadUsers() {
+            try {
+                const res = await window.api.get('/api/users');
+                currentUsers = (res && res.data) ? res.data : [];
+                renderKPIs(currentUsers);
+                renderUserTable(currentUsers);
+            } catch (err) {
+                console.error('Failed to load users:', err);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="table-empty-state">
+                            <div class="empty-state-wrap">
+                                <p style="color: #ef4444;">Failed to load user list</p>
+                                <span class="empty-subtitle">${AdminApp.escapeHtml(err.message || 'Please check your connection and login.')}</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                paginationInfo.textContent = 'Showing 0 of 0 entries';
+            }
+        }
+
+        function renderKPIs(users) {
+            const visible = (users || []).filter(u => (u.role || '').toUpperCase() !== 'OWNER');
+            const total = visible.length;
+            const admins = visible.filter(u => (u.role || '').toUpperCase() === 'ADMIN').length;
+            const staff = visible.filter(u => (u.role || '').toUpperCase() === 'STAFF').length;
+            const managers = visible.filter(u => (u.role || '').toUpperCase() === 'MANAGER').length;
+
+            document.getElementById('kpi-total-users').textContent = total;
+            document.getElementById('kpi-admin-users').textContent = admins;
+            document.getElementById('kpi-staff-users').textContent = staff;
+            document.getElementById('kpi-manager-users').textContent = managers;
+        }
+
+        function renderUserTable(users) {
+            const visibleUsers = (users || []).filter(u => (u.role || '').toUpperCase() !== 'OWNER');
+
+            if (!visibleUsers.length) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="table-empty-state">
+                            <div class="empty-state-wrap">
+                                <p>No users found</p>
+                                <span class="empty-subtitle">Use the "Create New User" button to submit a user creation request.</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                paginationInfo.textContent = 'Showing 0 of 0 entries';
+                return;
+            }
+
+            const currentUser = window.api.getCurrentUser() || {};
+
+            tableBody.innerHTML = visibleUsers.map(user => {
+                const roleUpper = (user.role || '').toUpperCase();
+                let roleClass = 'role-staff';
+                let roleLabel = 'Staff';
+
+                if (roleUpper === 'ADMIN') {
+                    roleClass = 'role-admin';
+                    roleLabel = 'Admin';
+                } else if (roleUpper === 'MANAGER') {
+                    roleClass = 'role-manager';
+                    roleLabel = 'Manager';
+                }
+
+                const isSelf = currentUser && currentUser.userId === user.userId;
+
+                let actionHtml = '';
+                if (isSelf) {
+                    actionHtml = '<span class="cell-subtext">Current User</span>';
+                } else {
+                    actionHtml = `
+                        <button type="button" class="btn-change-role-action" 
+                            onclick="openChangeRoleModal(${user.userId}, '${AdminApp.escapeHtml(user.fullName)}', '${roleLabel}')">
+                            Change Role
+                        </button>
+                    `;
+                }
+
+                return `
+                    <tr class="role-row" 
+                        data-user-id="${user.userId}" 
+                        data-user-name="${AdminApp.escapeHtml(user.fullName || '')}" 
+                        data-role="${roleLabel}">
+                        <td class="cell-bold">${user.userId}</td>
+                        <td>
+                            <div>${AdminApp.escapeHtml(user.fullName || '-')}</div>
+                        </td>
+                        <td>
+                            <span class="badge-role ${roleClass}">${roleLabel}</span>
+                        </td>
+                        <td class="cell-subtext">-</td>
+                        <td>${actionHtml}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            filterRoles();
+        }
+
         // Create User Modal Handlers
         function openCreateUserModal() {
+            document.getElementById('form-create-user').reset();
             AdminApp.openModal('modal-create-user');
         }
 
@@ -291,15 +398,36 @@
 
         document.getElementById('btn-open-create-user-modal')?.addEventListener('click', openCreateUserModal);
 
-        function handleCreateUserSubmit(e) {
+        async function handleCreateUserSubmit(e) {
             e.preventDefault();
-            const username = document.getElementById('new-username').value.trim();
             const fullName = document.getElementById('new-fullname').value.trim();
             const role = document.getElementById('new-role').value;
             const password = document.getElementById('new-password').value;
+            const reason = document.getElementById('new-reason').value.trim();
 
-            alert(`User "${fullName}" (${username}) with role ${role} created successfully.`);
-            closeCreateUserModal();
+            try {
+                const res = await window.api.post('/api/requests/user-create', {
+                    fullName,
+                    role,
+                    password,
+                    reason
+                });
+
+                closeCreateUserModal();
+                loadUsers();
+
+                AdminApp.showCenterAlert({
+                    title: 'Request Submitted!',
+                    message: res.message || `User creation request for "${fullName}" submitted successfully for approval.`,
+                    type: 'success'
+                });
+            } catch (err) {
+                AdminApp.showCenterAlert({
+                    title: 'Failed to Submit',
+                    message: err.message || 'Failed to submit user creation request',
+                    type: 'error'
+                });
+            }
         }
 
         // Change Role Modal Handlers (for existing users)
@@ -308,7 +436,17 @@
             document.getElementById('modal-user-id').value = userId;
             document.getElementById('modal-user-name').value = userName;
             document.getElementById('modal-current-role').value = currentRole;
-            document.getElementById('modal-new-role').value = currentRole === 'Admin' ? 'Staff' : 'Admin';
+            document.getElementById('modal-role-reason').value = '';
+
+            const select = document.getElementById('modal-new-role');
+            if (currentRole === 'Admin') {
+                select.value = 'Staff';
+            } else if (currentRole === 'Staff') {
+                select.value = 'Manager';
+            } else {
+                select.value = 'Staff';
+            }
+
             AdminApp.openModal('modal-change-role');
         }
 
@@ -316,12 +454,34 @@
             AdminApp.closeModal('modal-change-role');
         }
 
-        function handleChangeRoleSubmit(e) {
+        async function handleChangeRoleSubmit(e) {
             e.preventDefault();
+            const userId = parseInt(document.getElementById('modal-user-id').value, 10);
             const userName = document.getElementById('modal-user-name').value || 'User';
             const newRole = document.getElementById('modal-new-role').value;
-            alert(`Role change request for ${userName} to ${newRole} submitted successfully.`);
-            closeChangeRoleModal();
+            const reason = document.getElementById('modal-role-reason').value.trim();
+
+            try {
+                const res = await window.api.post('/api/requests/role-change', {
+                    userId,
+                    newRole,
+                    reason
+                });
+
+                closeChangeRoleModal();
+
+                AdminApp.showCenterAlert({
+                    title: 'Request Submitted!',
+                    message: res.message || `Role change request for ${userName} to ${newRole} submitted successfully for approval.`,
+                    type: 'success'
+                });
+            } catch (err) {
+                AdminApp.showCenterAlert({
+                    title: 'Failed to Submit',
+                    message: err.message || 'Failed to submit role change request',
+                    type: 'error'
+                });
+            }
         }
 
         function filterRoles() {
@@ -338,10 +498,10 @@
             rows.forEach(row => {
                 const uid = (row.getAttribute('data-user-id') || '').toLowerCase();
                 const uname = (row.getAttribute('data-user-name') || '').toLowerCase();
-                const urole = row.getAttribute('data-role');
+                const urole = (row.getAttribute('data-role') || '').toLowerCase();
 
                 const isMatch = (!query || uid.includes(query) || uname.includes(query)) &&
-                    (selectedRole === 'ALL' || urole === selectedRole);
+                    (selectedRole === 'ALL' || urole === selectedRole.toLowerCase());
 
                 row.style.display = isMatch ? '' : 'none';
                 if (isMatch) visibleCount++;
@@ -352,6 +512,9 @@
 
         searchInput.addEventListener('input', filterRoles);
         roleFilterSelect.addEventListener('change', filterRoles);
+
+        // Initialize on load
+        loadUsers();
     </script>
 </body>
 

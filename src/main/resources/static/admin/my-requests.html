@@ -241,13 +241,14 @@
 
             requestsTbody.innerHTML = items.map(req => {
                 const badgeClass = getStatusBadgeClass(req.status);
-                const reqId = req.requestId || (req.id ? ('#' + req.id) : '-');
+                const rawId = req.requestId || req.id;
+                const reqId = rawId !== undefined && rawId !== null ? ('#' + rawId) : '-';
                 const reqType = req.type || req.requestType || 'Request';
                 const requestedBy = req.requestedByName || req.requesterName || req.requestedBy || '-';
                 const role = req.role || 'Admin';
                 const displayDate = formatDisplayDate(req.date || req.requestedDatetime || req.createdAt);
                 const displayStatus = formatDisplayStatus(req.status);
-                const detailId = String(req.requestId || req.id || '');
+                const detailId = String(rawId || '');
 
                 return `
                     <tr>
@@ -290,7 +291,8 @@
                 const matchesQuery = !query ||
                     String(req.requestId || req.id || '').toLowerCase().includes(query) ||
                     String(req.type || req.requestType || '').toLowerCase().includes(query) ||
-                    String(req.requestedByName || req.requesterName || '').toLowerCase().includes(query);
+                    String(req.requestedByName || req.requesterName || '').toLowerCase().includes(query) ||
+                    String(req.detail || '').toLowerCase().includes(query);
                 const matchesDate = matchesDateFilter(req.date || req.requestedDatetime || req.createdAt, selectedDate);
 
                 return matchesStatus && matchesQuery && matchesDate;
@@ -310,7 +312,7 @@
 
         // Search Input Listener
         searchInput?.addEventListener('input', applyRequestsFilter);
-        document.getElementById('btn-refresh-data')?.addEventListener('click', applyRequestsFilter);
+        document.getElementById('btn-refresh-data')?.addEventListener('click', loadMyRequests);
 
         // Date Picker via Shared AdminApp
         AdminApp.initCustomDatePicker({
@@ -341,20 +343,36 @@
             if (!req) return;
 
             const badgeClass = getStatusBadgeClass(req.status);
-            const reqId = req.requestId || (req.id ? ('#' + req.id) : id);
+            const rawId = req.requestId || req.id;
+            const reqId = rawId !== undefined && rawId !== null ? ('#' + rawId) : id;
             const reqType = req.type || req.requestType || 'Request';
             const displayDate = formatDisplayDate(req.date || req.requestedDatetime || req.createdAt);
             const displayStatus = formatDisplayStatus(req.status);
             const requestedBy = req.requestedByName || req.requesterName || req.requestedBy || '-';
             const role = req.role || 'Admin';
-            const note = req.note || req.detail || req.payload || 'No additional note specified.';
+            const detailText = req.detail || req.note || 'No additional detail specified.';
 
-            const decisionInfo = (String(req.status || '').toUpperCase() === 'REJECTED' && req.decisionReason)
-                ? `<div class="detail-note-box warning-box" style="margin-top: 12px; background: #fff5f5; border: 1px solid #fed7d7; padding: 12px; border-radius: 8px;">
-                     <strong style="color: #c53030;">Reason for Rejection:</strong>
-                     <p style="color: #742a2a; margin-top: 4px;">${escapeHtml(req.decisionReason)}</p>
-                   </div>`
-                : '';
+            let decisionInfo = '';
+            const statusUpper = String(req.status || '').toUpperCase();
+            if (statusUpper === 'REJECTED') {
+                const deciderText = req.decidedByName 
+                    ? `<div style="font-size: 0.82rem; color: #9b2c2c; margin-top: 6px;">Reviewed by: <strong>${escapeHtml(req.decidedByName)}</strong> on ${formatDisplayDate(req.decidedDatetime)}</div>`
+                    : '';
+                decisionInfo = `
+                    <div class="detail-note-box warning-box" style="margin-top: 14px; background: #fff5f5; border: 1px solid #fed7d7; padding: 12px; border-radius: 8px;">
+                        <strong style="color: #c53030;">Reason for Rejection:</strong>
+                        <p style="color: #742a2a; margin-top: 4px; margin-bottom: 0;">${escapeHtml(req.decisionReason || 'No reason specified')}</p>
+                        ${deciderText}
+                    </div>
+                `;
+            } else if (statusUpper === 'APPROVED' && req.decidedByName) {
+                decisionInfo = `
+                    <div class="detail-note-box" style="margin-top: 14px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 8px;">
+                        <strong style="color: #166534;">Approval Information:</strong>
+                        <p style="color: #15803d; margin-top: 4px; margin-bottom: 0;">Approved by: <strong>${escapeHtml(req.decidedByName)}</strong> on ${formatDisplayDate(req.decidedDatetime)}</p>
+                    </div>
+                `;
+            }
 
             document.getElementById('req-detail-modal-body').innerHTML = `
                 <div class="detail-header-row">
@@ -381,8 +399,8 @@
                 </div>
 
                 <div class="detail-note-box">
-                    <span>Request Payload / Note:</span>
-                    <p>${escapeHtml(note)}</p>
+                    <span>Request Details:</span>
+                    <p>${escapeHtml(detailText)}</p>
                 </div>
                 ${decisionInfo}
             `;

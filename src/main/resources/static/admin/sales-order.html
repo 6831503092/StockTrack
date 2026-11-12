@@ -331,8 +331,8 @@
             if (user) {
                 const createdByEl = document.getElementById('new-so-created-by');
                 const userIdEl = document.getElementById('new-so-user-id');
-                if (createdByEl) createdByEl.value = user.fullName || user.username || '';
-                if (userIdEl) userIdEl.value = user.userId || user.username || '';
+                if (createdByEl) createdByEl.value = user.fullName || '';
+                if (userIdEl) userIdEl.value = user.userId || '';
             }
         }
 

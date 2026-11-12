@@ -372,6 +372,109 @@
         };
     }
 
+    function showToast(message, type = 'success', title = null, duration = 3800) {
+        let container = document.getElementById('stocktrack-toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'stocktrack-toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+
+        const icons = {
+            success: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+            error: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`,
+            info: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
+        };
+
+        const defaultTitles = {
+            success: 'Success',
+            error: 'Error',
+            info: 'Notice'
+        };
+
+        const toastType = ['success', 'error', 'info'].includes(type) ? type : 'success';
+        const displayTitle = title || defaultTitles[toastType];
+
+        const item = document.createElement('div');
+        item.className = `toast-item toast-${toastType}`;
+        item.innerHTML = `
+            <div class="toast-icon">
+                ${icons[toastType]}
+            </div>
+            <div class="toast-content">
+                <div class="toast-title">${escapeHtml(displayTitle)}</div>
+                <div class="toast-message">${escapeHtml(message)}</div>
+            </div>
+            <button type="button" class="toast-close-btn" aria-label="Close">&times;</button>
+        `;
+
+        const removeToast = () => {
+            if (item.classList.contains('toast-hiding')) return;
+            item.classList.add('toast-hiding');
+            setTimeout(() => {
+                if (item.parentNode) {
+                    item.parentNode.removeChild(item);
+                }
+            }, 320);
+        };
+
+        item.querySelector('.toast-close-btn')?.addEventListener('click', removeToast);
+
+        container.appendChild(item);
+
+        if (duration > 0) {
+            setTimeout(removeToast, duration);
+        }
+    }
+
+    function showCenterAlert({ title = 'Success!', message = '', type = 'success', confirmText = 'OK', onConfirm = null } = {}) {
+        let overlay = document.getElementById('stocktrack-center-alert');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'stocktrack-center-alert';
+            overlay.className = 'center-alert-overlay';
+            document.body.appendChild(overlay);
+        }
+
+        const icons = {
+            success: `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+            error: `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`
+        };
+
+        const alertType = ['success', 'error'].includes(type) ? type : 'success';
+        const displayTitle = title || (alertType === 'success' ? 'Success!' : 'Error');
+
+        overlay.innerHTML = `
+            <div class="center-alert-box">
+                <div class="center-alert-icon ${alertType}">
+                    ${icons[alertType]}
+                </div>
+                <h3 class="center-alert-title">${escapeHtml(displayTitle)}</h3>
+                <p class="center-alert-message">${escapeHtml(message)}</p>
+                <button type="button" class="center-alert-btn" id="btn-center-alert-ok">${escapeHtml(confirmText)}</button>
+            </div>
+        `;
+
+        const closeAlert = () => {
+            overlay.classList.remove('active');
+            if (typeof onConfirm === 'function') {
+                onConfirm();
+            }
+        };
+
+        overlay.querySelector('#btn-center-alert-ok')?.addEventListener('click', closeAlert);
+        overlay.onclick = (e) => {
+            if (e.target === overlay) closeAlert();
+        };
+
+        // Trigger opening animation smoothly
+        requestAnimationFrame(() => {
+            overlay.classList.add('active');
+            overlay.querySelector('#btn-center-alert-ok')?.focus();
+        });
+    }
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initImageFallbacks);
     } else {
@@ -390,6 +493,10 @@
         openModal,
         closeModal,
         matchesDateFilter,
-        initCustomDatePicker
+        initCustomDatePicker,
+        showToast,
+        showCenterAlert
     };
+    window.showToast = showToast;
+    window.showCenterAlert = showCenterAlert;
 })();

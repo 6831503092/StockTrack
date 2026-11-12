@@ -44,10 +44,4 @@ public class AuthController {
         UserDto user = authService.getCurrentUserDto(session, xUserId);
         return ResponseEntity.ok(ApiResponse.ok("User authenticated", user));
     }
-
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ApiResponse<Void>> handleResponseStatusException(ResponseStatusException ex) {
-        String reason = ex.getReason() != null ? ex.getReason() : ex.getMessage();
-        return ResponseEntity.status(ex.getStatusCode()).body(ApiResponse.error(reason));
-    }
 }
