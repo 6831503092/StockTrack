@@ -126,3 +126,673 @@
   border-color: #ef4444;
 }
 
+/* ==========================================
+   StockTrack - Manager Stylesheet
+   Specific styles for Manager role & views
+   ========================================== */
+
+/* Manager Specific Accent & Variables */
+:root {
+  --manager-accent: #f59e0b;
+  --manager-accent-light: #fffbeb;
+  --manager-accent-border: #fde68a;
+}
+
+/* Manager Role Badge */
+.sidebar-user .role-title.role-manager {
+  color: #d97706;
+  font-weight: 600;
+}
+
+/* Manager Approval Requests List */
+.approval-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.approval-card {
+  background-color: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.approval-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.approval-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.approval-info .request-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+}
+
+.approval-info .request-meta {
+  font-size: 0.825rem;
+  color: var(--text-secondary, #64748b);
+  display: flex;
+  gap: 12px;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge.approved {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.status-badge.rejected {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Approval Action Buttons */
+.approval-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-approve {
+  background-color: var(--primary-color, #27c690);
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-approve:hover {
+  background-color: var(--primary-hover, #20b582);
+}
+
+.btn-reject {
+  background-color: #ffffff;
+  color: #ef4444;
+  border: 1.5px solid #fca5a5;
+  padding: 7px 15px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reject:hover {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+}
+
+
+/* Manager dashboard: every rule is isolated from other roles. */
+.manager-dashboard .app-layout {
+  background: #fff;
+}
+
+.manager-dashboard .main-content {
+  padding: 24px 30px;
+}
+
+.manager-dashboard h1 {
+  color: #111;
+  font-size: 30px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.manager-dashboard .manager-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+  max-width: 1100px;
+}
+
+.manager-dashboard .manager-summary article {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.manager-dashboard .summary-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.manager-dashboard .summary-card-body {
+  padding-left: 4px;
+}
+
+.manager-dashboard .manager-summary h2 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0;
+}
+
+.manager-dashboard .manager-summary strong {
+  display: block;
+  margin: 0 0 4px 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.manager-dashboard .manager-summary p {
+  font-size: 13px;
+  margin: 0;
+  color: #64748b;
+}
+
+.manager-dashboard .manager-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.manager-dashboard .blue {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.manager-dashboard .red {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.manager-dashboard .orange {
+  background: #fff7ed;
+  color: #f59e0b;
+}
+
+.manager-dashboard .green {
+  background: #f0fdf4;
+  color: #22c55e;
+}
+
+.manager-dashboard .manager-chart-panel {
+  margin: 24px 0;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.manager-dashboard .manager-chart-heading h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.manager-dashboard .manager-chart-heading p {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.manager-dashboard .manager-legend {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+}
+
+.manager-dashboard .manager-legend::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.manager-dashboard .manager-chart {
+  height: 240px;
+  display: flex;
+  margin-top: 32px;
+  gap: 16px;
+}
+
+.manager-dashboard .manager-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 32px;
+  padding-bottom: 30px;
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: right;
+}
+
+.manager-dashboard .manager-bars {
+  flex: 1;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 0 40px;
+  background: 
+    linear-gradient(#f1f5f9, #f1f5f9) top/100% 1px no-repeat, 
+    linear-gradient(#f1f5f9, #f1f5f9) 0 50%/100% 1px no-repeat, 
+    linear-gradient(#f1f5f9, #f1f5f9) 0 calc(100% - 30px)/100% 1px no-repeat;
+}
+
+.manager-dashboard .manager-bar-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  position: relative;
+  padding-bottom: 32px; /* พื้นที่สำหรับวางชื่อสินค้าด้านล่างฐานกราฟ */
+}
+
+.manager-dashboard .manager-bar {
+  width: 60px;
+  background: #3b82f6;
+  border-radius: 6px 6px 4px 4px;
+  position: relative;
+  transition: height 0.3s ease;
+  z-index: 1;
+}
+
+.manager-dashboard .manager-bar strong {
+  position: absolute;
+  top: -22px;
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.manager-dashboard .manager-bar-label {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  font-size: 11px;
+  color: #64748b;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* หากชื่อยาวเกินจะแสดง ... */
+  padding: 0 4px;
+  line-height: 28px;
+}
+
+.manager-dashboard .manager-products {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.manager-dashboard .manager-products-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 0;
+}
+
+.manager-dashboard .manager-products-toolbar h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.manager-dashboard .toolbar-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.manager-dashboard .manager-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.manager-dashboard .manager-search input {
+  width: 280px;
+  padding: 10px 16px 10px 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.manager-dashboard .manager-search input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.manager-dashboard .manager-search svg {
+  position: absolute;
+  left: 12px;
+  color: #94a3b8;
+}
+
+.manager-dashboard .manager-zone-filter select {
+  padding: 10px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  color: #64748b;
+  min-width: 120px;
+  cursor: pointer;
+}
+
+.manager-dashboard table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.manager-dashboard th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: none;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.manager-dashboard th:first-child { border-radius: 0; }
+.manager-dashboard th:last-child { border-radius: 0; text-align: center; }
+
+.manager-dashboard td {
+  padding: 16px;
+  font-size: 14px;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.manager-dashboard .text-center {
+  text-align: center;
+}
+
+.manager-dashboard .manager-edit-button {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.manager-dashboard .manager-edit-button:hover {
+  background: #fff;
+  border-color: #3b82f6;
+  color: #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
+  transform: translateY(-1px);
+}
+
+.manager-dashboard .manager-edit-button:active {
+  transform: translateY(0);
+  background: #eff6ff;
+}
+
+.manager-dashboard .manager-edit-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.manager-dashboard .manager-data-note {
+  font-size: 11px;
+  color: #71809c;
+  margin: 22px 30px 0;
+}
+
+.manager-dashboard #manager-feedback {
+  font-size: 12px;
+  margin-top: 14px;
+}
+
+.manager-dashboard .manager-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.manager-dashboard .sidebar-user .role-title.role-manager {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.manager-dashboard .nav-item.active {
+  background: #e7eaef;
+}
+
+.manager-dashboard .sidebar-menu-label {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.manager-dashboard dialog {
+  margin: auto;
+  padding: 28px;
+  width: min(440px, calc(100% - 32px));
+  border: 1px solid #dce4f1;
+  border-radius: 14px;
+  color: #1e293b;
+}
+
+.manager-dashboard dialog::backdrop {
+  background: #0f172a66;
+}
+
+.manager-dashboard dialog h2 {
+  font-size: 20px;
+  margin-bottom: 18px;
+}
+
+.manager-dashboard dialog label {
+  display: block;
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+.manager-dashboard dialog input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.manager-dashboard dialog form>div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.manager-dashboard dialog button {
+  padding: 10px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.manager-dashboard dialog button[type=submit] {
+  background: #2088d8;
+  color: white;
+}
+
+.manager-dashboard #manager-edit-error {
+  color: #b91c1c;
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+@media(max-width:1100px) {
+  .manager-dashboard .manager-summary {
+    gap: 16px;
+  }
+
+  .manager-dashboard .manager-products-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .manager-dashboard .manager-products-toolbar h2 {
+    width: 100%;
+  }
+
+  .manager-dashboard .manager-search {
+    flex: 1;
+  }
+
+  .manager-dashboard .manager-search input {
+    width: 100%;
+  }
+}
+
+@media(max-width:768px) {
+  .manager-dashboard #sidebar-container {
+    width: 64px;
+    flex-shrink: 0;
+  }
+
+  .manager-dashboard .sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 64px;
+    background: white;
+    border-right: 1px solid #eef2f6;
+    padding: 20px 0;
+  }
+
+  .manager-dashboard .sidebar-logo,
+  .manager-dashboard .sidebar-user,
+  .manager-dashboard .nav-item,
+  .manager-dashboard .nav-logout,
+  .manager-dashboard .sidebar-menu-label {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .manager-dashboard .sidebar-divider {
+    margin: 16px 10px;
+  }
+
+  .manager-dashboard .main-content {
+    padding: 20px 16px;
+  }
+
+  .manager-dashboard .manager-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .manager-dashboard .manager-chart-panel {
+    padding: 18px 12px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .manager-dashboard .manager-bar-label {
+    font-size: 9px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .manager-dashboard .manager-bars {
+    padding: 0;
+    gap: 8px;
+  }
+
+  .manager-dashboard .manager-chart {
+    gap: 8px;
+  }
+
+  .manager-dashboard .manager-products-toolbar {
+    padding: 0 16px 20px;
+    gap: 12px;
+  }
+
+  .manager-dashboard .manager-products-toolbar h2 {
+    font-size: 22px;
+  }
+
+  .manager-dashboard .manager-search {
+    flex-basis: 100%;
+  }
+}
+/* Approval queue: scoped to Manager so Admin pages are unaffected. */
+.manager-requests #manager-request-dialog {
+    width: min(560px, calc(100vw - 32px)); max-height: 85vh; overflow: auto;
+    margin: auto; padding: 28px; border: 1px solid var(--border-color); border-radius: 16px;
+    color: var(--text-primary); font-family: var(--font-family);
+}
+.manager-requests #manager-request-dialog::backdrop { background: rgb(15 23 42 / 45%); }
+.manager-requests #manager-request-dialog h2 { margin-bottom: 24px; }
+.manager-requests #manager-request-detail p { margin: 4px 0 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.manager-requests #manager-request-dialog textarea {
+    display: block; width: 100%; margin: 8px 0 16px; padding: 12px;
+    border: 1px solid var(--border-color); border-radius: 8px; font: inherit; resize: vertical;
+}
+.manager-requests .manager-request-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; }
+.manager-requests #manager-request-message { color: #b91c1c; margin-bottom: 12px; }
+.manager-requests [hidden] { display: none !important; }
