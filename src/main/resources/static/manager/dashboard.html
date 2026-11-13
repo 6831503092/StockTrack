@@ -4,96 +4,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>StockTrack - Manager Dashboard</title>
+
     <link rel="icon" type="image/png" href="../picture/favicon/favicon.png">
-    <!-- Google Fonts -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@400;500;600&display=swap"
         rel="stylesheet">
-    <!-- Stylesheet -->
+
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/manager.css">
 </head>
 
-<body>
+<body class="manager-dashboard">
+
     <div class="app-layout">
-        <!-- Sidebar Navigation (Modular Component) -->
-        <div id="sidebar-container" data-role="MANAGER" data-active-menu="dashboard"></div>
+
+        <!-- Sidebar Navigation -->
+        <div id="sidebar-container"
+            data-role="MANAGER"
+            data-active-menu="dashboard">
+        </div>
 
         <!-- Main Content Area -->
-        <main class="main-content">
-            <header class="content-header">
-                <h1>Manager Dashboard</h1>
-                <p>Welcome back, Manager. Review and approve inventory requests and purchase orders.</p>
+        <main class="main-content dashboard-main-layout">
+
+            <!-- 1. Top Header Row -->
+            <header class="requests-header-row">
+                <div class="requests-header-left">
+                    <h1>Dashboard</h1>
+                    <p>Overview of inventory, stock levels and warehouse operations</p>
+                </div>
             </header>
 
-            <section class="placeholder-card">
-                <p style="color: #64748b;">Main content display area for Manager Dashboard</p>
+            <!-- 2. KPI Summary Cards Grid (Unified with Admin .po-stats-grid) -->
+            <section class="po-stats-grid" aria-label="Inventory overview">
+
+                <div class="po-stat-card">
+                    <div class="po-stat-icon mint">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Total Items</span>
+                        <span class="stat-value mint" id="manager-total">-</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-icon red">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Low Stock Items</span>
+                        <span class="stat-value red" id="manager-low">-</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-icon amber">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <circle cx="12" cy="14" r="4"></circle>
+                            <polyline points="12 12 12 14 14 15"></polyline>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Pending Requests</span>
+                        <span class="stat-value amber" id="manager-pending">-</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-icon blue">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 21h18"></path>
+                            <path d="M5 21V7l7-4 7 4v14"></path>
+                            <path d="M9 10h6"></path>
+                            <path d="M9 14h6"></path>
+                            <path d="M9 18h6"></path>
+                        </svg>
+                    </div>
+                    <div class="po-stat-info">
+                        <span class="stat-label">Total Warehouse</span>
+                        <span class="stat-value blue" id="manager-warehouse">-</span>
+                    </div>
+                </div>
+
             </section>
-            <section class="po-card">
+
+            <!-- 3. Stock Chart Card (Unified with Admin .po-card) -->
+            <section class="po-card manager-chart-card">
+
+                <div class="card-header-flex">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <div>
+                            <div style="display: flex; align-items: center;">
+                                <h2>Stock quantity by product</h2>
+                                <span class="chart-count-pill" id="chart-product-count">0 items</span>
+                            </div>
+                            <p class="card-subtitle" id="chart-subtitle">Current available stock · Units (Hover over bars to inspect details)</p>
+                        </div>
+                    </div>
+
+                    <div class="card-header-controls">
+                        <select id="manager-chart-zone" class="po-status-select" style="min-width: 130px; font-size: 0.85rem; padding: 6px 12px; border-radius: 8px;" aria-label="Filter chart by zone">
+                            <option value="all">All zones</option>
+                        </select>
+
+                        <div class="manager-chart-legend">
+                            <span class="legend-dot in-stock"></span> In stock
+                            <span class="legend-dot low-stock" style="margin-left: 14px;"></span> Low stock (&le; 20)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="manager-chart" role="img" aria-label="Stock quantities">
+                    <div class="manager-axis">
+                        <span id="manager-axis-top">100</span>
+                        <span id="manager-axis-75">75</span>
+                        <span id="manager-axis-mid">50</span>
+                        <span id="manager-axis-25">25</span>
+                        <span id="manager-axis-0">0</span>
+                    </div>
+
+                    <div class="manager-bars" id="manager-bars"></div>
+                </div>
+
+            </section>
+
+            <!-- 4. Products Details Card (Unified with Admin .po-card & .po-table) -->
+            <section class="po-card manager-products-card">
+
                 <div class="card-header-flex">
                     <h2>Products Details</h2>
 
                     <div class="card-header-controls">
                         <div class="po-search-box w-260">
-                            <input type="text" id="search-products" placeholder="Search product name or ID...">
+                            <input
+                                id="manager-search"
+                                type="search"
+                                placeholder="Search product name or ID...">
                             <span class="search-icon">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="11" cy="11" r="8"></circle>
                                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                 </svg>
                             </span>
                         </div>
 
-                        <button type="button" class="btn-create-po" id="btn-open-add-product-modal">
-                            Add Product
-                        </button>
+                        <select id="manager-zone" class="po-status-select zone-select-lg">
+                            <option value="all">All zones</option>
+                        </select>
                     </div>
                 </div>
 
-                <!-- Table View -->
                 <div class="po-table-wrapper">
                     <table class="po-table">
                         <thead>
                             <tr>
-                                <th>Product ID</th>
-                                <th style="width: 76px; text-align: center;">Image</th>
+                                <th style="width: 120px; text-align: center;">Product ID</th>
                                 <th>Product Name</th>
                                 <th>Default Cost</th>
                                 <th>Selling Price</th>
                                 <th>Current Stock</th>
                                 <th>Min Alert</th>
-                                <th>Action</th>
+                                <th style="width: 110px; text-align: center;">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="products-table-body">
-                        </tbody>
+
+                        <tbody id="manager-product-rows"></tbody>
                     </table>
                 </div>
+
+                <p id="manager-feedback" role="status"></p>
+
+            </section>
+
         </main>
+
+    </div>
+
+    <!-- 5. Edit Product Modal (Unified with Admin .modal-overlay & .modal-box) -->
+    <div class="modal-overlay" id="modal-edit-product">
+        <div class="modal-box modal-edit-product-box">
+            <div class="modal-header-with-close">
+                <h2 class="edit-product-title" style="margin-bottom: 0;">Edit Product</h2>
+                <button type="button" class="btn-close-modal" id="btn-close-edit-modal">&times;</button>
+            </div>
+
+            <form id="manager-edit-form">
+                <div class="edit-product-grid">
+                    <!-- Column 1 -->
+                    <div class="edit-product-col">
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="manager-edit-id">Product ID</label>
+                            <input type="text" id="manager-edit-id" class="edit-input-readonly" readonly>
+                        </div>
+
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="manager-edit-cost">Default Cost (฿)</label>
+                            <input type="number" step="0.01" min="0" id="manager-edit-cost" name="cost" class="edit-input-editable" required>
+                        </div>
+
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="manager-edit-minimum">Min Stock Alert</label>
+                            <input type="number" min="0" id="manager-edit-minimum" name="minimum" class="edit-input-editable" required>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 -->
+                    <div class="edit-product-col">
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="manager-edit-name">Product Name</label>
+                            <input type="text" id="manager-edit-name" name="productName" class="edit-input-editable" required maxlength="50">
+                        </div>
+
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="manager-edit-price">Selling Price (฿)</label>
+                            <input type="number" step="0.01" min="0" id="manager-edit-price" name="price" class="edit-input-editable" required>
+                        </div>
+
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="manager-edit-stock">Current Stock</label>
+                            <input type="number" min="0" id="manager-edit-stock" name="stock" class="edit-input-editable" required>
+                        </div>
+                    </div>
+                </div>
+
+                <p id="manager-edit-error" role="alert" style="color: #dc2626; font-size: 0.85rem; margin-top: 12px;"></p>
+
+                <div class="edit-product-actions">
+                    <button type="button" class="btn-edit-cancel" id="manager-edit-cancel">Cancel</button>
+                    <button type="submit" class="btn-edit-submit">Save Changes</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Scripts -->
+    <script src="../js/api.js"></script>
     <script src="../js/sidebar.js"></script>
-    <script>
-        (function checkAccess() {
-            const raw = localStorage.getItem('stocktrack_user');
-            if (!raw) {
-                window.location.replace('../index.html');
-                return;
-            }
-            try {
-                const user = JSON.parse(raw);
-                if (!user || user.role !== 'MANAGER') {
-                    window.location.replace('../index.html');
-                }
-            } catch (err) {
-                localStorage.removeItem('stocktrack_user');
-                window.location.replace('../index.html');
-            }
-        })();
-    </script>
-</body>
+    <script src="../js/manager.js"></script>
 
+</body>
 </html>

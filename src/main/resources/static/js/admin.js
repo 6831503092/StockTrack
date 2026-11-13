@@ -582,6 +582,98 @@
         });
     }
 
+    function showRejectionModal({
+        title = 'Reason for Rejection',
+        requestId = '',
+        requestType = 'Request',
+        date = '',
+        rejectedBy = 'Manager',
+        rejectedDatetime = '',
+        reason = 'No reason specified.',
+        onViewDetail = null
+    } = {}) {
+        let overlay = document.getElementById('stocktrack-rejection-modal');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'stocktrack-rejection-modal';
+            overlay.className = 'modal-overlay rejection-modal-overlay';
+            document.body.appendChild(overlay);
+        }
+
+        const formattedDate = formatDisplayDate(date || new Date());
+        const formattedDecidedDate = rejectedDatetime ? formatDisplayDate(rejectedDatetime) : formattedDate;
+        const displayId = requestId ? (String(requestId).startsWith('#') ? requestId : '#' + requestId) : '-';
+
+        overlay.innerHTML = `
+            <div class="modal-box rejection-reason-modal-box">
+                <div class="rejection-reason-header">
+                    <div class="rejection-header-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="rejection-header-text">
+                        <h3>${escapeHtml(title)}</h3>
+                        <p>${escapeHtml(requestType)} ${escapeHtml(displayId)}</p>
+                    </div>
+                    <button type="button" class="btn-close-modal" id="btn-close-rejection-x" style="margin-left: auto;">&times;</button>
+                </div>
+
+                <div class="rejection-reason-body">
+                    <div class="rejection-meta-grid">
+                        <div class="rejection-meta-item">
+                            <div class="meta-label">Rejected by</div>
+                            <div class="meta-val">${escapeHtml(rejectedBy || 'Manager')}</div>
+                        </div>
+                        <div class="rejection-meta-item">
+                            <div class="meta-label">Decided Date</div>
+                            <div class="meta-val">${escapeHtml(formattedDecidedDate)}</div>
+                        </div>
+                    </div>
+
+                    <div class="rejection-content-box">
+                        <div class="rejection-content-title">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            Reason specified by Manager
+                        </div>
+                        <p class="rejection-content-text">${escapeHtml(reason || 'No specific reason provided.')}</p>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                    ${onViewDetail ? `<button type="button" class="btn-action-detail" id="btn-rejection-view-detail" style="padding: 7px 16px; border-radius: 8px;">View Full Details</button>` : ''}
+                    <button type="button" class="btn-secondary" id="btn-close-rejection" style="padding: 7px 16px; border-radius: 8px;">Close</button>
+                </div>
+            </div>
+        `;
+
+        const closeModal = () => {
+            overlay.classList.remove('active');
+        };
+
+        overlay.querySelector('#btn-close-rejection')?.addEventListener('click', closeModal);
+        overlay.querySelector('#btn-close-rejection-x')?.addEventListener('click', closeModal);
+        overlay.querySelector('#btn-rejection-view-detail')?.addEventListener('click', () => {
+            closeModal();
+            if (typeof onViewDetail === 'function') {
+                onViewDetail();
+            }
+        });
+        overlay.onclick = (e) => {
+            if (e.target === overlay) closeModal();
+        };
+
+        requestAnimationFrame(() => {
+            overlay.classList.add('active');
+        });
+    }
+
     function getProductImageUrl(productName, zoneCode) {
         if (!productName) return '../picture/favicon/favicon.png';
         const clean = String(productName).toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -642,10 +734,31 @@
         unitColumnLabel,
         items,
         totalQty,
-        totalPrice
+        totalPrice,
+        decisionReason = '',
+        decidedByName = '',
+        decidedDatetime = ''
     }) {
         const statusUpper = String(status || 'PENDING').toUpperCase();
         const statusColor = statusUpper === 'APPROVED' ? '#10b981' : (statusUpper === 'REJECTED' ? '#ef4444' : '#b45309');
+
+        let rejectionBannerHtml = '';
+        if (statusUpper === 'REJECTED' && decisionReason) {
+            rejectionBannerHtml = `
+                <div class="order-rejection-banner">
+                    <div class="rejection-banner-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span>Reason for Rejection</span>
+                    </div>
+                    <p class="rejection-banner-text">${escapeHtml(decisionReason)}</p>
+                    ${decidedByName ? `<div class="rejection-banner-meta">Reviewed by <strong>${escapeHtml(decidedByName)}</strong> ${decidedDatetime ? 'on ' + formatDisplayDate(decidedDatetime) : ''}</div>` : ''}
+                </div>
+            `;
+        }
 
         return `
             <div class="order-review-container">
@@ -659,6 +772,8 @@
                         <span>Status: <span class="status-tag" style="color: ${statusColor};">[ ${escapeHtml(status).toLowerCase()} ]</span></span>
                     </div>
                 </div>
+
+                ${rejectionBannerHtml}
 
                 <div class="order-info-card">
                     <h4>Information</h4>
@@ -752,10 +867,12 @@
         initCustomDatePicker,
         showToast,
         showCenterAlert,
+        showRejectionModal,
         getProductImageUrl,
         renderOrderReviewRows,
         renderOrderDetailModal
     };
     window.showToast = showToast;
     window.showCenterAlert = showCenterAlert;
+    window.showRejectionModal = showRejectionModal;
 })();

@@ -34,6 +34,9 @@ public class PurchaseOrderDto {
     private Integer totalQty;
     private BigDecimal totalPrice;
     private String status; // "Pending", "Approved", "Rejected", "Received"
+    private String decisionReason;
+    private String decidedByName;
+    private LocalDateTime decidedDatetime;
     private List<PurchaseOrderItemDto> items;
 
     public static PurchaseOrderDto fromEntity(PurchaseOrder po, List<PurchaseOrderItem> items) {
@@ -51,10 +54,16 @@ public class PurchaseOrderDto {
         User creator = po.getCreatedBy();
         Integer creatorUserId = creator != null ? creator.getUserId() : null;
 
+        var appReq = po.getRequest();
+        String decisionReason = appReq != null ? appReq.getDecisionReason() : null;
+        String decidedByName = (appReq != null && appReq.getDecidedBy() != null)
+                ? appReq.getDecidedBy().getFullName() : null;
+        LocalDateTime decidedDatetime = appReq != null ? appReq.getDecidedDatetime() : null;
+
         return PurchaseOrderDto.builder()
                 .id(po.getPoId())
                 .poId(po.getPoId())
-                .requestId(po.getRequest() != null ? po.getRequest().getRequestId() : null)
+                .requestId(appReq != null ? appReq.getRequestId() : null)
                 .supplierId(supplier != null ? supplier.getSupplierId() : null)
                 .supplier(supplier != null ? supplier.getCompanyName() : "-")
                 .createdByUserId(creatorUserId)
@@ -65,6 +74,9 @@ public class PurchaseOrderDto {
                 .totalQty(totalQty)
                 .totalPrice(po.getTotalAmount() != null ? po.getTotalAmount() : BigDecimal.ZERO)
                 .status(po.getStatus() != null ? formatStatus(po.getStatus().name()) : "Pending")
+                .decisionReason(decisionReason)
+                .decidedByName(decidedByName)
+                .decidedDatetime(decidedDatetime)
                 .items(itemDtos)
                 .build();
     }

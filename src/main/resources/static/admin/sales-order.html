@@ -412,7 +412,19 @@
                             <span class="badge-status ${statusClass}">${escapeHtml(so.status)}</span>
                         </td>
                         <td>
-                            <button type="button" class="btn-action-detail" onclick="viewSODetail('${escapeHtml(displayId)}')">Detail</button>
+                            <div class="action-buttons-group">
+                                <button type="button" class="btn-action-detail" onclick="viewSODetail('${escapeHtml(displayId)}')">Detail</button>
+                                ${String(so.status || '').toUpperCase() === 'REJECTED' ? `
+                                    <button type="button" class="btn-action-reason" onclick="viewSORejectionReason('${escapeHtml(displayId)}')" title="View reason for rejection">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Reason
+                                    </button>
+                                ` : ''}
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -789,10 +801,40 @@
                 unitColumnLabel: 'Unit Price',
                 items: so.items || [],
                 totalQty: so.totalQty !== undefined ? so.totalQty : (so.totalQuantity || 0),
-                totalPrice: so.totalPrice !== undefined ? so.totalPrice : (so.totalAmount || 0)
+                totalPrice: so.totalPrice !== undefined ? so.totalPrice : (so.totalAmount || 0),
+                decisionReason: so.decisionReason || '',
+                decidedByName: so.decidedByName || '',
+                decidedDatetime: so.decidedDatetime || ''
             });
 
             AdminApp.openModal('modal-so-detail');
+        }
+
+        async function viewSORejectionReason(soId) {
+            let so = soData.find(item => String(item.soId || item.id) === String(soId));
+            if (!so || !so.decisionReason) {
+                try {
+                    const rawId = String(soId).replace(/^#/, '');
+                    const res = await window.api.get(`/api/sales-orders/${rawId}`);
+                    if (res?.success && res.data) {
+                        so = res.data;
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch SO details:', err);
+                }
+            }
+            if (!so) return;
+
+            AdminApp.showRejectionModal({
+                title: 'Reason for Rejection',
+                requestId: so.soId || so.id,
+                requestType: 'Sales Order',
+                date: so.orderDatetime || so.date,
+                rejectedBy: so.decidedByName || 'Manager',
+                rejectedDatetime: so.decidedDatetime,
+                reason: so.decisionReason || 'No specific reason provided by manager.',
+                onViewDetail: () => viewSODetail(soId)
+            });
         }
 
         // Initialize: Load all data from API

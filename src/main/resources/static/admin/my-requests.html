@@ -182,6 +182,7 @@
                 const displayDate = formatDisplayDate(req.date || req.requestedDatetime || req.createdAt);
                 const displayStatus = formatDisplayStatus(req.status);
                 const detailId = String(rawId || '');
+                const isRejected = String(req.status || '').toUpperCase() === 'REJECTED';
 
                 return `
                     <tr>
@@ -194,7 +195,19 @@
                         <td>${escapeHtml(displayDate)}</td>
                         <td><span class="badge-status ${badgeClass}">${escapeHtml(displayStatus)}</span></td>
                         <td>
-                            <button type="button" class="btn-action-detail" onclick="viewRequestDetail('${escapeHtml(detailId)}')">Detail</button>
+                            <div class="action-buttons-group">
+                                <button type="button" class="btn-action-detail" onclick="viewRequestDetail('${escapeHtml(detailId)}')">Detail</button>
+                                ${isRejected ? `
+                                    <button type="button" class="btn-action-reason" onclick="viewRejectionReason('${escapeHtml(detailId)}')" title="View reason for rejection">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Reason
+                                    </button>
+                                ` : ''}
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -304,6 +317,22 @@
                     </div>
                 </div>
             `;
+        }
+
+        function viewRejectionReason(id) {
+            const req = requestsData.find(r => String(r.requestId || r.id) === String(id));
+            if (!req) return;
+
+            AdminApp.showRejectionModal({
+                title: 'Reason for Rejection',
+                requestId: req.requestId ?? req.id,
+                requestType: req.type || req.requestType || 'Request',
+                date: req.date || req.requestedDatetime || req.createdAt,
+                rejectedBy: req.decidedByName || 'Manager',
+                rejectedDatetime: req.decidedDatetime,
+                reason: req.decisionReason || 'No specific reason provided by manager.',
+                onViewDetail: () => viewRequestDetail(id)
+            });
         }
 
         function viewRequestDetail(id) {

@@ -57,23 +57,27 @@ public class AuthService {
     }
 
     public User resolveCurrentUser(HttpSession session, String xUserIdHeader) {
-        Integer resolvedUserId = null;
+        User user = null;
 
-        if (session != null && session.getAttribute(SESSION_USER_ID) != null) {
-            resolvedUserId = (Integer) session.getAttribute(SESSION_USER_ID);
-        } else if (xUserIdHeader != null && !xUserIdHeader.isBlank()) {
-            try {
-                resolvedUserId = Integer.valueOf(xUserIdHeader.trim());
-            } catch (NumberFormatException ignored) {
-            }
+        if (xUserIdHeader != null && !xUserIdHeader.isBlank()) {
+            user = findMatchingUser(xUserIdHeader).orElse(null);
         }
 
-        if (resolvedUserId == null) {
+        if (user == null && session != null && session.getAttribute(SESSION_USER_ID) != null) {
+            Integer sessionUserId = (Integer) session.getAttribute(SESSION_USER_ID);
+            user = userRepository.findByUserIdAndIsActiveTrue(sessionUserId).orElse(null);
+        }
+
+        if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please log in to continue");
         }
 
-        return userRepository.findByUserIdAndIsActiveTrue(resolvedUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account is inactive or not found"));
+        if (session != null) {
+            session.setAttribute(SESSION_USER_ID, user.getUserId());
+            session.setAttribute(SESSION_USER_ROLE, user.getRole().name());
+        }
+
+        return user;
     }
 
     public User requireRole(HttpSession session, String xUserIdHeader, Role... allowedRoles) {

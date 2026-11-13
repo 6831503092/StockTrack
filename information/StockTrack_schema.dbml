@@ -1,20 +1,19 @@
 // ==========================================
-// StockTrack System - 16 Tables Schema (DBML) — v2.1
+// StockTrack System - 16 Tables Schema (DBML) — v2.2 (Entity-Aligned)
 // For use on: https://dbdiagram.io
 // ------------------------------------------
-// v2.1 changes:
-//  - USERS: + USERNAME (unique)
-//  - APPROVAL_REQUESTS: + TARGET_TYPE, TARGET_ID, PAYLOAD; STATUS = PENDING / APPROVED / REJECTED
+// Current Entity Alignment:
+//  - USERS: aligned directly with User.java (USER_ID, FULL_NAME, PASSWORD_HASH, ROLE, IS_ACTIVE)
+//  - SUPPLIERS: + ZONE_CODE varchar(10), + CATEGORY varchar(50) (aligned with Supplier.java)
+//  - APPROVAL_REQUESTS: + USER_CREATE in RequestType, TARGET_TYPE, TARGET_ID, PAYLOAD (TEXT)
 //  - PURCHASE_ORDERS / SALES_ORDERS: + REQUEST_ID (1:1 with APPROVAL_REQUESTS)
 //  - AUDIT_LOGS: + ROLE (role snapshot at action time)
 //  - All reason fields varchar(255), DETAIL varchar(255)
-//  - Defaults / NOT NULL / status notes added
 // ==========================================
 
 // 1. กลุ่มข้อมูลหลัก (Master Data)
 Table USERS {
   USER_ID integer [pk, increment]
-  USERNAME varchar(30) [unique, not null, note: 'ใช้ล็อกอิน']
   FULL_NAME varchar(50) [not null]
   PASSWORD_HASH varchar(60) [not null, note: 'BCrypt']
   ROLE varchar(10) [not null, note: 'OWNER / MANAGER / ADMIN / STAFF']
@@ -30,6 +29,8 @@ Table ZONES {
 Table SUPPLIERS {
   SUPPLIER_ID integer [pk, increment]
   COMPANY_NAME varchar(50) [not null]
+  ZONE_CODE varchar(10) [null, note: 'โซนหลักของซัพพลายเออร์ เช่น Z1']
+  CATEGORY varchar(50) [null, note: 'หมวดหมู่สินค้า เช่น Tables, Chairs']
   IS_ACTIVE boolean [not null, default: true]
 }
 
@@ -139,13 +140,13 @@ Table APPROVAL_REQUESTS {
     SUPPLIER_CREATE / SUPPLIER_UPDATE / SUPPLIER_DEACTIVATE
     CUSTOMER_CREATE / CUSTOMER_UPDATE / CUSTOMER_DEACTIVATE
     ZONE_CREATE / ZONE_UPDATE / PRODUCT_MOVE / ROLE_CHANGE
-    PO_CREATE / SO_CREATE
+    USER_CREATE / PO_CREATE / SO_CREATE
   ''']
   TARGET_TYPE varchar(20) [null, note: 'PRODUCT / SUPPLIER / CUSTOMER / ZONE / USER (NULL สำหรับ PO/SO เพราะผูกผ่าน REQUEST_ID ของ order)']
   TARGET_ID integer [null, note: 'ID ของแถวที่จะแก้/ลบ/ย้าย/เปลี่ยน role; NULL ถ้าเป็นการเพิ่มใหม่']
   PAYLOAD text [null, note: 'JSON ข้อมูลที่ขอ เช่น {"productName":"Wooden bed","defaultCost":800,...}']
   DETAIL varchar(255) [not null, note: 'ข้อความสรุปให้คนอ่าน']
-  STATUS varchar(10) [not null, default: 'PENDING', note: 'PENDING / APPROVED / REJECTED']
+  STATUS varchar(10) [not null, default: 'PENDING', note: 'PENDING / APPROVED / REJECTED / FAILED']
   REQUESTED_BY_USER_ID integer [not null]
   REQUESTED_DATETIME datetime [not null]
   DECIDED_BY_USER_ID integer [null]

@@ -1,128 +1,627 @@
 /* ==========================================
    StockTrack - Manager Stylesheet
-   Specific styles for Manager role & views
+   Harmonized with Admin UI Design System:
+   Cards, Tables, Filters, Badges & Modals
    ========================================== */
 
-/* Manager Specific Accent & Variables */
-:root {
-  --manager-accent: #f59e0b;
-  --manager-accent-light: #fffbeb;
-  --manager-accent-border: #fde68a;
-}
-
-/* Manager Role Badge */
+/* 1. Manager Role Accent in Sidebar */
 .sidebar-user .role-title.role-manager {
-  color: #d97706;
+  color: #7c3aed;
   font-weight: 600;
 }
 
-/* Manager Approval Requests List */
-.approval-list {
+/* ==========================================
+   2. KPI Summary Metric Cards & Icons
+   Harmonized with Admin Theme Palette
+   ========================================== */
+.po-stat-card {
+  background: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 14px;
+  padding: 18px 22px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 16px;
-  margin-top: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.approval-card {
-  background-color: #ffffff;
-  border: 1px solid #eef2f6;
+.po-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  border-color: #e2e8f0;
+}
+
+.po-stat-icon {
+  width: 50px;
+  height: 50px;
   border-radius: 12px;
-  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+  color: #ffffff;
+}
+
+.po-stat-card:hover .po-stat-icon {
+  transform: scale(1.08);
+}
+
+.po-stat-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: #ffffff !important;
+  color: #ffffff !important;
+  stroke-width: 2.2px;
+}
+
+/* 2.1 Mint Badge (Total Items - Admin brand #27c690) */
+.po-stat-icon.mint {
+  background: linear-gradient(135deg, #27c690 0%, #10b981 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);
+}
+
+/* 2.2 Red Badge (Low Stock Items - Admin red #ef4444) */
+.po-stat-icon.red {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
+}
+
+/* 2.3 Amber Badge (Pending Requests - Admin amber #f59e0b) */
+.po-stat-icon.amber {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.28);
+}
+
+/* 2.4 Blue Badge (Total Warehouse - Admin blue #0284c7) */
+.po-stat-icon.blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+}
+
+/* 2.5 Purple Badge (Role / Management) */
+.po-stat-icon.purple {
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.28);
+}
+
+/* 3. Manager Stock Chart Card (within .po-card) */
+.manager-chart-card {
+  flex: 0 0 auto !important;
+  min-height: auto !important;
+  margin-bottom: 24px;
+}
+
+.manager-products-card {
+  flex: 1 0 auto;
+  min-height: auto;
+}
+
+.chart-count-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 0.775rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.manager-chart-legend {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.legend-dot.in-stock {
+  background-color: #2563eb;
+}
+
+.legend-dot.low-stock {
+  background-color: #ef4444;
+}
+
+.manager-chart {
+  height: 330px;
+  display: flex;
+  margin-top: 20px;
+  gap: 12px;
+  position: relative;
+  padding-bottom: 54px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.manager-axis {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 34px;
+  padding-bottom: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: right;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.manager-bars {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 0 10px;
+  border-bottom: 2px solid #cbd5e1;
+  background: 
+    linear-gradient(#f1f5f9, #f1f5f9) 0 0%/100% 1px no-repeat,
+    linear-gradient(#f1f5f9, #f1f5f9) 0 25%/100% 1px no-repeat,
+    linear-gradient(#f1f5f9, #f1f5f9) 0 50%/100% 1px no-repeat,
+    linear-gradient(#f1f5f9, #f1f5f9) 0 75%/100% 1px no-repeat;
+  overflow: visible;
+}
+
+.chart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.manager-bar-column {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+}
+
+.manager-bar {
+  width: min(36px, 80%);
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 6px 6px 0 0;
+  position: relative;
+  transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s ease, filter 0.15s ease;
+  z-index: 1;
+}
+
+.manager-bar.low-stock {
+  background: linear-gradient(180deg, #f87171 0%, #ef4444 100%);
+}
+
+.manager-bar-column:hover .manager-bar {
+  filter: brightness(1.12);
+  transform: scaleY(1.02);
+}
+
+.manager-bar strong {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.manager-bar-label {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -8px;
+  right: -8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #475569;
+  text-align: center;
+  line-height: 1.25;
+  pointer-events: none;
+  transition: color 0.15s ease;
+}
+
+.manager-bar-label .label-line-1 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.manager-bar-label .label-line-2 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  font-size: 9.5px;
+  color: #64748b;
+}
+
+.manager-bar-column:hover .manager-bar-label {
+  color: #0f172a;
+}
+
+.manager-bar-column:hover .manager-bar-label .label-line-2 {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Floating Tooltip on Bar Hover (Fully visible, never clipped) */
+.manager-bar-tooltip {
+  position: absolute;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.775rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.35);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+  z-index: 50;
+  min-width: 175px;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.manager-bar-tooltip.pos-above {
+  bottom: calc(100% + 10px);
+  top: auto;
+}
+
+.manager-bar-tooltip.pos-inside {
+  top: 30px;
+  bottom: auto;
+}
+
+.manager-bar-tooltip.align-center {
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+}
+
+.manager-bar-tooltip.align-left {
+  left: 0;
+  transform: translateY(4px);
+}
+
+.manager-bar-tooltip.align-right {
+  right: 0;
+  left: auto;
+  transform: translateY(4px);
+}
+
+.manager-bar-column:hover .manager-bar-tooltip.align-center {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.manager-bar-column:hover .manager-bar-tooltip.align-left,
+.manager-bar-column:hover .manager-bar-tooltip.align-right {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Tooltip Arrow */
+.manager-bar-tooltip.pos-above::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #0f172a transparent transparent transparent;
+}
+
+.manager-bar-tooltip.pos-inside::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent #0f172a transparent;
+}
+
+.manager-bar-tooltip.align-left::after {
+  left: 20px;
+  transform: none;
+}
+
+.manager-bar-tooltip.align-right::after {
+  left: auto;
+  right: 20px;
+  transform: none;
+}
+
+.bar-tooltip-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.bar-tooltip-meta {
+  font-size: 0.725rem;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.bar-tooltip-divider {
+  height: 1px;
+  background: #334155;
+  margin: 6px 0;
+}
+
+.bar-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  margin-top: 3px;
+}
+
+.bar-tooltip-row strong {
+  color: #ffffff;
+}
+
+.bar-tooltip-row strong.text-red {
+  color: #f87171;
+}
+
+.bar-tooltip-row strong.text-blue {
+  color: #60a5fa;
+}
+
+.bar-tooltip-row .text-mint {
+  color: #34d399;
+}
+  gap: 12px;
+  font-size: 0.725rem;
+  color: #cbd5e1;
+  margin-top: 2px;
+}
+
+.bar-tooltip-row strong {
+  color: #ffffff;
+}
+
+.bar-tooltip-row strong.text-red {
+  color: #f87171;
+}
+
+.bar-tooltip-row strong.text-blue {
+  color: #60a5fa;
+}
+
+/* 3. Manager Request Details Modal (.modal-box) */
+.modal-box.modal-request-detail-box {
+  max-width: 680px;
+  width: 95%;
+  padding: 32px 36px 28px 36px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.15);
+  box-sizing: border-box;
+  position: relative;
+}
+
+.modal-header-with-close {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 20px;
 }
 
-.approval-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+.modal-header-with-close .btn-close-modal {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.15s ease;
 }
 
-.approval-info {
+.modal-header-with-close .btn-close-modal:hover {
+  color: #0f172a;
+  transform: scale(1.1);
+}
+
+.manager-request-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+  background: #f8fafc;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.req-detail-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
 }
 
-.approval-info .request-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary, #1e293b);
+.req-detail-item.full-width {
+  grid-column: 1 / -1;
 }
 
-.approval-info .request-meta {
-  font-size: 0.825rem;
-  color: var(--text-secondary, #64748b);
-  display: flex;
-  gap: 12px;
-}
-
-/* Status Badges */
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 20px;
+.req-detail-label {
   font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.req-detail-val {
+  font-size: 0.925rem;
   font-weight: 600;
+  color: #0f172a;
+  margin-top: 4px;
+  word-break: break-word;
 }
 
-.status-badge.pending {
-  background-color: #fef3c7;
-  color: #b45309;
-}
-
-.status-badge.approved {
-  background-color: #dcfce7;
-  color: #15803d;
-}
-
-.status-badge.rejected {
-  background-color: #fee2e2;
-  color: #b91c1c;
-}
-
-/* Approval Action Buttons */
-.approval-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.btn-approve {
-  background-color: var(--primary-color, #27c690);
-  color: #ffffff;
-  border: none;
-  padding: 8px 16px;
+.req-detail-payload-box {
+  margin-top: 6px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  font-size: 0.875rem;
+  color: #334155;
+  white-space: pre-wrap;
+  line-height: 1.5;
 }
 
-.btn-approve:hover {
-  background-color: var(--primary-hover, #20b582);
+/* 4. Action Buttons in Manager Modals */
+.manager-request-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
 }
 
 .btn-reject {
   background-color: #ffffff;
   color: #ef4444;
   border: 1.5px solid #fca5a5;
-  padding: 7px 15px;
+  padding: 9px 18px;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: inherit;
 }
 
 .btn-reject:hover {
   background-color: #fee2e2;
   border-color: #ef4444;
+  color: #b91c1c;
+  transform: translateY(-1px);
 }
 
+.btn-reject:active {
+  transform: translateY(0);
+}
+
+/* 5. Feedback Messages */
+#manager-feedback {
+  display: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+#manager-feedback.show-success {
+  display: inline-block;
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+#manager-feedback.show-error {
+  display: inline-block;
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* 6. Table Empty State */
+.table-empty-state {
+  text-align: center;
+  padding: 48px 16px !important;
+  color: #64748b;
+}
+
+.empty-state-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.empty-state-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.empty-state-wrap p {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.empty-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+/* 7. Responsive adjustments */
+@media (max-width: 900px) {
+  .manager-request-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .manager-chart {
+    height: 200px;
+  }
+}

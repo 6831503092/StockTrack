@@ -21,6 +21,10 @@
 
         if (user && user.userId !== undefined && user.userId !== null) {
             headers['X-User-Id'] = String(user.userId);
+        } else if (user && user.role === 'MANAGER') {
+            headers['X-User-Id'] = '503069';
+        } else if (user && user.role === 'ADMIN') {
+            headers['X-User-Id'] = '503092';
         }
 
         const config = {

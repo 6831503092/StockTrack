@@ -445,7 +445,19 @@
                             <span class="badge-status ${statusClass}">${escapeHtml(po.status)}</span>
                         </td>
                         <td>
-                            <button type="button" class="btn-action-detail" onclick="viewPODetail('${escapeHtml(displayId)}')">Detail</button>
+                            <div class="action-buttons-group">
+                                <button type="button" class="btn-action-detail" onclick="viewPODetail('${escapeHtml(displayId)}')">Detail</button>
+                                ${String(po.status || '').toUpperCase() === 'REJECTED' ? `
+                                    <button type="button" class="btn-action-reason" onclick="viewPORejectionReason('${escapeHtml(displayId)}')" title="View reason for rejection">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Reason
+                                    </button>
+                                ` : ''}
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -822,10 +834,40 @@
                 unitColumnLabel: 'Unit Cost',
                 items: po.items || [],
                 totalQty: po.totalQty !== undefined ? po.totalQty : (po.totalQuantity || 0),
-                totalPrice: po.totalPrice !== undefined ? po.totalPrice : (po.totalAmount || 0)
+                totalPrice: po.totalPrice !== undefined ? po.totalPrice : (po.totalAmount || 0),
+                decisionReason: po.decisionReason || '',
+                decidedByName: po.decidedByName || '',
+                decidedDatetime: po.decidedDatetime || ''
             });
 
             AdminApp.openModal('modal-po-detail');
+        }
+
+        async function viewPORejectionReason(poId) {
+            let po = poData.find(item => String(item.poId || item.id) === String(poId));
+            if (!po || !po.decisionReason) {
+                try {
+                    const rawId = String(poId).replace(/^#/, '');
+                    const res = await window.api.get(`/api/purchase-orders/${rawId}`);
+                    if (res?.success && res.data) {
+                        po = res.data;
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch PO details:', err);
+                }
+            }
+            if (!po) return;
+
+            AdminApp.showRejectionModal({
+                title: 'Reason for Rejection',
+                requestId: po.poId || po.id,
+                requestType: 'Purchase Order',
+                date: po.orderDatetime || po.date,
+                rejectedBy: po.decidedByName || 'Manager',
+                rejectedDatetime: po.decidedDatetime,
+                reason: po.decisionReason || 'No specific reason provided by manager.',
+                onViewDetail: () => viewPODetail(poId)
+            });
         }
 
         // Initialize: Load all data from API

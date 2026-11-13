@@ -35,6 +35,9 @@ public class SalesOrderDto {
     private Integer totalQty;
     private BigDecimal totalPrice;
     private String status; // "Pending", "Approved", "Rejected", "Issued"
+    private String decisionReason;
+    private String decidedByName;
+    private LocalDateTime decidedDatetime;
     private List<SalesOrderItemDto> items;
 
     public static SalesOrderDto fromEntity(SalesOrder so, List<SalesOrderItem> items) {
@@ -53,10 +56,16 @@ public class SalesOrderDto {
         User creator = so.getCreatedBy();
         Integer creatorUserId = creator != null ? creator.getUserId() : null;
 
+        var appReq = so.getRequest();
+        String decisionReason = appReq != null ? appReq.getDecisionReason() : null;
+        String decidedByName = (appReq != null && appReq.getDecidedBy() != null)
+                ? appReq.getDecidedBy().getFullName() : null;
+        LocalDateTime decidedDatetime = appReq != null ? appReq.getDecidedDatetime() : null;
+
         return SalesOrderDto.builder()
                 .id(so.getSoId())
                 .soId(so.getSoId())
-                .requestId(so.getRequest() != null ? so.getRequest().getRequestId() : null)
+                .requestId(appReq != null ? appReq.getRequestId() : null)
                 .customerId(cust != null ? cust.getCustomerId() : null)
                 .customer(custName)
                 .customerName(custName)
@@ -68,6 +77,9 @@ public class SalesOrderDto {
                 .totalQty(totalQty)
                 .totalPrice(so.getTotalAmount() != null ? so.getTotalAmount() : BigDecimal.ZERO)
                 .status(so.getStatus() != null ? formatStatus(so.getStatus().name()) : "Pending")
+                .decisionReason(decisionReason)
+                .decidedByName(decidedByName)
+                .decidedDatetime(decidedDatetime)
                 .items(itemDtos)
                 .build();
     }
