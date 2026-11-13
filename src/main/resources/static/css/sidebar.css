@@ -111,7 +111,7 @@
 .sidebar-logo .logo-text {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--primary-color, #27c690);
+  color: var(--primary-color, #10b981);
   letter-spacing: -0.02em;
   white-space: nowrap;
   opacity: 0;
@@ -166,8 +166,8 @@
   transition: color 0.2s ease;
 }
 
-.sidebar-user .role-title.role-admin { color: #27c690; }
-.sidebar-user .role-title.role-manager { color: #3b82f6; }
+.sidebar-user .role-title.role-admin { color: #10b981; }
+.sidebar-user .role-title.role-manager { color: #10b981; }
 .sidebar-user .role-title.role-owner { color: #8b5cf6; }
 .sidebar-user .role-title.role-staff { color: #10b981; }
 
@@ -189,7 +189,7 @@
 }
 
 .sidebar-user:hover .avatar {
-  border-color: var(--primary-color, #27c690);
+  border-color: var(--primary-color, #10b981);
 }
 
 .sidebar-user-details {

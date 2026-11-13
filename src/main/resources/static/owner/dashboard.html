@@ -12,7 +12,7 @@
     <!-- Stylesheet -->
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
+<body class="role-dashboard owner-dashboard">
     <div class="app-layout">
         <!-- Sidebar Navigation (Modular Component) -->
         <div id="sidebar-container" data-role="OWNER" data-active-menu="dashboard"></div>
@@ -24,9 +24,7 @@
                 <p>Welcome back, Owner. High-level business metrics, executive approvals, and store insights.</p>
             </header>
 
-            <section class="placeholder-card">
-                <p style="color: #64748b;">พื้นที่ส่วนแสดงผลข้อมูลหลักของหน้า Owner (เช่น สรุปผลประกอบการ ยอดขาย และรายงานภาพรวม)</p>
-            </section>
+            <section class="placeholder-card role-empty-state" aria-labelledby="owner-overview-title"><span class="role-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 20V9l7-5 7 5v11M9 20v-6h6v6M8 10h.01M16 10h.01"/></svg></span><div><p class="role-empty-eyebrow">OWNER WORKSPACE</p><h2 id="owner-overview-title">Executive overview</h2><p>Business summaries and reports are not connected in this workspace yet.</p></div></section>
         </main>
     </div>
 

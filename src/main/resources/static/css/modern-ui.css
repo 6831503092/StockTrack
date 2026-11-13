@@ -1,0 +1,244 @@
+/* Shared StockTrack SaaS interface refinements. */
+:root {
+  --ui-radius-sm: 8px;
+  --ui-radius-md: 12px;
+  --ui-radius-lg: 18px;
+  --ui-shadow-card: 0 1px 3px rgba(15, 23, 42, .04), 0 8px 24px rgba(15, 23, 42, .035);
+  --ui-shadow-raised: 0 12px 28px rgba(15, 23, 42, .09);
+}
+
+html { min-width: 320px; background: var(--bg-page); }
+body { color: var(--text-primary); background: var(--bg-page); }
+button, input, select, textarea { font: inherit; }
+button { transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease, transform .16s ease; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(16, 185, 129, .28);
+  outline-offset: 2px;
+}
+button:disabled { cursor: not-allowed; opacity: .55; }
+
+/* Consistent application canvas and content rhythm. */
+.app-layout { background: var(--bg-page); }
+.main-content { padding: clamp(24px, 3.5vw, 48px); }
+.content-header { margin-bottom: 28px; }
+.content-header h1, .manager-dashboard > .main-content > h1 {
+  color: var(--text-primary);
+  font-size: clamp(1.55rem, 2.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1.25;
+}
+.content-header p { margin-top: 7px; color: var(--text-secondary); line-height: 1.6; }
+.placeholder-card, .admin-stat-card, .owner-stat-card, .approval-card {
+  border-color: var(--border-color);
+  border-radius: var(--ui-radius-md);
+  box-shadow: var(--ui-shadow-card);
+}
+.placeholder-card { padding: clamp(24px, 4vw, 40px); }
+.role-empty-state { display: flex; align-items: flex-start; gap: 20px; max-width: 760px; }
+.role-empty-icon { display: grid; place-items: center; width: 48px; height: 48px; flex: 0 0 48px; border-radius: 14px; background: #d1fae5; color: #047857; }
+.role-empty-icon svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.role-empty-eyebrow { margin-bottom: 7px; color: #047857; font-size: 10px; font-weight: 700; letter-spacing: .1em; }
+.role-empty-state h2 { margin-bottom: 7px; color: var(--text-primary); font-size: 18px; letter-spacing: -.02em; }
+.role-empty-state div > p:last-child { max-width: 520px; color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
+
+/* Shared navigation styling for all roles. */
+.sidebar {
+  background: var(--bg-white);
+  border-color: var(--border-color);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, .025);
+}
+.sidebar-user .role-title.role-admin,
+.sidebar-user .role-title.role-manager,
+.sidebar-user .role-title.role-owner,
+.sidebar-user .role-title.role-staff { color: #047857; }
+.sidebar-logo .logo-icon { stroke: #10b981; }
+.nav-item.active { background: #ecfdf5; }
+.nav-item.active .sidebar-icon-box, .nav-item.active .nav-title { color: #047857; }
+.manager-dashboard .nav-item.active { background: #ecfdf5; }
+.manager-dashboard .nav-item.active .sidebar-icon-box,
+.manager-dashboard .nav-item.active .nav-title { color: #047857; }
+.nav-item:hover { background: #f1f5f9; }
+.sidebar-divider { background: #edf2f7; }
+.nav-item, .nav-logout { min-height: 44px; }
+
+/* Login form controls. */
+.right-panel { background: var(--bg-white); }
+.form-header h1 { letter-spacing: -.04em; }
+.form-group label { color: #334155; font-weight: 600; }
+.form-group input { min-height: 48px; border-color: var(--border-color); border-radius: 10px; }
+.form-group input:focus { border-color: var(--primary-color); }
+.btn-submit {
+  min-height: 48px;
+  background: var(--primary-color);
+  box-shadow: 0 5px 14px rgba(16, 185, 129, .18);
+}
+.btn-submit:hover { background: var(--primary-hover); box-shadow: 0 8px 20px rgba(16, 185, 129, .24); }
+
+/* Manager dashboard cards, chart, product table, filters, and edit dialog. */
+.manager-dashboard .app-layout { background: var(--bg-page); }
+.manager-dashboard .main-content { padding: clamp(24px, 3.5vw, 48px); }
+.manager-dashboard .main-content > h1 { margin-bottom: 24px; color: var(--text-primary); font-size: clamp(1.55rem, 2.2vw, 2rem); font-weight: 700; letter-spacing: -.035em; line-height: 1.25; }
+.manager-dashboard > .app-layout > .main-content > h1 { margin-bottom: 24px; }
+.manager-dashboard .manager-summary { max-width: none; gap: 16px; }
+.manager-dashboard .manager-summary article {
+  min-width: 0;
+  padding: 20px;
+  border-color: var(--border-color);
+  border-radius: var(--ui-radius-md);
+  background: var(--bg-white);
+  box-shadow: var(--ui-shadow-card);
+  color: var(--text-primary);
+}
+.manager-dashboard .manager-summary article > div { gap: 12px; }
+.manager-dashboard .manager-summary h2 { color: var(--text-secondary); font-size: 12px; font-weight: 600; }
+.manager-dashboard .manager-summary strong { margin: 16px 0 4px; color: var(--text-primary); font-size: 28px; font-weight: 700; letter-spacing: -.04em; }
+.manager-dashboard .manager-summary p { margin-left: 0; color: var(--text-secondary); font-size: 12px; }
+.manager-dashboard .manager-icon { width: 40px; height: 40px; border-radius: 11px; color: #047857; font-size: 21px; }
+.manager-dashboard .manager-summary .blue,
+.manager-dashboard .manager-summary .green { background: #d1fae5; }
+.manager-dashboard .manager-summary .red { background: #fee2e2; color: #b91c1c; }
+.manager-dashboard .manager-summary .orange { background: #fef3c7; color: #b45309; }
+.manager-dashboard .manager-chart-panel,
+.manager-dashboard .manager-products {
+  margin-left: 0;
+  margin-right: 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--ui-radius-md);
+  background: var(--bg-white);
+  box-shadow: var(--ui-shadow-card);
+}
+.manager-dashboard .manager-chart-panel { padding: 24px; }
+.manager-dashboard .manager-chart-heading h2 { color: var(--text-primary); font-size: 16px; font-weight: 700; }
+.manager-dashboard .manager-chart-heading p, .manager-dashboard .manager-axis { color: var(--text-secondary); }
+.manager-dashboard .manager-legend::before,
+.manager-dashboard .manager-bar { background: var(--primary-color); }
+.manager-dashboard .manager-bars {
+  background: linear-gradient(var(--border-color),var(--border-color)) top/100% 1px no-repeat,
+    linear-gradient(var(--border-color),var(--border-color)) 0 calc(50% - 15px)/100% 1px no-repeat,
+    linear-gradient(var(--border-color),var(--border-color)) 0 calc(100% - 30px)/100% 1px no-repeat;
+}
+.manager-dashboard .manager-products { overflow: hidden; padding: 22px 0 18px; }
+.manager-dashboard .manager-products-toolbar { padding: 0 24px 20px; gap: 12px; }
+.manager-dashboard .manager-products-toolbar h2 { color: var(--text-primary); font-size: 20px; font-weight: 700; letter-spacing: -.025em; }
+.manager-dashboard .manager-products-toolbar input,
+.manager-dashboard .manager-products-toolbar select {
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--ui-radius-sm);
+  background: #fff;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.manager-dashboard .manager-search input { width: min(310px, 100%); }
+.manager-dashboard .manager-table-scroll { overflow-x: auto; }
+.manager-dashboard table { min-width: 760px; color: var(--text-primary); font-size: 13px; text-align: left; }
+.manager-dashboard th { padding: 13px 16px; background: #f8fafc; color: #475569; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.manager-dashboard td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
+.manager-dashboard tbody tr:hover { background: #f8fafc; }
+.manager-dashboard .manager-edit-button { padding: 6px 10px; border: 1px solid #a7f3d0; border-radius: 7px; color: #047857; font-size: 12px; font-weight: 600; }
+.manager-dashboard .manager-edit-button:hover { background: #ecfdf5; color: #047857; }
+.manager-dashboard .manager-data-note { margin: 16px 24px 0; color: var(--text-secondary); }
+.manager-dashboard #manager-feedback { color: var(--text-secondary); }
+.manager-dashboard dialog { max-height: min(90vh, 760px); overflow-y: auto; border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--ui-shadow-raised); }
+.manager-dashboard dialog label { color: #334155; font-weight: 600; }
+.manager-dashboard dialog input { min-height: 42px; border-color: var(--border-color); border-radius: 8px; font: inherit; }
+.manager-dashboard dialog button { min-height: 40px; border-radius: 8px; font-weight: 600; }
+.manager-dashboard dialog button[type=submit] { border-color: var(--primary-color); background: var(--primary-color); }
+.manager-dashboard dialog button[type=submit]:hover { background: var(--primary-hover); }
+
+/* Responsive layouts, including a shared bottom navigation for touch screens. */
+@media (max-width: 900px) {
+  .manager-dashboard .manager-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 768px) {
+  .app-layout { display: block; min-height: 100vh; }
+  .app-layout #sidebar-container {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 1000;
+    width: 100%;
+    height: 68px;
+    background: #fff;
+  }
+  .app-layout #sidebar-container .sidebar {
+    position: static;
+    display: flex;
+    width: 100%;
+    height: 68px;
+    min-height: 68px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px max(6px, env(safe-area-inset-bottom));
+    border: 1px solid var(--border-color);
+    border-bottom: 0;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 24px rgba(15, 23, 42, .07);
+    overflow: visible;
+  }
+  .app-layout #sidebar-container .sidebar-logo,
+  .app-layout #sidebar-container .sidebar-user,
+  .app-layout #sidebar-container .sidebar-divider,
+  .app-layout #sidebar-container .sidebar-menu-label { display: none; }
+  .app-layout #sidebar-container .sidebar-nav {
+    display: flex;
+    flex: 1;
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 4px;
+  }
+  .app-layout #sidebar-container .nav-item,
+  .app-layout #sidebar-container .nav-logout {
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+    margin: 0;
+    border-radius: 12px;
+  }
+  .app-layout #sidebar-container .nav-item .sidebar-icon-box,
+  .app-layout #sidebar-container .nav-logout .sidebar-icon-box { width: 48px; height: 48px; }
+  .app-layout #sidebar-container .sidebar-bottom {
+    display: flex;
+    width: auto;
+    margin: 0 0 0 4px;
+    padding: 0;
+    border: 0;
+  }
+  .app-layout #sidebar-container .nav-title,
+  .app-layout #sidebar-container .nav-item::after,
+  .app-layout #sidebar-container .nav-logout::after { display: none !important; }
+  .app-layout #sidebar-container .sidebar-bottom .nav-logout:hover { color: #b91c1c; background: #fef2f2; }
+  .app-layout > .main-content,
+  .app-layout > #sidebar-container + .main-content { min-height: 100vh; padding: 24px 18px 96px; }
+  .manager-dashboard .main-content { padding: 24px 18px 96px; }
+  .manager-dashboard .manager-summary { gap: 12px; }
+  .manager-dashboard .manager-summary article { padding: 16px; }
+  .manager-dashboard .manager-chart-panel { padding: 18px 14px; }
+  .manager-dashboard .manager-products-toolbar { padding: 0 16px 18px; }
+}
+@media (max-width: 540px) {
+  .main-content { padding: 22px 16px 96px; }
+  .content-header { margin-bottom: 22px; }
+  .manager-dashboard .manager-summary { grid-template-columns: 1fr 1fr; }
+  .manager-dashboard .manager-summary article { min-height: 126px; padding: 14px 12px; }
+  .manager-dashboard .manager-summary article > div { align-items: flex-start; gap: 8px; }
+  .manager-dashboard .manager-summary h2 { padding-top: 2px; font-size: 11px; }
+  .manager-dashboard .manager-icon { width: 34px; height: 34px; flex: 0 0 34px; font-size: 18px; }
+  .manager-dashboard .manager-chart-heading { align-items: flex-start; }
+  .manager-dashboard .manager-legend { margin-right: 0; white-space: nowrap; }
+  .manager-dashboard .manager-axis { width: 30px; }
+  .manager-dashboard .manager-bar-label { max-width: 64px; overflow-wrap: anywhere; }
+  .manager-dashboard .manager-products-toolbar h2 { width: 100%; }
+  .manager-dashboard .manager-search, .manager-dashboard .manager-products-toolbar > label:last-child { flex-basis: 100%; }
+  .manager-dashboard .manager-search input, .manager-dashboard .manager-products-toolbar select { width: 100%; }
+  .manager-dashboard dialog form > div { flex-wrap: wrap; }
+  .role-empty-state { gap: 14px; padding: 22px 18px; }
+  .role-empty-icon { width: 40px; height: 40px; flex-basis: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

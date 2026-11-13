@@ -263,7 +263,7 @@
 }
 
 .badge-icon-wrap.icon-green-solid {
-    background: linear-gradient(135deg, #27c690 0%, #1ea678 100%);
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
     box-shadow: 0 3px 8px rgba(39, 198, 144, 0.35);
 }
 
@@ -284,8 +284,8 @@
 }
 
 .badge-chart-bars .bar-1 { height: 10px; }
-.badge-chart-bars .bar-2 { height: 16px; background: #27c690; }
-.badge-chart-bars .bar-3 { height: 22px; background: #27c690; }
+.badge-chart-bars .bar-2 { height: 16px; background: #10b981; }
+.badge-chart-bars .bar-3 { height: 22px; background: #10b981; }
 .badge-chart-bars .bar-4 { height: 13px; background: #6ee7b7; }
 
 /* Badge 2: Pulse & Line Tracker */
@@ -299,7 +299,7 @@
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    background: #27c690;
+    background: #10b981;
     position: relative;
 }
 
@@ -328,7 +328,7 @@
     top: 0;
     bottom: 0;
     width: 62%;
-    background: #27c690;
+    background: #10b981;
     border-radius: 3px;
 }
 
@@ -346,9 +346,9 @@
     border-radius: 1px;
 }
 
-.barcode-lines .b-1 { width: 3px; background: #27c690; }
+.barcode-lines .b-1 { width: 3px; background: #10b981; }
 .barcode-lines .b-2 { width: 1.5px; }
-.barcode-lines .b-3 { width: 4px; background: #27c690; }
+.barcode-lines .b-3 { width: 4px; background: #10b981; }
 .barcode-lines .b-4 { width: 2px; }
 .barcode-lines .b-5 { width: 3px; }
 
@@ -365,7 +365,7 @@
 .badge-progress-pill .progress-fill {
     width: 78%;
     height: 100%;
-    background: linear-gradient(90deg, #27c690, #34d399);
+    background: linear-gradient(90deg, #10b981, #34d399);
     border-radius: 4px;
 }
 

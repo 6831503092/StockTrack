@@ -6,6 +6,7 @@
 @import 'admin.css';
 @import 'manager.css';
 @import 'owner.css';
+@import 'modern-ui.css';
 
 /* ==========================================
    StockTrack - Global Styles & Design Tokens
@@ -13,23 +14,23 @@
 
 :root {
     /* Brand Colors */
-    --primary-color: #27c690;
-    --primary-hover: #20b582;
-    --primary-active: #1aa072;
-    --primary-light: #e8f8f2;
-    --primary-glow: rgba(39, 198, 144, 0.2);
+    --primary-color: #10b981;
+    --primary-hover: #047857;
+    --primary-active: #047857;
+    --primary-light: #d1fae5;
+    --primary-glow: rgba(16, 185, 129, 0.2);
 
     /* Left Panel Mint Shades */
-    --mint-bg: #edf8f3;
-    --mint-surface: #e2f4ec;
-    --mint-accent: #c7edd9;
+    --mint-bg: #f0fdf4;
+    --mint-surface: #ecfdf5;
+    --mint-accent: #d1fae5;
 
     /* Neutral Colors */
     --text-primary: #1e293b;
     --text-secondary: #64748b;
     --text-muted: #94a3b8;
     --border-color: #e2e8f0;
-    --border-focus: #27c690;
+    --border-focus: #10b981;
     --bg-white: #ffffff;
     --bg-page: #f8fafc;
 
@@ -39,8 +40,8 @@
     /* Transitions & Shadows */
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s ease;
-    --shadow-input-focus: 0 0 0 4px rgba(39, 198, 144, 0.15);
-    --shadow-button-hover: 0 8px 24px rgba(39, 198, 144, 0.28);
+    --shadow-input-focus: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    --shadow-button-hover: 0 8px 24px rgba(16, 185, 129, 0.2);
 }
 
 /* Base Reset */

@@ -12,7 +12,7 @@
     <!-- Stylesheet -->
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
+<body class="role-dashboard admin-dashboard">
     <div class="app-layout">
         <!-- Sidebar Navigation (Modular Component) -->
         <div id="sidebar-container" data-role="ADMIN" data-active-menu="dashboard"></div>
@@ -24,9 +24,7 @@
                 <p>Welcome back, Administrator. Manage users, inventory, and system orders.</p>
             </header>
 
-            <section class="placeholder-card">
-                <p style="color: #64748b;">พื้นที่ส่วนแสดงผลข้อมูลหลักของหน้า Admin Dashboard</p>
-            </section>
+            <section class="placeholder-card role-empty-state" aria-labelledby="admin-overview-title"><span class="role-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></span><div><p class="role-empty-eyebrow">ADMIN WORKSPACE</p><h2 id="admin-overview-title">Administrative overview</h2><p>Dashboard summaries are not connected in this workspace yet.</p></div></section>
         </main>
     </div>
 

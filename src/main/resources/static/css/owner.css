@@ -5,14 +5,14 @@
 
 /* Owner Specific Accent & Variables */
 :root {
-  --owner-accent: #7c3aed;
-  --owner-accent-light: #f5f3ff;
-  --owner-accent-border: #ddd6fe;
+  --owner-accent: #047857;
+  --owner-accent-light: #d1fae5;
+  --owner-accent-border: #a7f3d0;
 }
 
 /* Owner Role Badge */
 .sidebar-user .role-title.role-owner {
-  color: #7c3aed;
+  color: #047857;
   font-weight: 600;
 }
 

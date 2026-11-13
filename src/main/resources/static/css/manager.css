@@ -5,14 +5,14 @@
 
 /* Manager Specific Accent & Variables */
 :root {
-  --manager-accent: #f59e0b;
-  --manager-accent-light: #fffbeb;
-  --manager-accent-border: #fde68a;
+  --manager-accent: #10b981;
+  --manager-accent-light: #d1fae5;
+  --manager-accent-border: #a7f3d0;
 }
 
 /* Manager Role Badge */
 .sidebar-user .role-title.role-manager {
-  color: #d97706;
+  color: #047857;
   font-weight: 600;
 }
 
@@ -94,7 +94,7 @@
 }
 
 .btn-approve {
-  background-color: var(--primary-color, #27c690);
+  background-color: var(--primary-color, #10b981);
   color: #ffffff;
   border: none;
   padding: 8px 16px;
@@ -106,7 +106,7 @@
 }
 
 .btn-approve:hover {
-  background-color: var(--primary-hover, #20b582);
+  background-color: var(--primary-hover, #047857);
 }
 
 .btn-reject {
@@ -142,12 +142,12 @@
 .manager-dashboard .manager-chart-panel { margin: 28px 4px 36px; padding: 24px 28px; border: 1px solid #dce4f1; border-radius: 14px; }
 .manager-dashboard .manager-chart-heading { display: flex; justify-content: space-between; gap: 12px; }
 .manager-dashboard .manager-chart-heading h2 { font-size: 16px; }.manager-dashboard .manager-chart-heading p { font-size: 11px; color: #71809c; margin-top: 5px; }
-.manager-dashboard .manager-legend { font-size: 11px; color: #71809c; margin-right: 12%; }.manager-dashboard .manager-legend::before { content: ''; display: inline-block; width: 10px; height: 10px; background: #2088d8; border-radius: 3px; margin-right: 8px; }
+.manager-dashboard .manager-legend { font-size: 11px; color: #71809c; margin-right: 12%; }.manager-dashboard .manager-legend::before { content: ''; display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 3px; margin-right: 8px; }
 .manager-dashboard .manager-chart { height: 205px; display: flex; margin-top: 26px; gap: 22px; }
 .manager-dashboard .manager-axis { display: flex; flex-direction: column; justify-content: space-between; width: 42px; padding-bottom: 30px; font-size: 10px; color: #71809c; }
 .manager-dashboard .manager-bars { flex: 1; display: flex; justify-content: space-around; gap: 20px; padding: 0 24px; background: linear-gradient(#dce4f1,#dce4f1) top/100% 1px no-repeat,linear-gradient(#dce4f1,#dce4f1) 0 calc(50% - 15px)/100% 1px no-repeat,linear-gradient(#dce4f1,#dce4f1) 0 calc(100% - 30px)/100% 1px no-repeat; }
 .manager-dashboard .manager-bar-column { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-width: 0; position: relative; padding-bottom: 30px; }
-.manager-dashboard .manager-bar { width: min(95px,75%); background: #2088d8; border-radius: 9px 9px 7px 7px; position: relative; min-height: 1px; }
+.manager-dashboard .manager-bar { width: min(95px,75%); background: #10b981; border-radius: 9px 9px 7px 7px; position: relative; min-height: 1px; }
 .manager-dashboard .manager-bar strong { position: absolute; top: -24px; width: 100%; text-align: center; font-size: 12px; font-weight: 600; }
 .manager-dashboard .manager-bar-label { position: absolute; bottom: 0; font-size: 12px; color: #64748b; white-space: nowrap; }
 .manager-dashboard .manager-products { border: 1px solid #ccc; border-radius: 10px; padding: 24px 0 20px; }
@@ -155,10 +155,10 @@
 .manager-dashboard .manager-products-toolbar input,.manager-dashboard select { padding: 10px 18px; border: 1px solid #999; border-radius: 5px; font: inherit; font-size: 16px; background: white; color: #334155; }
 .manager-dashboard .manager-search input { width: 310px; }.manager-dashboard select { min-width: 150px; }
 .manager-dashboard .manager-table-scroll { overflow-x: auto; }.manager-dashboard table { border-collapse: collapse; width: 100%; min-width: 850px; color: #111; text-align: center; font-size: 16px; }.manager-dashboard th { background: #eee; padding: 22px 14px; font-weight: 500; }.manager-dashboard td { padding: 24px 14px; }.manager-dashboard th:first-child { border-radius: 12px 0 0 12px; }.manager-dashboard th:last-child { border-radius: 0 12px 12px 0; }
-.manager-dashboard .manager-edit-button { background: transparent; border: 0; cursor: pointer; color: #111; font: inherit; }.manager-dashboard .manager-edit-button:hover { color: #2088d8; }
+.manager-dashboard .manager-edit-button { background: transparent; border: 0; cursor: pointer; color: #111; font: inherit; }.manager-dashboard .manager-edit-button:hover { color: #10b981; }
 .manager-dashboard .manager-data-note { font-size: 11px; color: #71809c; margin: 22px 30px 0; }.manager-dashboard #manager-feedback { font-size: 12px; margin-top: 14px; }
 .manager-dashboard .manager-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .manager-dashboard .sidebar-user .role-title.role-manager { color: #64748b; font-weight: 500; }.manager-dashboard .nav-item.active { background: #e7eaef; }.manager-dashboard .sidebar-menu-label { text-transform: none; letter-spacing: 0; }
-.manager-dashboard dialog { margin: auto; padding: 28px; width: min(440px,calc(100% - 32px)); border: 1px solid #dce4f1; border-radius: 14px; color: #1e293b; }.manager-dashboard dialog::backdrop { background: #0f172a66; }.manager-dashboard dialog h2 { font-size: 20px; margin-bottom: 18px; }.manager-dashboard dialog label { display: block; font-size: 12px; margin-top: 12px; }.manager-dashboard dialog input { display: block; width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #cbd5e1; border-radius: 6px; }.manager-dashboard dialog form > div { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }.manager-dashboard dialog button { padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; }.manager-dashboard dialog button[type=submit] { background: #2088d8; color: white; }.manager-dashboard #manager-edit-error { color: #b91c1c; font-size: 12px; margin-top: 12px; }
+.manager-dashboard dialog { margin: auto; padding: 28px; width: min(440px,calc(100% - 32px)); border: 1px solid #dce4f1; border-radius: 14px; color: #1e293b; }.manager-dashboard dialog::backdrop { background: #0f172a66; }.manager-dashboard dialog h2 { font-size: 20px; margin-bottom: 18px; }.manager-dashboard dialog label { display: block; font-size: 12px; margin-top: 12px; }.manager-dashboard dialog input { display: block; width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #cbd5e1; border-radius: 6px; }.manager-dashboard dialog form > div { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }.manager-dashboard dialog button { padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; }.manager-dashboard dialog button[type=submit] { background: #10b981; color: white; }.manager-dashboard #manager-edit-error { color: #b91c1c; font-size: 12px; margin-top: 12px; }
 @media(max-width:1100px) { .manager-dashboard .manager-summary { gap: 16px; }.manager-dashboard .manager-products-toolbar { flex-wrap: wrap; }.manager-dashboard .manager-products-toolbar h2 { width: 100%; }.manager-dashboard .manager-search { flex: 1; }.manager-dashboard .manager-search input { width: 100%; } }
 @media(max-width:768px) { .manager-dashboard #sidebar-container { width: 64px; flex-shrink: 0; }.manager-dashboard .sidebar { display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: 64px; background: white; border-right: 1px solid #eef2f6; padding: 20px 0; }.manager-dashboard .sidebar-logo,.manager-dashboard .sidebar-user,.manager-dashboard .nav-item,.manager-dashboard .nav-logout,.manager-dashboard .sidebar-menu-label { margin-left: 10px; margin-right: 10px; }.manager-dashboard .sidebar-divider { margin: 16px 10px; }.manager-dashboard .main-content { padding: 20px 16px; }.manager-dashboard .manager-summary { grid-template-columns: repeat(2,minmax(0,1fr)); }.manager-dashboard .manager-chart-panel { padding: 18px 12px; margin-left: 0; margin-right: 0; }.manager-dashboard .manager-bar-label { font-size: 9px; white-space: normal; text-align: center; }.manager-dashboard .manager-bars { padding: 0; gap: 8px; }.manager-dashboard .manager-chart { gap: 8px; }.manager-dashboard .manager-products-toolbar { padding: 0 16px 20px; gap: 12px; }.manager-dashboard .manager-products-toolbar h2 { font-size: 22px; }.manager-dashboard .manager-search { flex-basis: 100%; } }

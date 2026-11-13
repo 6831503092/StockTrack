@@ -11,14 +11,14 @@
 <a class="staff-skip-link" href="#staff-main">Skip to content</a>
 <div class="app-layout"><div id="sidebar-container" data-role="STAFF" data-active-menu="transfer"></div>
 <main class="main-content" id="staff-main" tabindex="-1">
-<header class="staff-header"><div><h1>Transfer Product</h1><p id="transfer-subtitle">Select an approved request to begin</p></div><span class="connection-status" id="transfer-connection" role="status"><span></span>Online</span></header>
+<header class="staff-header"><div class="workflow-hero-copy"><p class="workflow-hero-kicker">WAREHOUSE / STOCK MOVEMENT</p><h1>Transfer Product</h1><p id="transfer-subtitle">Select an approved request to begin</p></div><div class="workflow-hero-art transfer-art" aria-hidden="true"><svg viewBox="0 0 180 140" fill="none"><path d="m27 48 63-33 63 33v62l-63 33-63-33V48Z" fill="#fff" fill-opacity=".09" stroke="#fff" stroke-opacity=".55" stroke-width="2"/><path d="m27 48 63 35 63-35M90 83v60" stroke="#fff" stroke-opacity=".55" stroke-width="2"/><path d="M60 59h54l-12-11m12 11-12 11M120 85H66l12-11m-12 11 12 11" stroke="#f0e5ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="142" cy="27" r="5" fill="#ecdfff"/></svg></div><span class="connection-status" id="transfer-connection" role="status"><span></span>Online</span></header>
 <p class="transfer-eyebrow">TRANSFER WORKFLOW / <span id="transfer-stage-label">REQUESTS</span></p>
 <h2 id="transfer-stage-title" tabindex="-1">Requests</h2>
 <ol class="transfer-steps" aria-label="Workflow progress"><li aria-current="step">1. Requests</li><li>2. Details</li><li>3. Verify</li><li>4. Confirm</li><li>5. Result</li></ol>
 <p id="transfer-alert" role="alert" hidden></p>
 <section aria-live="polite" id="transfer-stage-content" aria-labelledby="transfer-stage-title"></section>
 <aside class="transfer-tip"><h3>Tip</h3><p id="transfer-tip-text">Only approved requests can be processed.</p></aside>
-<footer class="transfer-footer"><div><p id="transfer-save-note">Draft progress is saved locally until the staff member confirms.</p><small>Sample requests · Browser only; warehouse inventory is not updated.</small></div><div><button type="button" id="transfer-back" hidden>? Back</button><button type="button" id="transfer-next">Continue ?</button></div></footer>
+<footer class="transfer-footer"><div><p id="transfer-save-note">Draft progress is saved locally until the staff member confirms.</p><small>Sample requests ï¿½ Browser only; warehouse inventory is not updated.</small></div><div><button type="button" id="transfer-back" hidden>? Back</button><button type="button" id="transfer-next">Continue ?</button></div></footer>
 <a class="workflow-dashboard-link" href="dashboard.html">? Back to dashboard</a>
 </main></div>
 <script src="../js/api.js"></script><script src="../js/sidebar.js"></script><script>
@@ -93,10 +93,10 @@
         const item = request();
         if (step === 4) {
             const panel = el('div',undefined,content); panel.className = 'transfer-details';
-            el('h3','Transfer saved successfully',panel); el('p','Request ' + item.id + ' · ' + item.reference,panel); el('p',quantities.reduce((sum,q) => sum + q,0) + ' units recorded in this browser.',panel); el('p','Warehouse inventory has not been updated.',panel); return;
+            el('h3','Transfer saved successfully',panel); el('p','Request ' + item.id + ' ï¿½ ' + item.reference,panel); el('p',quantities.reduce((sum,q) => sum + q,0) + ' units recorded in this browser.',panel); el('p','Warehouse inventory has not been updated.',panel); return;
         }
         const panel = el('div',undefined,content); panel.className = 'transfer-details';
-        el('h3',item.id + ' · ' + item.reference,panel); el('p','Requested by ' + item.requester + ' · ' + item.date,panel); el('p','Source: Warehouse 1 ? Destination: Warehouse 2 · Status: Approved',panel);
+        el('h3',item.id + ' ï¿½ ' + item.reference,panel); el('p','Requested by ' + item.requester + ' ï¿½ ' + item.date,panel); el('p','Source: Warehouse 1 ? Destination: Warehouse 2 ï¿½ Status: Approved',panel);
         const body = table(['Product','Approved quantity',step === 1 ? 'Unit' : 'Transfer quantity']);
         item.items.forEach((product,i) => {
             const row = el('tr',undefined,body); el('td',product[0],row); el('td',product[1],row);
@@ -148,4 +148,3 @@
 })();
 </script>
 </body></html>
-
