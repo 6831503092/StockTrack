@@ -48,8 +48,14 @@
                 {
                     id: 'dashboard',
                     title: 'Dashboard',
-                    url: '#dashboard',
+                    url: 'dashboard.html',
                     icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2.5"></rect><rect x="13" y="3" width="8" height="8" rx="2.5"></rect><rect x="3" y="13" width="8" height="8" rx="2.5"></rect><rect x="13" y="13" width="8" height="8" rx="2.5"></rect></svg>`
+                },
+                {
+                    id: 'activity-log',
+                    title: 'Activity Log',
+                    url: 'activity-log.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path><path d="M12 7v5l3 2"></path></svg>`
                 }
             ]
         },
