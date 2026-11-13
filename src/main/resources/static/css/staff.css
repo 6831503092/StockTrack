@@ -229,9 +229,13 @@
 :is(.receive-workflow,.issue-workflow,.transfer-workflow) td { padding: 18px 10px; border-bottom: 1px solid #e1e7f3; }
 :is(.receive-workflow,.issue-workflow,.transfer-workflow) button { font: inherit; cursor: pointer; }
 :is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-open,.issue-open,.transfer-open) { border: 0; background: none; color: #152153; font-size: 11px; }
-:is(.receive-workflow,.issue-workflow,.transfer-workflow) input[type=radio] { appearance: none; width: 16px; height: 20px; border: 1.5px solid #10b981; border-radius: 4px; cursor: pointer; display: grid; place-items: center; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) input[type=radio] { appearance: none; width: 18px; height: 18px; margin: 0; border: 1.5px solid #94a3b8; border-radius: 5px; background: white; cursor: pointer; display: grid; place-items: center; transition: border-color .15s, background-color .15s, box-shadow .15s, transform .15s; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) input[type=radio]:hover { border-color: #10b981; transform: translateY(-1px); box-shadow: 0 3px 8px rgba(16,185,129,.2); }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) input[type=radio]:checked { border-color: #10b981; background: #10b981; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) input[type=radio]:checked::after { content: ''; width: 5px; height: 9px; border: solid white; border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) input[type=radio]:focus-visible { outline: 3px solid rgba(16,185,129,.25); outline-offset: 2px; }
 :is(.receive-workflow,.issue-workflow,.transfer-workflow) input[type=radio]:checked::after { content: '✓'; color: #10b981; font-size: 14px; }
-:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-tip,.issue-tip,.transfer-tip) { margin-top: 54px; margin-bottom: 28px; padding: 16px 14px; background: white; border: 1px solid #e1e7f3; border-left: 3px solid #10b981; border-radius: 0 10px 10px 0; align-self: flex-start; max-width: 300px; }
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-tip,.issue-tip,.transfer-tip) { margin-top: 54px; margin-bottom: 28px; padding: 16px 14px; background: white; border: 1px solid #e1e7f3; border-left: 3px solid #2563eb; border-radius: 0 10px 10px 0; align-self: flex-start; max-width: 300px; }
 :is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-tip,.issue-tip,.transfer-tip) h3 { font-size: 13px; margin-bottom: 10px; }
 :is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-tip,.issue-tip,.transfer-tip) p { font-size: 11px; line-height: 1.8; color: #6a7da5; }
 :is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-footer,.issue-footer,.transfer-footer) { margin-top: auto; padding-top: 0; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
@@ -284,3 +288,32 @@
  .staff-dashboard .summary-card { min-height: 108px; }
  .staff-dashboard .staff-skip-link { left: 12px; }
 }
+
+/* Keep the receipt confirmation prominent above the right-side action button. */
+.receive-workflow .receive-footer > div:last-child { position: relative; }
+.receive-workflow .receive-confirm-check { position: absolute; right: 0; bottom: calc(100% + 12px); width: min(360px, calc(100vw - 48px)); margin: 0; padding: 14px 16px; border: 1px solid #2563eb; border-radius: 10px; background: #eff6ff; color: #065f46; font-size: 14px; font-weight: 600; line-height: 1.5; box-shadow: 0 4px 12px rgba(16, 185, 129, .12); }
+.receive-workflow .receive-confirm-check input { width: 18px; height: 18px; flex: 0 0 auto; accent-color: #10b981; }
+
+
+.issue-workflow .issue-footer > div:last-child, .transfer-workflow .transfer-footer > div:last-child { position: relative; }
+.issue-workflow .issue-confirm-check, .transfer-workflow .transfer-confirm-check { position: absolute; right: 0; bottom: calc(100% + 12px); width: min(360px, calc(100vw - 48px)); margin: 0; padding: 14px 16px; border: 1px solid #2563eb; border-radius: 10px; background: #eff6ff; color: #065f46; font-size: 14px; font-weight: 600; line-height: 1.5; box-shadow: 0 4px 12px rgba(16, 185, 129, .12); }
+.issue-workflow .issue-confirm-check input, .transfer-workflow .transfer-confirm-check input { width: 18px; height: 18px; flex: 0 0 auto; accent-color: #10b981; }
+
+
+.issue-workflow .issue-confirm-check { width: max-content; max-width: calc(100vw - 48px); align-items: center; }
+@media (max-width: 560px) { .issue-workflow .issue-confirm-check { width: min(360px, calc(100vw - 48px)); align-items: flex-start; } }
+
+/* Minimal emphasis for dashboard statistic cards. */
+.staff-dashboard .summary-card { border-color: #e2e8f0; box-shadow: 0 2px 8px rgba(15, 23, 42, .05); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.staff-dashboard .summary-card:hover { transform: translateY(-3px); border-color: #a7f3d0; box-shadow: 0 8px 18px rgba(15, 23, 42, .08); }
+@media (prefers-reduced-motion: reduce) { .staff-dashboard .summary-card { transition: none; } .staff-dashboard .summary-card:hover { transform: none; } }
+
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-confirm-check,.issue-confirm-check,.transfer-confirm-check) { width: max-content; max-width: calc(100vw - 48px); align-items: center; }
+@media (max-width: 560px) { :is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-confirm-check,.issue-confirm-check,.transfer-confirm-check) { width: min(360px, calc(100vw - 48px)); align-items: flex-start; } }
+
+:is(.receive-workflow,.issue-workflow,.transfer-workflow) :is(.receive-confirm-check,.issue-confirm-check,.transfer-confirm-check) { color: #000; }
+
+.staff-dashboard .workflow-icon { display: grid; place-items: center; width: 42px; height: 42px; margin-bottom: 18px; border-radius: 12px; background: #ecfdf5; color: #059669; }
+.staff-dashboard .workflow-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.staff-dashboard .workflow-card:hover .workflow-icon { background: #d1fae5; }
+@media (max-width: 540px) { .staff-dashboard .workflow-icon { width: 36px; height: 36px; margin-bottom: 12px; } }

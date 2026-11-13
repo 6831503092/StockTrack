@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,8 +18,8 @@
 <p id="issue-alert" role="alert" hidden></p>
 <section aria-live="polite" id="issue-stage-content" aria-labelledby="issue-stage-title"></section>
 <aside class="issue-tip"><h3>Tip</h3><p id="issue-tip-text">Only approved requests can be processed.</p></aside>
-<footer class="issue-footer"><div><p id="issue-save-note">Draft progress is saved locally until the staff member confirms.</p><small>Sample requests · Browser only; warehouse inventory is not updated.</small></div><div><button type="button" id="issue-back" hidden>← Back</button><button type="button" id="issue-next">Continue →</button></div></footer>
-<a class="workflow-dashboard-link" href="dashboard.html">← Back to dashboard</a>
+<footer class="issue-footer"><div><p id="issue-save-note">Draft progress is saved locally until the staff member confirms.</p><small>Sample requests � Browser only; warehouse inventory is not updated.</small></div><div><button type="button" id="issue-back" hidden>? Back</button><button type="button" id="issue-next">Continue ?</button></div></footer>
+<a class="workflow-dashboard-link" href="dashboard.html">? Back to dashboard</a>
 </main></div>
 <script src="../js/api.js"></script><script src="../js/sidebar.js"></script><script>
 (function () {
@@ -38,6 +38,7 @@
     const alert = document.getElementById('issue-alert');
     const next = document.getElementById('issue-next');
     const back = document.getElementById('issue-back');
+    const actions = document.querySelector('.issue-footer > div:last-child');
     const titles = ['Requests','Details','Verify','Confirm','Result'];
     function el(tag,text,parent) { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (parent) parent.appendChild(node); return node; }
     function error(text) { alert.textContent = text; alert.hidden = false; }
@@ -67,12 +68,13 @@
     }
     function render() {
         content.replaceChildren();
+        actions.querySelector('.issue-confirm-check')?.remove();
         document.getElementById('issue-stage-title').textContent = titles[step];
         document.getElementById('issue-stage-label').textContent = titles[step].toUpperCase();
         document.getElementById('issue-subtitle').textContent = ['Select an approved request to begin','Review the approved request details','Check quantities against the products picked','Review and confirm your local issue record','Your issue record is complete'][step];
         document.querySelectorAll('.issue-steps li').forEach((node,i) => { node.removeAttribute('aria-current'); if (i === step) node.setAttribute('aria-current','step'); node.classList.toggle('complete',i < step); });
         back.hidden = step === 0 || step === 4;
-        next.textContent = step === 3 ? 'Confirm issue →' : step === 4 ? 'Issue another →' : 'Continue →';
+        next.textContent = step === 3 ? 'Confirm issue ?' : step === 4 ? 'Issue another ?' : 'Continue ?';
         document.getElementById('issue-tip-text').textContent = ['Only approved requests can be processed.','Check the request reference before continuing.','Issued quantities must be between 1 and the approved quantity.','Confirm only after checking the physical goods.','This issue record is saved locally. Warehouse inventory has not been updated.'][step];
         if (step === 0) {
             el('h3','Available approved requests',content);
@@ -80,7 +82,7 @@
             requests.filter(item => !completed.includes(item.id)).forEach(item => {
                 const row = el('tr',undefined,body);
                 [item.id,item.reference,item.requester,item.date,item.items.length,'Approved'].forEach(value => el('td',value,row));
-                const open = el('button','Open →',el('td',undefined,row)); open.type = 'button'; open.className = 'issue-open'; open.setAttribute('aria-label','Open ' + item.id);
+                const open = el('button','Open ?',el('td',undefined,row)); open.type = 'button'; open.className = 'issue-open'; open.setAttribute('aria-label','Open ' + item.id);
                 open.addEventListener('click',() => { choose(item.id); step = 1; render(); focusTitle(); });
                 const radio = el('input',undefined,el('td',undefined,row)); radio.type = 'radio'; radio.name = 'request'; radio.value = item.id; radio.checked = item.id === selected; radio.setAttribute('aria-label','Select ' + item.id);
                 radio.addEventListener('change',() => choose(item.id));
@@ -91,10 +93,10 @@
         const item = request();
         if (step === 4) {
             const panel = el('div',undefined,content); panel.className = 'issue-details';
-            el('h3','Issue saved successfully',panel); el('p','Request ' + item.id + ' · ' + item.reference,panel); el('p',quantities.reduce((sum,q) => sum + q,0) + ' units recorded in this browser.',panel); el('p','Warehouse inventory has not been updated.',panel); return;
+            el('h3','Issue saved successfully',panel); el('p','Request ' + item.id + ' � ' + item.reference,panel); el('p',quantities.reduce((sum,q) => sum + q,0) + ' units recorded in this browser.',panel); el('p','Warehouse inventory has not been updated.',panel); return;
         }
         const panel = el('div',undefined,content); panel.className = 'issue-details';
-        el('h3',item.id + ' · ' + item.reference,panel); el('p','Requested by ' + item.requester + ' · ' + item.date,panel); el('p','Source: Warehouse 1 · Status: Approved',panel);
+        el('h3',item.id + ' � ' + item.reference,panel); el('p','Requested by ' + item.requester + ' � ' + item.date,panel); el('p','Source: Warehouse 1 � Status: Approved',panel);
         const body = table(['Product','Approved quantity',step === 1 ? 'Unit' : 'Issued quantity']);
         item.items.forEach((product,i) => {
             const row = el('tr',undefined,body); el('td',product[0],row); el('td',product[1],row);
@@ -110,7 +112,7 @@
         }
         if (step === 3) {
             if (notes) el('p','Notes: ' + notes,panel);
-            const label = el('label',undefined,content); label.className = 'issue-confirm-check';
+            const label = el('label',undefined,actions); label.className = 'issue-confirm-check';
             const check = el('input',undefined,label); check.type = 'checkbox'; check.checked = confirmed; check.addEventListener('change',() => { confirmed = check.checked; });
             el('span','I have checked the goods and quantities. Save this issue record in this browser.',label);
         }
