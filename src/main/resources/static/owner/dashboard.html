@@ -1,55 +1,173 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StockTrack - Owner Dashboard</title>
-    <link rel="icon" type="image/png" href="../picture/favicon/favicon.png">
-    <!-- Google Fonts -->
+
+    <link rel="icon" href="../picture/favicon/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Stylesheet -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
-    <div class="app-layout">
-        <!-- Sidebar Navigation (Modular Component) -->
-        <div id="sidebar-container" data-role="OWNER" data-active-menu="dashboard"></div>
 
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <header class="content-header">
-                <h1>Owner Executive Dashboard</h1>
-                <p>Welcome back, Owner. High-level business metrics, executive approvals, and store insights.</p>
-            </header>
+<body class="owner-dashboard">
+<div class="app-layout">
 
-            <section class="placeholder-card">
-                <p style="color: #64748b;">Main content display area for Owner (e.g. business metrics, sales summary, and executive reports)</p>
-            </section>
-        </main>
-    </div>
+    <div id="sidebar-container"
+         data-role="OWNER"
+         data-active-menu="dashboard"></div>
 
-    <!-- Scripts -->
-    <script src="../js/sidebar.js"></script>
-    <script>
-        (function checkAccess() {
-            const raw = localStorage.getItem('stocktrack_user');
-            if (!raw) {
-                window.location.replace('../index.html');
-                return;
-            }
-            try {
-                const user = JSON.parse(raw);
-                if (!user || user.role !== 'OWNER') {
-                    window.location.replace('../index.html');
-                }
-            } catch (err) {
-                localStorage.removeItem('stocktrack_user');
-                window.location.replace('../index.html');
-            }
-        })();
-    </script>
+    <main class="main-content owner-main">
+
+        <header class="owner-header">
+            <div>
+                <span class="owner-eyebrow">BUSINESS OVERVIEW</span>
+                <h1>Owner Dashboard</h1>
+                <p>Monitor your business performance and inventory.</p>
+            </div>
+            <div class="owner-status">
+                <span class="status-dot"></span>
+                Owner Overview
+            </div>
+        </header>
+
+        <!-- KPI CARDS -->
+        <section class="owner-stats-grid">
+
+            <article class="owner-stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Total Revenue</span>
+                    <span class="stat-icon revenue-icon">฿</span>
+                </div>
+                <h2 class="stat-value">—</h2>
+                <span class="stat-description">Total business revenue</span>
+            </article>
+
+            <article class="owner-stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Inventory Value</span>
+                    <span class="stat-icon inventory-icon">▦</span>
+                </div>
+                <h2 class="stat-value">—</h2>
+                <span class="stat-description">Current inventory value</span>
+            </article>
+
+            <article class="owner-stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Total Sale</span>
+                    <span class="stat-icon sale-icon">↗</span>
+                </div>
+                <h2 class="stat-value">—</h2>
+                <span class="stat-description">Number of sales transactions</span>
+            </article>
+
+            <article class="owner-stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Total Export</span>
+                    <span class="stat-icon export-icon">⇧</span>
+                </div>
+                <h2 class="stat-value">—</h2>
+                <span class="stat-description">Total exported product units</span>
+            </article>
+
+            <article class="owner-stat-card profit-card">
+                <div class="stat-top">
+                    <span class="stat-label">Total Profit</span>
+                    <span class="stat-icon profit-icon">◈</span>
+                </div>
+                <h2 class="stat-value">—</h2>
+                <span class="stat-description">Total business profit</span>
+            </article>
+
+        </section>
+
+        <!-- PRODUCT PERFORMANCE -->
+        <section class="owner-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Product Performance</h2>
+                    <p>Discover your best performing products.</p>
+                </div>
+            </div>
+
+            <div class="owner-content-grid">
+
+                <!-- HOT SELLER -->
+                <article class="owner-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <span class="performance-icon hot-icon">★</span>
+                            <div>
+                                <h3>Hot Seller</h3>
+                                <p>Top selling products</p>
+                            </div>
+                        </div>
+                        <span class="panel-tag">BEST SELLER</span>
+                    </div>
+
+                    <div class="performance-empty">
+                        <div class="empty-icon">★</div>
+                        <h4>No sales data available</h4>
+                        <p>Best selling products will appear here.</p>
+                    </div>
+                </article>
+
+                <!-- TOP IMPORT -->
+                <article class="owner-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <span class="performance-icon import-icon">⇩</span>
+                            <div>
+                                <h3>Top Import</h3>
+                                <p>Most imported products</p>
+                            </div>
+                        </div>
+                        <span class="panel-tag">BEST IMPORT</span>
+                    </div>
+
+                    <div class="performance-empty">
+                        <div class="empty-icon">▦</div>
+                        <h4>No import data available</h4>
+                        <p>Most imported products will appear here.</p>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <footer class="owner-footer">
+            <span>StockTrack</span>
+            <span>Owner Dashboard</span>
+        </footer>
+
+    </main>
+</div>
+
+<script src="../js/sidebar.js"></script>
+
+<script>
+(function checkAccess() {
+    const raw = localStorage.getItem('stocktrack_user');
+
+    if (!raw) {
+        window.location.replace('../index.html');
+        return;
+    }
+
+    try {
+        const user = JSON.parse(raw);
+
+        if (!user || user.role !== 'OWNER') {
+            window.location.replace('../index.html');
+        }
+    } catch (err) {
+        localStorage.removeItem('stocktrack_user');
+        window.location.replace('../index.html');
+    }
+})();
+</script>
 </body>
 </html>
-

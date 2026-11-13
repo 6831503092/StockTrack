@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrack - Activity Log</title>
+
+    <link rel="icon" href="../picture/favicon/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body class="owner-dashboard">
+<div class="app-layout">
+
+    <div id="sidebar-container"
+         data-role="OWNER"
+         data-active-menu="activity-log"></div>
+
+    <main class="main-content owner-main">
+
+        <header class="owner-header">
+            <div>
+                <span class="owner-eyebrow">BUSINESS RECORDS</span>
+                <h1>Activity Log</h1>
+                <p>Track and review all business activities.</p>
+            </div>
+        </header>
+
+        <!-- FILTERS -->
+        <section class="owner-panel activity-filter-panel">
+
+            <div class="activity-filter-header">
+                <div>
+                    <h2>Activity History</h2>
+                    <p>Search and filter business records.</p>
+                </div>
+            </div>
+
+            <div class="activity-toolbar">
+
+                <input
+                    type="search"
+                    id="activity-search"
+                    placeholder="Search activities..."
+                    aria-label="Search activities">
+
+                <select id="activity-type" aria-label="Activity type">
+                    <option value="all">All Activities</option>
+                    <option value="sale">Sales</option>
+                    <option value="import">Import</option>
+                    <option value="export">Export</option>
+                </select>
+
+                <input
+                    type="date"
+                    id="activity-date"
+                    aria-label="Filter by date">
+
+            </div>
+
+            <!-- ACTIVITY TABLE -->
+            <div class="activity-table-wrapper">
+                <table class="activity-table">
+                    <thead>
+                        <tr>
+                            <th>Activity</th>
+                            <th>Description</th>
+                            <th>Reference</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="activity-table-body">
+                        <tr>
+                            <td colspan="5" class="activity-no-data">
+                                <div class="empty-icon">☰</div>
+                                <h3>No activity records available</h3>
+                                <p>Business activity records will appear here when available.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+
+        <footer class="owner-footer">
+            <span>StockTrack</span>
+            <span>Activity Log</span>
+        </footer>
+
+    </main>
+</div>
+
+<script src="../js/sidebar.js"></script>
+
+<script>
+(function checkAccess() {
+    const raw = localStorage.getItem('stocktrack_user');
+
+    if (!raw) {
+        window.location.replace('../index.html');
+        return;
+    }
+
+    try {
+        const user = JSON.parse(raw);
+
+        if (!user || user.role !== 'OWNER') {
+            window.location.replace('../index.html');
+        }
+    } catch (err) {
+        localStorage.removeItem('stocktrack_user');
+        window.location.replace('../index.html');
+    }
+})();
+</script>
+</body>
+</html>
