@@ -173,7 +173,7 @@
 .sidebar-user .role-title.role-admin { color: #27c690; }
 .sidebar-user .role-title.role-manager { color: #3b82f6; }
 .sidebar-user .role-title.role-owner { color: #8b5cf6; }
-.sidebar-user .role-title.role-staff { color: #10b981; }
+.sidebar-user .role-title.role-staff { color: #20b582; }
 
 .sidebar-user-row {
   display: flex;

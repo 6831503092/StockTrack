@@ -96,8 +96,26 @@
                 {
                     id: 'dashboard',
                     title: 'Dashboard',
-                    url: '#dashboard',
+                    url: 'dashboard.html',
                     icon: DASHBOARD_ICON
+                },
+                {
+                    id: 'receive',
+                    title: 'Receive Items',
+                    url: 'receive-items.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"></path></svg>`
+                },
+                {
+                    id: 'stock-out',
+                    title: 'Stock Out',
+                    url: 'stock-out.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 18v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1"></path></svg>`
+                },
+                {
+                    id: 'transfer',
+                    title: 'Transfer Product',
+                    url: 'transfer-items.html',
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14m0 0-4-4m4 4-4 4M20 16H6m0 0 4-4m-4 4 4 4"></path></svg>`
                 }
             ]
         }

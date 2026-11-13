@@ -16,13 +16,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "issue_check_items")
+@Table(name = "stock_out_check_items")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IssueCheckItem {
+public class StockOutCheckItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +31,7 @@ public class IssueCheckItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "check_id", nullable = false)
-    private IssueCheck issueCheck;
+    private StockOutCheck stockOutCheck;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "so_item_id", nullable = false)

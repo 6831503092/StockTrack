@@ -90,8 +90,8 @@ public class SalesOrderDto {
             case "PENDING" -> "Pending";
             case "APPROVED" -> "Approved";
             case "REJECTED" -> "Rejected";
-            case "ISSUED" -> "Issued";
-            case "REJECTED_ON_ISSUE" -> "Rejected on Issue";
+            case "ISSUED", "STOCK_OUT" -> "Stock Out";
+            case "REJECTED_ON_ISSUE", "REJECTED_ON_STOCK_OUT" -> "Rejected on Stock Out";
             default -> raw;
         };
     }

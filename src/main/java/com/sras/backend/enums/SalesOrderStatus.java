@@ -5,5 +5,7 @@ public enum SalesOrderStatus {
     APPROVED,
     REJECTED,
     ISSUED,
-    REJECTED_ON_ISSUE
+    STOCK_OUT,
+    REJECTED_ON_ISSUE,
+    REJECTED_ON_STOCK_OUT
 }

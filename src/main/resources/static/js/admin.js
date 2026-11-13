@@ -9,8 +9,8 @@
         Pending: 'badge-pending'
     };
 
-    const APPROVED_STATUSES = new Set(['APPROVED', 'COMPLETED', 'RECEIVED', 'ISSUED']);
-    const REJECTED_STATUSES = new Set(['REJECTED', 'REJECTED_ON_RECEIPT', 'REJECTED_ON_ISSUE']);
+    const APPROVED_STATUSES = new Set(['APPROVED', 'COMPLETED', 'RECEIVED', 'ISSUED', 'STOCK_OUT']);
+    const REJECTED_STATUSES = new Set(['REJECTED', 'REJECTED_ON_RECEIPT', 'REJECTED_ON_ISSUE', 'REJECTED_ON_STOCK_OUT']);
 
     const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,

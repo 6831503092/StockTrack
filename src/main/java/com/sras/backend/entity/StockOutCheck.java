@@ -1,6 +1,6 @@
 package com.sras.backend.entity;
 
-import com.sras.backend.enums.IssueCheckResult;
+import com.sras.backend.enums.StockOutCheckResult;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,13 +22,13 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "issue_checks")
+@Table(name = "stock_out_checks")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IssueCheck {
+public class StockOutCheck {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,8 +47,8 @@ public class IssueCheck {
     private LocalDateTime checkedDatetime;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "result", length = 10, nullable = false)
-    private IssueCheckResult result;
+    @Column(name = "result", length = 20, nullable = false)
+    private StockOutCheckResult result;
 
     @Column(name = "reject_reason", length = 255)
     private String rejectReason;

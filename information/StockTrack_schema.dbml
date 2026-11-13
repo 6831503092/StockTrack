@@ -114,22 +114,24 @@ Table SALES_ORDER_ITEMS {
   SUBTOTAL decimal(10,2) [not null]
 }
 
-Table ISSUE_CHECKS {
+Table STOCK_OUT_CHECKS {
   CHECK_ID integer [pk, increment]
   SO_ID integer [unique, not null]
   CHECKED_BY_USER_ID integer [not null]
   CHECKED_DATETIME datetime [not null]
-  RESULT varchar(10) [not null, note: 'ISSUED / REJECTED']
+  RESULT varchar(10) [not null, note: 'STOCK_OUT / REJECTED']
   REJECT_REASON varchar(255) [null, note: 'บังคับเมื่อ RESULT = REJECTED']
+  Note: 'เดิมชื่อ ISSUE_CHECKS (Stock Out / Goods Issuance)'
 }
 
-Table ISSUE_CHECK_ITEMS {
+Table STOCK_OUT_CHECK_ITEMS {
   CHECK_ITEM_ID integer [pk, increment]
   CHECK_ID integer [not null]
   SO_ITEM_ID integer [not null]
   EXPECTED_QTY integer [not null]
   COUNTED_QTY integer [not null]
   IS_CORRECT_PRODUCT boolean [not null]
+  Note: 'เดิมชื่อ ISSUE_CHECK_ITEMS'
 }
 
 // 4. กลุ่มคำขอ ย้ายคลัง และประวัติการทำงาน (Governance & Stock Movement)
@@ -189,7 +191,7 @@ Ref: USERS.USER_ID < APPROVAL_REQUESTS.DECIDED_BY_USER_ID
 Ref: USERS.USER_ID < PURCHASE_ORDERS.CREATED_BY_USER_ID
 Ref: USERS.USER_ID < RECEIVING_CHECKS.CHECKED_BY_USER_ID
 Ref: USERS.USER_ID < SALES_ORDERS.CREATED_BY_USER_ID
-Ref: USERS.USER_ID < ISSUE_CHECKS.CHECKED_BY_USER_ID
+Ref: USERS.USER_ID < STOCK_OUT_CHECKS.CHECKED_BY_USER_ID
 Ref: USERS.USER_ID < STOCK_MOVEMENTS.VERIFIED_BY_USER_ID
 Ref: USERS.USER_ID < AUDIT_LOGS.USER_ID
 
@@ -218,11 +220,11 @@ Ref: PURCHASE_ORDERS.PO_ID - RECEIVING_CHECKS.PO_ID
 Ref: RECEIVING_CHECKS.CHECK_ID < RECEIVING_CHECK_ITEMS.CHECK_ID
 Ref: PURCHASE_ORDER_ITEMS.PO_ITEM_ID < RECEIVING_CHECK_ITEMS.PO_ITEM_ID
 
-// Sales & Issue Checks (4 เส้น)
+// Sales & Stock Out Checks (4 เส้น)
 Ref: SALES_ORDERS.SO_ID < SALES_ORDER_ITEMS.SO_ID
-Ref: SALES_ORDERS.SO_ID - ISSUE_CHECKS.SO_ID
-Ref: ISSUE_CHECKS.CHECK_ID < ISSUE_CHECK_ITEMS.CHECK_ID
-Ref: SALES_ORDER_ITEMS.SO_ITEM_ID < ISSUE_CHECK_ITEMS.SO_ITEM_ID
+Ref: SALES_ORDERS.SO_ID - STOCK_OUT_CHECKS.SO_ID
+Ref: STOCK_OUT_CHECKS.CHECK_ID < STOCK_OUT_CHECK_ITEMS.CHECK_ID
+Ref: SALES_ORDER_ITEMS.SO_ITEM_ID < STOCK_OUT_CHECK_ITEMS.SO_ITEM_ID
 
 // ==========================================
 // การจัดกลุ่มสีใน dbdiagram (TableGroups)
@@ -245,8 +247,8 @@ TableGroup Inbound_Purchasing {
 TableGroup Outbound_Sales {
   SALES_ORDERS
   SALES_ORDER_ITEMS
-  ISSUE_CHECKS
-  ISSUE_CHECK_ITEMS
+  STOCK_OUT_CHECKS
+  STOCK_OUT_CHECK_ITEMS
 }
 
 TableGroup Governance_And_Movements {
