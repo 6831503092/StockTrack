@@ -76,7 +76,11 @@
             'ZONE_CREATE': 'Zone Create',
             'ZONE_UPDATE': 'Zone Edit',
             'SUPPLIER_CREATE': 'Supplier Create',
-            'CUSTOMER_CREATE': 'Customer Create'
+            'SUPPLIER_UPDATE': 'Supplier Edit',
+            'SUPPLIER_DEACTIVATE': 'Supplier Deactivate',
+            'CUSTOMER_CREATE': 'Customer Create',
+            'CUSTOMER_UPDATE': 'Customer Edit',
+            'CUSTOMER_DEACTIVATE': 'Customer Deactivate'
         };
         return map[type] || type || '-';
     }
@@ -114,6 +118,55 @@
                 if (Array.isArray(p.items) && p.items.length) {
                     lines.push(`Items (${p.items.length}): ` + p.items.map(it => `${it.productName || it.productId} (x${it.quantity})`).join(', '));
                 }
+            } else if (r.requestType === 'SUPPLIER_CREATE' || r.requestType === 'SUPPLIER_UPDATE' || r.requestType === 'SUPPLIER_DEACTIVATE') {
+                const opLabel = r.requestType === 'SUPPLIER_CREATE' ? 'Request to Add New Supplier'
+                    : r.requestType === 'SUPPLIER_UPDATE' ? 'Request to Edit Supplier' : 'Request to Delete Supplier';
+                lines.push(`Action: ${opLabel}`);
+                if (p.supplierId) lines.push(`Supplier ID: #${p.supplierId}`);
+                if (p.companyName) {
+                    const oldName = p.oldCompanyName && p.oldCompanyName !== p.companyName ? ` (was: ${p.oldCompanyName})` : '';
+                    lines.push(`Company Name: ${p.companyName}${oldName}`);
+                }
+                if (p.category !== undefined) {
+                    const catVal = p.category || '-';
+                    const oldCat = p.oldCategory && p.oldCategory !== p.category ? ` (was: ${p.oldCategory})` : '';
+                    lines.push(`Products: ${catVal}${oldCat}`);
+                }
+                if (p.zoneCode !== undefined) {
+                    const zoneVal = p.zoneCode ? `Zone ${p.zoneCode}` : 'None';
+                    const oldZone = p.oldZoneCode && p.oldZoneCode !== p.zoneCode ? ` (was: Zone ${p.oldZoneCode})` : '';
+                    lines.push(`Assigned Zone: ${zoneVal}${oldZone}`);
+                }
+                if (p.reason) lines.push(`Detail: ${p.reason}`);
+            } else if (r.requestType === 'CUSTOMER_CREATE' || r.requestType === 'CUSTOMER_UPDATE' || r.requestType === 'CUSTOMER_DEACTIVATE') {
+                const opLabel = r.requestType === 'CUSTOMER_CREATE' ? 'Request to Add New Customer'
+                    : r.requestType === 'CUSTOMER_UPDATE' ? 'Request to Edit Customer' : 'Request to Delete Customer';
+                lines.push(`Action: ${opLabel}`);
+                if (p.customerId) lines.push(`Customer ID: #${p.customerId}`);
+                if (p.customerName) {
+                    const oldName = p.oldCustomerName && p.oldCustomerName !== p.customerName ? ` (was: ${p.oldCustomerName})` : '';
+                    lines.push(`Customer Name: ${p.customerName}${oldName}`);
+                }
+                if (p.reason) lines.push(`Detail: ${p.reason}`);
+            } else if (r.requestType === 'ZONE_CREATE' || r.requestType === 'ZONE_UPDATE') {
+                const isCreate = r.requestType === 'ZONE_CREATE';
+                const opLabel = isCreate ? 'Request to Create New Zone' : 'Request to Edit Zone Capacity';
+                lines.push(`Action: ${opLabel}`);
+                if (p.zoneCode) lines.push(`Zone Code: ${p.zoneCode}`);
+                if (p.zoneName) {
+                    const oldName = p.oldZoneName && p.oldZoneName !== p.zoneName ? ` (was: ${p.oldZoneName})` : '';
+                    lines.push(`Zone Name: ${p.zoneName}${oldName}`);
+                }
+                if (p.capacity !== undefined) {
+                    const oldCap = p.oldCapacity !== undefined && p.oldCapacity !== p.capacity
+                        ? ` (was: ${Number(p.oldCapacity).toLocaleString()} Units)`
+                        : '';
+                    lines.push(`Requested Capacity: ${Number(p.capacity).toLocaleString()} Units${oldCap}`);
+                }
+                if (!isCreate && p.storedUnits !== undefined) {
+                    lines.push(`Currently Stored: ${Number(p.storedUnits).toLocaleString()} Units`);
+                }
+                if (p.reason) lines.push(`Detail: ${p.reason}`);
             } else {
                 for (const [k, v] of Object.entries(p)) {
                     if (k === 'passwordHash' || k === 'password') continue;
@@ -697,7 +750,9 @@
 
                 // 2. Request Type
                 const typeStr = formatRequestType(r.requestType);
-                const typeTd = createElement('td', typeStr, 'cell-medium');
+                const typeTd = createElement('td', null, 'cell-medium');
+                const typeMain = createElement('div', typeStr);
+                typeTd.appendChild(typeMain);
                 row.appendChild(typeTd);
 
                 // 3. Requested By

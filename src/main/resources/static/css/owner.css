@@ -432,3 +432,153 @@
         gap: 8px;
     }
 }
+
+/* Performance Lists */
+.performance-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.performance-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: #FAFCFB;
+    border: 1px solid var(--owner-border);
+    border-radius: 10px;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.performance-item:hover {
+    background: #F0FAF6;
+    transform: translateX(2px);
+}
+
+.performance-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.performance-rank {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--owner-accent-light);
+    color: var(--owner-accent-dark);
+    font-size: 0.78rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.performance-rank.rank-1 {
+    background: #FFF6E8;
+    color: #E6A23C;
+}
+
+.performance-rank.rank-2 {
+    background: #EFF6FF;
+    color: #3B82F6;
+}
+
+.performance-product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.performance-product-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--owner-text);
+}
+
+.performance-product-zone {
+    font-size: 0.74rem;
+    color: var(--owner-muted);
+}
+
+.performance-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.performance-value {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--owner-text);
+}
+
+.performance-sub {
+    font-size: 0.72rem;
+    color: var(--owner-muted);
+}
+
+/* Activity Badges */
+.activity-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.badge-sale {
+    background: #EEF4FF;
+    color: #3b82f6;
+}
+
+.badge-import {
+    background: #E8FAF4;
+    color: #10b981;
+}
+
+.badge-export {
+    background: #F3EEFF;
+    color: #8b5cf6;
+}
+
+.badge-other {
+    background: #F1F5F9;
+    color: #64748B;
+}
+
+.badge-status-completed {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
+.badge-status-approved {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.badge-status-rejected {
+    background: #FEE2E2;
+    color: #B91C1C;
+}
+
+.badge-status-pending {
+    background: #FEF3C7;
+    color: #B45309;
+}
+
+.activity-ref-code {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-weight: 600;
+    color: #475569;
+    background: #F1F5F9;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 0.76rem;
+}
+

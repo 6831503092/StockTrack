@@ -1,10 +1,13 @@
 // ==========================================
-// StockTrack System - 16 Tables Schema (DBML) — v2.2 (Entity-Aligned)
+// StockTrack System - 16 Tables Schema (DBML) — v2.3 (100% Entity-Aligned)
 // For use on: https://dbdiagram.io
 // ------------------------------------------
 // Current Entity Alignment:
-//  - USERS: aligned directly with User.java (USER_ID, FULL_NAME, PASSWORD_HASH, ROLE, IS_ACTIVE)
+//  - USERS: aligned directly with User.java (USER_ID is application-assigned 6-digit ID, no increment)
 //  - SUPPLIERS: + ZONE_CODE varchar(10), + CATEGORY varchar(50) (aligned with Supplier.java)
+//  - SALES_ORDERS: STATUS aligned with SalesOrderStatus.java (includes STOCK_OUT & REJECTED_ON_STOCK_OUT)
+//  - STOCK_OUT_CHECKS: RESULT varchar(20) (aligned with StockOutCheck.java)
+//  - STOCK_MOVEMENTS: STATUS default 'PENDING_VERIFICATION' (aligned with StockMovement.java)
 //  - APPROVAL_REQUESTS: + USER_CREATE in RequestType, TARGET_TYPE, TARGET_ID, PAYLOAD (TEXT)
 //  - PURCHASE_ORDERS / SALES_ORDERS: + REQUEST_ID (1:1 with APPROVAL_REQUESTS)
 //  - AUDIT_LOGS: + ROLE (role snapshot at action time)
@@ -13,7 +16,7 @@
 
 // 1. กลุ่มข้อมูลหลัก (Master Data)
 Table USERS {
-  USER_ID integer [pk, increment]
+  USER_ID integer [pk, note: 'Application-assigned 6-digit employee ID (503xxx), no auto-increment']
   FULL_NAME varchar(50) [not null]
   PASSWORD_HASH varchar(60) [not null, note: 'BCrypt']
   ROLE varchar(10) [not null, note: 'OWNER / MANAGER / ADMIN / STAFF']
@@ -101,7 +104,7 @@ Table SALES_ORDERS {
   REQUEST_ID integer [unique, not null, note: 'คำขออนุมัติของ SO ใบนี้']
   ORDER_DATETIME datetime [not null]
   TOTAL_AMOUNT decimal(10,2) [not null]
-  STATUS varchar(20) [not null, note: 'PENDING / APPROVED / REJECTED / ISSUED / REJECTED_ON_ISSUE']
+  STATUS varchar(20) [not null, note: 'PENDING / APPROVED / REJECTED / ISSUED / STOCK_OUT / REJECTED_ON_ISSUE / REJECTED_ON_STOCK_OUT']
 }
 
 Table SALES_ORDER_ITEMS {
@@ -119,7 +122,7 @@ Table STOCK_OUT_CHECKS {
   SO_ID integer [unique, not null]
   CHECKED_BY_USER_ID integer [not null]
   CHECKED_DATETIME datetime [not null]
-  RESULT varchar(10) [not null, note: 'STOCK_OUT / REJECTED']
+  RESULT varchar(20) [not null, note: 'STOCK_OUT / REJECTED']
   REJECT_REASON varchar(255) [null, note: 'บังคับเมื่อ RESULT = REJECTED']
   Note: 'เดิมชื่อ ISSUE_CHECKS (Stock Out / Goods Issuance)'
 }
@@ -163,7 +166,7 @@ Table STOCK_MOVEMENTS {
   FROM_ZONE_ID integer [not null]
   TO_ZONE_ID integer [not null]
   QUANTITY integer [not null]
-  STATUS varchar(20) [not null, note: 'PENDING_VERIFICATION / COMPLETED / REJECTED']
+  STATUS varchar(20) [not null, default: 'PENDING_VERIFICATION', note: 'PENDING_VERIFICATION / COMPLETED / REJECTED']
   COUNTED_QTY integer [null]
   VERIFIED_BY_USER_ID integer [null]
   VERIFIED_DATETIME datetime [null]
@@ -173,7 +176,7 @@ Table STOCK_MOVEMENTS {
 Table AUDIT_LOGS {
   LOG_ID integer [pk, increment]
   USER_ID integer [not null]
-  ROLE varchar(10) [not null, note: 'role ณ เวลาที่ทำ action']
+  ROLE varchar(10) [not null, note: 'OWNER / MANAGER / ADMIN / STAFF (role ณ เวลาที่ทำ action)']
   ACTION_TYPE varchar(20) [not null]
   DETAIL varchar(255) [not null]
   ACTION_DATETIME datetime [not null]

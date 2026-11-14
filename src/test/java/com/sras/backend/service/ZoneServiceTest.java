@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sras.backend.dto.ApprovalRequestDto;
 import com.sras.backend.dto.ProductDto;
 import com.sras.backend.dto.ProductMoveRequest;
+import com.sras.backend.dto.ZoneCreateRequest;
 import com.sras.backend.dto.ZoneDto;
 import com.sras.backend.dto.ZoneProductSummaryDto;
+import com.sras.backend.dto.ZoneUpdateRequest;
 import com.sras.backend.entity.ApprovalRequest;
 import com.sras.backend.entity.Product;
 import com.sras.backend.entity.User;
@@ -206,5 +208,85 @@ class ZoneServiceTest {
         ProductMoveRequest req = new ProductMoveRequest("Z2", null, List.of(), "Reorganize");
 
         assertThrows(ResponseStatusException.class, () -> zoneService.submitProductMoveRequest(req, adminUser));
+    }
+
+    @Test
+    @DisplayName("createZone: success creates new zone with capacity")
+    void testCreateZone_Success() {
+        ZoneCreateRequest req = new ZoneCreateRequest("Z5", "Zone 5 - Accessories", 600);
+        when(zoneRepository.existsByZoneCode("Z5")).thenReturn(false);
+        when(zoneRepository.existsByZoneName("Zone 5 - Accessories")).thenReturn(false);
+        when(zoneRepository.save(any(Zone.class))).thenAnswer(invocation -> {
+            Zone z = invocation.getArgument(0);
+            z.setZoneId(5);
+            return z;
+        });
+
+        ZoneDto result = zoneService.createZone(req, adminUser);
+
+        assertNotNull(result);
+        assertEquals("Z5", result.getZoneCode());
+        assertEquals("Zone 5 - Accessories", result.getZoneName());
+        assertEquals(600, result.getCapacity());
+    }
+
+    @Test
+    @DisplayName("updateZone: updates zone capacity and name successfully")
+    void testUpdateZone_CapacitySuccess() {
+        when(zoneRepository.findByZoneCode("Z1")).thenReturn(Optional.of(zone1));
+        when(zoneRepository.save(any(Zone.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(productRepository.findByIsActiveTrue()).thenReturn(List.of());
+
+        ZoneUpdateRequest req = new ZoneUpdateRequest("Zone 1 - Main Tables", 800);
+        ZoneDto result = zoneService.updateZone("Z1", req, adminUser);
+
+        assertNotNull(result);
+        assertEquals(800, result.getCapacity());
+        assertEquals("Zone 1 - Main Tables", result.getZoneName());
+    }
+
+    @Test
+    @DisplayName("requestZoneCreate: creates pending ZONE_CREATE approval request")
+    void testRequestZoneCreate_Success() {
+        ZoneCreateRequest req = new ZoneCreateRequest("Z5", "Zone 5", 600);
+        when(zoneRepository.existsByZoneCode("Z5")).thenReturn(false);
+        when(zoneRepository.existsByZoneName("Zone 5")).thenReturn(false);
+        when(approvalRequestRepository.findByRequestTypeAndStatus(RequestType.ZONE_CREATE, ApprovalStatus.PENDING))
+                .thenReturn(List.of());
+        when(approvalRequestRepository.save(any(ApprovalRequest.class))).thenAnswer(invocation -> {
+            ApprovalRequest ar = invocation.getArgument(0);
+            ar.setRequestId(30);
+            return ar;
+        });
+
+        ApprovalRequestDto result = zoneService.requestZoneCreate(req, adminUser);
+
+        assertNotNull(result);
+        assertEquals(30, result.getRequestId());
+        assertEquals("ZONE_CREATE", result.getRequestType());
+        assertEquals("PENDING", result.getStatus());
+    }
+
+    @Test
+    @DisplayName("requestZoneUpdate: creates pending ZONE_UPDATE approval request")
+    void testRequestZoneUpdate_Success() {
+        zone1.setCapacity(500);
+        when(zoneRepository.findByZoneCode("Z1")).thenReturn(Optional.of(zone1));
+        when(approvalRequestRepository.existsByRequestTypeAndTargetIdAndStatus(RequestType.ZONE_UPDATE, 1, ApprovalStatus.PENDING))
+                .thenReturn(false);
+        when(productRepository.findByZoneZoneIdAndIsActiveTrue(1)).thenReturn(List.of(product1));
+        when(approvalRequestRepository.save(any(ApprovalRequest.class))).thenAnswer(invocation -> {
+            ApprovalRequest ar = invocation.getArgument(0);
+            ar.setRequestId(31);
+            return ar;
+        });
+
+        ZoneUpdateRequest req = new ZoneUpdateRequest("Zone 1", 800);
+        ApprovalRequestDto result = zoneService.requestZoneUpdate("Z1", req, adminUser);
+
+        assertNotNull(result);
+        assertEquals(31, result.getRequestId());
+        assertEquals("ZONE_UPDATE", result.getRequestType());
+        assertEquals("PENDING", result.getStatus());
     }
 }

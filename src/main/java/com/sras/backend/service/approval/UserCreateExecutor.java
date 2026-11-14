@@ -38,8 +38,16 @@ public class UserCreateExecutor implements ApprovalExecutor {
             String roleStr = node.path("role").asText("STAFF");
             String passwordHash = node.path("passwordHash").asText("");
 
-            User user = userRepository.findById(userId).orElse(new User());
-            user.setUserId(userId);
+            if (userId <= 0) {
+                throw new IllegalArgumentException("Invalid userId in payload: " + userId);
+            }
+
+            // Existing row -> loaded entity (isNew=false -> UPDATE); otherwise new entity (isNew=true -> INSERT)
+            User user = userRepository.findById(userId).orElseGet(() -> {
+                User u = new User();
+                u.setUserId(userId);
+                return u;
+            });
             user.setFullName(fullName);
             user.setRole(Role.valueOf(roleStr));
             if (!passwordHash.isBlank()) {

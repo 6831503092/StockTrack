@@ -64,6 +64,33 @@ body {
 }
 
 input,
-button {
+button,
+select,
+textarea {
     font-family: inherit;
+}
+
+/* Global muted guide/placeholder text for inputs, textareas, and unselected dropdowns */
+input::placeholder,
+textarea::placeholder {
+    color: #94a3b8 !important;
+    font-weight: 400 !important;
+    opacity: 1 !important;
+    text-transform: none;
+}
+
+select.is-placeholder,
+select:has(option[value=""]:checked) {
+    color: #94a3b8 !important;
+    font-weight: 400 !important;
+}
+
+select option {
+    color: #0f172a;
+    font-weight: 500;
+}
+
+select option[value=""] {
+    color: #94a3b8;
+    font-weight: 400;
 }

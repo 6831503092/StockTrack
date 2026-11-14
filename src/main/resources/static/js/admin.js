@@ -582,6 +582,62 @@
         });
     }
 
+    function showConfirmDialog({
+        title = 'Confirm Action',
+        message = 'Are you sure you want to proceed?',
+        confirmText = 'Delete',
+        cancelText = 'Cancel',
+        type = 'danger'
+    } = {}) {
+        return new Promise((resolve) => {
+            let overlay = document.getElementById('stocktrack-center-confirm');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'stocktrack-center-confirm';
+                overlay.className = 'center-alert-overlay';
+                document.body.appendChild(overlay);
+            }
+
+            const icons = {
+                danger: `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+                warning: `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`
+            };
+
+            const iconHtml = icons[type] || icons.danger;
+
+            overlay.innerHTML = `
+                <div class="center-alert-box">
+                    <div class="center-alert-icon danger">${iconHtml}</div>
+                    <h3 class="center-alert-title">${escapeHtml(title)}</h3>
+                    <p class="center-alert-message">${escapeHtml(message)}</p>
+                    <div class="center-alert-actions">
+                        <button type="button" class="btn-cancel" id="btn-confirm-dialog-cancel">${escapeHtml(cancelText)}</button>
+                        <button type="button" class="btn-confirm-danger" id="btn-confirm-dialog-ok">${escapeHtml(confirmText)}</button>
+                    </div>
+                </div>
+            `;
+
+            let resolved = false;
+            const close = (result) => {
+                if (resolved) return;
+                resolved = true;
+                overlay.classList.remove('active');
+                resolve(result);
+            };
+
+            overlay.querySelector('#btn-confirm-dialog-ok')?.addEventListener('click', () => close(true));
+            overlay.querySelector('#btn-confirm-dialog-cancel')?.addEventListener('click', () => close(false));
+            overlay.onclick = (e) => {
+                if (e.target === overlay) close(false);
+            };
+
+            requestAnimationFrame(() => {
+                overlay.classList.add('active');
+                overlay.querySelector('#btn-confirm-dialog-cancel')?.focus();
+            });
+        });
+    }
+
     function showRejectionModal({
         title = 'Reason for Rejection',
         requestId = '',
@@ -845,10 +901,370 @@
         `;
     }
 
+    // ==========================================
+    // 10. Searchable Product Combobox (Create PO / SO)
+    // ==========================================
+    let productComboMenuEl = null;
+    let activeProductCombo = null;
+
+    function getProductComboMenu() {
+        if (!productComboMenuEl) {
+            productComboMenuEl = document.createElement('div');
+            productComboMenuEl.id = 'stocktrack-product-combo-menu';
+            productComboMenuEl.className = 'po-product-combo-menu';
+            document.body.appendChild(productComboMenuEl);
+
+            document.addEventListener('mousedown', (e) => {
+                if (!activeProductCombo) return;
+                if (activeProductCombo.wrapper.contains(e.target) || productComboMenuEl.contains(e.target)) {
+                    return;
+                }
+                closeActiveProductCombo(true);
+            });
+
+            window.addEventListener('resize', () => {
+                if (activeProductCombo) positionProductComboMenu(activeProductCombo.wrapper);
+            });
+
+            window.addEventListener('scroll', (e) => {
+                if (!activeProductCombo) return;
+                if (productComboMenuEl && e.target === productComboMenuEl) return;
+                positionProductComboMenu(activeProductCombo.wrapper);
+            }, true);
+        }
+        return productComboMenuEl;
+    }
+
+    function positionProductComboMenu(wrapper) {
+        const menu = getProductComboMenu();
+        if (!wrapper || !menu.classList.contains('active')) return;
+        const rect = wrapper.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) {
+            closeActiveProductCombo(false);
+            return;
+        }
+        menu.style.width = `${Math.max(rect.width, 240)}px`;
+        menu.style.left = `${rect.left}px`;
+
+        const spaceBelow = window.innerHeight - rect.bottom - 12;
+        const menuHeight = Math.min(menu.scrollHeight || 220, 230);
+        if (spaceBelow < menuHeight && rect.top > menuHeight + 12) {
+            menu.style.top = `${rect.top - menuHeight - 4}px`;
+        } else {
+            menu.style.top = `${rect.bottom + 4}px`;
+        }
+    }
+
+    function closeActiveProductCombo(restoreValue = true) {
+        if (!activeProductCombo) return;
+        const { wrapper, syncFromSelect } = activeProductCombo;
+        wrapper.classList.remove('is-open');
+        if (productComboMenuEl) {
+            productComboMenuEl.classList.remove('active');
+            productComboMenuEl.innerHTML = '';
+        }
+        if (restoreValue && typeof syncFromSelect === 'function') {
+            syncFromSelect();
+        }
+        activeProductCombo = null;
+    }
+
+    function enhanceProductSelect(selectEl) {
+        if (!selectEl || !(selectEl instanceof HTMLSelectElement)) return;
+        if (selectEl.dataset.comboEnhanced === 'true') {
+            if (typeof selectEl._syncCombobox === 'function') {
+                selectEl._syncCombobox();
+            }
+            return;
+        }
+
+        selectEl.dataset.comboEnhanced = 'true';
+        selectEl.style.display = 'none';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'po-product-combobox';
+        selectEl.parentNode.insertBefore(wrapper, selectEl);
+        wrapper.appendChild(selectEl);
+
+        const inputEl = document.createElement('input');
+        inputEl.type = 'text';
+        inputEl.className = 'po-wire-select po-product-search-input';
+        inputEl.autocomplete = 'off';
+        inputEl.placeholder = 'Select Product';
+
+        wrapper.appendChild(inputEl);
+
+        let highlightedIdx = -1;
+        let currentFilteredOptions = [];
+
+        function getSelectableOptions() {
+            return Array.from(selectEl.options).filter(opt => opt.value !== '' && !opt.disabled);
+        }
+
+        function getEmptyMessage() {
+            const firstOpt = selectEl.options[0];
+            if (firstOpt && firstOpt.value === '' && firstOpt.textContent) {
+                const txt = firstOpt.textContent.trim();
+                if (txt.toLowerCase().includes('supplier') || txt.toLowerCase().includes('no products')) {
+                    return txt;
+                }
+            }
+            return 'No matching products';
+        }
+
+        function syncFromSelect() {
+            const firstOpt = selectEl.options[0];
+            const firstText = firstOpt ? firstOpt.textContent.trim() : '';
+            inputEl.placeholder = firstText || 'Select Product';
+
+            const selectedOpt = selectEl.options[selectEl.selectedIndex];
+            if (selectedOpt && selectedOpt.value !== '' && !selectedOpt.disabled) {
+                inputEl.value = selectedOpt.textContent.trim();
+            } else {
+                inputEl.value = '';
+            }
+        }
+
+        function selectOption(opt) {
+            if (!opt) return;
+            selectEl.value = opt.value;
+            syncFromSelect();
+            closeActiveProductCombo(false);
+            selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+            if (typeof selectEl.onchange === 'function') {
+                selectEl.onchange();
+            }
+        }
+
+        function renderMenuOptions(query = '') {
+            const menu = getProductComboMenu();
+            const selectable = getSelectableOptions();
+            const q = String(query || '').trim().toLowerCase();
+
+            if (selectable.length === 0) {
+                currentFilteredOptions = [];
+                highlightedIdx = -1;
+                menu.innerHTML = `<div class="po-product-combo-empty">${escapeHtml(getEmptyMessage())}</div>`;
+                positionProductComboMenu(wrapper);
+                return;
+            }
+
+            currentFilteredOptions = selectable.filter(opt => {
+                if (!q) return true;
+                const name = (opt.textContent || '').trim().toLowerCase();
+                return name.includes(q);
+            });
+
+            if (currentFilteredOptions.length === 0) {
+                highlightedIdx = -1;
+                menu.innerHTML = `<div class="po-product-combo-empty">No matching products</div>`;
+                positionProductComboMenu(wrapper);
+                return;
+            }
+
+            const currentVal = selectEl.value;
+            highlightedIdx = currentFilteredOptions.findIndex(o => o.value === currentVal);
+            if (highlightedIdx < 0 && q) {
+                highlightedIdx = 0;
+            }
+
+            menu.innerHTML = currentFilteredOptions.map((opt, idx) => {
+                const name = opt.textContent.trim();
+                const isSelected = opt.value === currentVal;
+                const isHighlighted = idx === highlightedIdx;
+
+                return `
+                    <div class="po-product-combo-item ${isSelected ? 'is-selected' : ''} ${isHighlighted ? 'is-highlighted' : ''}" data-idx="${idx}">
+                        ${escapeHtml(name)}
+                    </div>
+                `;
+            }).join('');
+
+            menu.querySelectorAll('.po-product-combo-item').forEach(itemEl => {
+                itemEl.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    const idx = parseInt(itemEl.getAttribute('data-idx'), 10);
+                    const chosen = currentFilteredOptions[idx];
+                    if (chosen) selectOption(chosen);
+                });
+            });
+
+            positionProductComboMenu(wrapper);
+
+            const activeEl = menu.querySelector('.po-product-combo-item.is-highlighted, .po-product-combo-item.is-selected');
+            if (activeEl) {
+                activeEl.scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        function updateHighlight() {
+            const menu = getProductComboMenu();
+            const items = menu.querySelectorAll('.po-product-combo-item');
+            items.forEach((el, i) => {
+                el.classList.toggle('is-highlighted', i === highlightedIdx);
+                if (i === highlightedIdx) {
+                    el.scrollIntoView({ block: 'nearest' });
+                }
+            });
+        }
+
+        function openMenu(query = '') {
+            if (activeProductCombo && activeProductCombo.wrapper !== wrapper) {
+                closeActiveProductCombo(true);
+            }
+            const menu = getProductComboMenu();
+            wrapper.classList.add('is-open');
+            menu.classList.add('active');
+            activeProductCombo = { wrapper, selectEl, inputEl, syncFromSelect };
+            renderMenuOptions(query);
+        }
+
+        inputEl.addEventListener('focus', () => {
+            openMenu('');
+            if (inputEl.value) {
+                inputEl.select();
+            }
+        });
+
+        inputEl.addEventListener('click', () => {
+            if (!wrapper.classList.contains('is-open')) {
+                openMenu('');
+            }
+        });
+
+        inputEl.addEventListener('input', () => {
+            const val = inputEl.value;
+            if (!val.trim()) {
+                selectEl.selectedIndex = 0;
+                selectEl.value = '';
+                const row = selectEl.closest('.po-wire-item-row');
+                if (row) {
+                    const unitInput = row.querySelector('.po-item-unit-price, .so-item-unit-price');
+                    const totalInput = row.querySelector('.po-item-total-price, .so-item-total-price');
+                    if (unitInput) {
+                        unitInput.value = '';
+                        unitInput.dataset.cost = '0';
+                        unitInput.dataset.price = '0';
+                    }
+                    if (totalInput) totalInput.value = '';
+                }
+            }
+            openMenu(val);
+        });
+
+        inputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (!wrapper.classList.contains('is-open')) {
+                    openMenu('');
+                    return;
+                }
+                if (currentFilteredOptions.length > 0) {
+                    highlightedIdx = (highlightedIdx + 1) % currentFilteredOptions.length;
+                    updateHighlight();
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (!wrapper.classList.contains('is-open')) {
+                    openMenu('');
+                    return;
+                }
+                if (currentFilteredOptions.length > 0) {
+                    highlightedIdx = (highlightedIdx - 1 + currentFilteredOptions.length) % currentFilteredOptions.length;
+                    updateHighlight();
+                }
+            } else if (e.key === 'Enter') {
+                if (wrapper.classList.contains('is-open')) {
+                    e.preventDefault();
+                    if (highlightedIdx >= 0 && currentFilteredOptions[highlightedIdx]) {
+                        selectOption(currentFilteredOptions[highlightedIdx]);
+                    } else if (currentFilteredOptions.length === 1) {
+                        selectOption(currentFilteredOptions[0]);
+                    }
+                }
+            } else if (e.key === 'Escape') {
+                if (wrapper.classList.contains('is-open')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeActiveProductCombo(true);
+                }
+            }
+        });
+
+        const observer = new MutationObserver(() => {
+            syncFromSelect();
+            if (activeProductCombo && activeProductCombo.wrapper === wrapper) {
+                renderMenuOptions('');
+            }
+        });
+        observer.observe(selectEl, { childList: true, subtree: true, attributes: true });
+
+        selectEl._syncCombobox = syncFromSelect;
+        selectEl._comboInput = inputEl;
+        syncFromSelect();
+    }
+
+    function syncProductSelects(root = document) {
+        if (!root || typeof root.querySelectorAll !== 'function') return;
+        const selects = root.querySelectorAll('select.po-item-product, select.so-item-product');
+        selects.forEach(sel => enhanceProductSelect(sel));
+    }
+
+    function syncSelectPlaceholders(root = document) {
+        if (!root || typeof root.querySelectorAll !== 'function') return;
+        root.querySelectorAll('select').forEach(sel => {
+            const isPlaceholder = sel.value === '';
+            sel.classList.toggle('is-placeholder', isPlaceholder);
+        });
+    }
+
+    function initProductComboboxObserver() {
+        syncProductSelects(document);
+        syncSelectPlaceholders(document);
+
+        document.addEventListener('change', (e) => {
+            if (e.target && e.target.tagName === 'SELECT') {
+                e.target.classList.toggle('is-placeholder', e.target.value === '');
+            }
+        });
+
+        document.addEventListener('reset', (e) => {
+            setTimeout(() => syncSelectPlaceholders(e.target || document), 0);
+        });
+
+        const bodyObserver = new MutationObserver((mutations) => {
+            for (const m of mutations) {
+                if (m.type === 'childList' && m.target && m.target.tagName === 'SELECT') {
+                    m.target.classList.toggle('is-placeholder', m.target.value === '');
+                }
+                for (const node of m.addedNodes) {
+                    if (node.nodeType === 1) {
+                        if (node.matches && (node.matches('select.po-item-product') || node.matches('select.so-item-product'))) {
+                            enhanceProductSelect(node);
+                        } else if (node.querySelectorAll) {
+                            syncProductSelects(node);
+                            syncSelectPlaceholders(node);
+                        }
+                        if (node.tagName === 'SELECT') {
+                            node.classList.toggle('is-placeholder', node.value === '');
+                        }
+                    }
+                }
+            }
+        });
+        if (document.body) {
+            bodyObserver.observe(document.body, { childList: true, subtree: true });
+        }
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initImageFallbacks);
+        document.addEventListener('DOMContentLoaded', () => {
+            initImageFallbacks();
+            initProductComboboxObserver();
+        });
     } else {
         initImageFallbacks();
+        initProductComboboxObserver();
     }
 
     window.AdminApp = {
@@ -867,12 +1283,16 @@
         initCustomDatePicker,
         showToast,
         showCenterAlert,
+        showConfirmDialog,
         showRejectionModal,
         getProductImageUrl,
         renderOrderReviewRows,
-        renderOrderDetailModal
+        renderOrderDetailModal,
+        enhanceProductSelect,
+        syncProductSelects
     };
     window.showToast = showToast;
     window.showCenterAlert = showCenterAlert;
+    window.showConfirmDialog = showConfirmDialog;
     window.showRejectionModal = showRejectionModal;
 })();

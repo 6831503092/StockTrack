@@ -1,9 +1,12 @@
 package com.sras.backend.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sras.backend.dto.ApprovalRequestDto;
 import com.sras.backend.dto.PurchaseOrderCreateRequest;
 import com.sras.backend.dto.PurchaseOrderDto;
 import com.sras.backend.dto.PurchaseOrderItemRequest;
+import com.sras.backend.dto.SupplierDto;
+import com.sras.backend.dto.SupplierRequest;
 import com.sras.backend.entity.ApprovalRequest;
 import com.sras.backend.entity.Product;
 import com.sras.backend.entity.PurchaseOrder;
@@ -193,5 +196,113 @@ class PurchaseOrderServiceTest {
         assertThrows(ResponseStatusException.class, () ->
                 purchaseOrderService.createPurchaseOrder(req, currentUser)
         );
+    }
+
+    @Test
+    @DisplayName("Create supplier successfully")
+    void createSupplier_success() {
+        SupplierRequest req = new SupplierRequest("New Wood Co.", "Z2", "Chairs");
+        when(supplierRepository.findByCompanyName("New Wood Co.")).thenReturn(Optional.empty());
+        when(supplierRepository.save(any(Supplier.class))).thenAnswer(invocation -> {
+            Supplier s = invocation.getArgument(0);
+            s.setSupplierId(10);
+            return s;
+        });
+
+        SupplierDto result = purchaseOrderService.createSupplier(req, currentUser);
+
+        assertNotNull(result);
+        assertEquals(10, result.getSupplierId());
+        assertEquals("New Wood Co.", result.getCompanyName());
+        assertEquals("Z2", result.getZoneCode());
+        verify(supplierRepository).save(any(Supplier.class));
+        verify(auditLogService).log(eq(currentUser), eq("SUPPLIER_CREATE"), anyString());
+    }
+
+    @Test
+    @DisplayName("Update supplier successfully")
+    void updateSupplier_success() {
+        Supplier existing = Supplier.builder().supplierId(1).companyName("Old Name").zoneCode("Z1").isActive(true).build();
+        when(supplierRepository.findById(1)).thenReturn(Optional.of(existing));
+        when(supplierRepository.findByCompanyName("Updated Name")).thenReturn(Optional.empty());
+        when(supplierRepository.save(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SupplierDto result = purchaseOrderService.updateSupplier(1, new SupplierRequest("Updated Name", "Z3", "Beds"), currentUser);
+
+        assertNotNull(result);
+        assertEquals("Updated Name", result.getCompanyName());
+        assertEquals("Z3", result.getZoneCode());
+        verify(auditLogService).log(eq(currentUser), eq("SUPPLIER_UPDATE"), anyString());
+    }
+
+    @Test
+    @DisplayName("Delete supplier marks isActive false")
+    void deleteSupplier_success() {
+        Supplier existing = Supplier.builder().supplierId(1).companyName("To Delete").isActive(true).build();
+        when(supplierRepository.findById(1)).thenReturn(Optional.of(existing));
+
+        purchaseOrderService.deleteSupplier(1, currentUser);
+
+        assertFalse(existing.getIsActive());
+        verify(supplierRepository).save(existing);
+        verify(auditLogService).log(eq(currentUser), eq("SUPPLIER_DELETE"), anyString());
+    }
+
+    @Test
+    @DisplayName("Request supplier create generates PENDING approval request")
+    void requestSupplierCreate_createsPendingApprovalRequest() {
+        SupplierRequest req = new SupplierRequest("Pending Wood Co.", "Z1", "Desks");
+        when(supplierRepository.findByCompanyName("Pending Wood Co.")).thenReturn(Optional.empty());
+        when(approvalRequestRepository.save(any(ApprovalRequest.class))).thenAnswer(inv -> {
+            ApprovalRequest r = inv.getArgument(0);
+            r.setRequestId(999);
+            return r;
+        });
+
+        ApprovalRequestDto dto = purchaseOrderService.requestSupplierCreate(req, currentUser);
+
+        assertNotNull(dto);
+        assertEquals(999, dto.getRequestId());
+        assertEquals("PENDING", dto.getStatus());
+        verify(approvalRequestRepository).save(any(ApprovalRequest.class));
+        verify(auditLogService).log(eq(currentUser), eq("REQUEST_CREATE"), anyString());
+    }
+
+    @Test
+    @DisplayName("Request supplier update generates PENDING approval request")
+    void requestSupplierUpdate_createsPendingApprovalRequest() {
+        Supplier existing = Supplier.builder().supplierId(5).companyName("Existing Supplier").zoneCode("Z1").isActive(true).build();
+        when(supplierRepository.findById(5)).thenReturn(Optional.of(existing));
+        when(approvalRequestRepository.save(any(ApprovalRequest.class))).thenAnswer(inv -> {
+            ApprovalRequest r = inv.getArgument(0);
+            r.setRequestId(1001);
+            return r;
+        });
+
+        ApprovalRequestDto dto = purchaseOrderService.requestSupplierUpdate(5, new SupplierRequest("Renamed Supplier", "Z2", "Cabinets"), currentUser);
+
+        assertNotNull(dto);
+        assertEquals(1001, dto.getRequestId());
+        assertEquals("PENDING", dto.getStatus());
+        verify(approvalRequestRepository).save(any(ApprovalRequest.class));
+    }
+
+    @Test
+    @DisplayName("Request supplier deactivate generates PENDING approval request")
+    void requestSupplierDeactivate_createsPendingApprovalRequest() {
+        Supplier existing = Supplier.builder().supplierId(5).companyName("Existing Supplier").zoneCode("Z1").isActive(true).build();
+        when(supplierRepository.findById(5)).thenReturn(Optional.of(existing));
+        when(approvalRequestRepository.save(any(ApprovalRequest.class))).thenAnswer(inv -> {
+            ApprovalRequest r = inv.getArgument(0);
+            r.setRequestId(1002);
+            return r;
+        });
+
+        ApprovalRequestDto dto = purchaseOrderService.requestSupplierDeactivate(5, currentUser);
+
+        assertNotNull(dto);
+        assertEquals(1002, dto.getRequestId());
+        assertEquals("PENDING", dto.getStatus());
+        verify(approvalRequestRepository).save(any(ApprovalRequest.class));
     }
 }

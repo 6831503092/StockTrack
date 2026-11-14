@@ -28,7 +28,7 @@ public class ZoneDto {
                 .zoneName(zone.getZoneName())
                 .productCount(productCount != null ? productCount : 0L)
                 .totalUnits(totalUnits != null ? totalUnits : 0L)
-                .capacity(500)
+                .capacity(zone.getCapacity() != null ? zone.getCapacity() : 500)
                 .build();
     }
 }

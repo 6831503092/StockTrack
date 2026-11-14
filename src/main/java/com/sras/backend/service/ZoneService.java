@@ -6,8 +6,10 @@ import com.sras.backend.dto.ApprovalRequestDto;
 import com.sras.backend.dto.ProductDto;
 import com.sras.backend.dto.ProductMoveRequest;
 import com.sras.backend.dto.ProductUpdateRequest;
+import com.sras.backend.dto.ZoneCreateRequest;
 import com.sras.backend.dto.ZoneDto;
 import com.sras.backend.dto.ZoneProductSummaryDto;
+import com.sras.backend.dto.ZoneUpdateRequest;
 import com.sras.backend.entity.ApprovalRequest;
 import com.sras.backend.entity.Product;
 import com.sras.backend.entity.User;
@@ -71,7 +73,8 @@ public class ZoneService {
 
     @Transactional(readOnly = true)
     public ZoneProductSummaryDto getZoneProductSummary() {
-        long activeZonesCount = zoneRepository.count();
+        List<Zone> allZones = zoneRepository.findAll();
+        long activeZonesCount = allZones.size();
         List<Product> products = productRepository.findByIsActiveTrue();
 
         long storedUnits = 0;
@@ -86,13 +89,245 @@ public class ZoneService {
             }
         }
 
+        long totalCapacity = allZones.stream()
+                .mapToLong(z -> z.getCapacity() != null ? z.getCapacity() : 500L)
+                .sum();
+
         return ZoneProductSummaryDto.builder()
                 .activeZonesCount(activeZonesCount)
                 .storedUnits(storedUnits)
                 .totalProducts(products.size())
                 .lowStockCount(lowStockCount)
-                .totalCapacity(activeZonesCount * 500)
+                .totalCapacity(totalCapacity)
                 .build();
+    }
+
+    @Transactional
+    public ZoneDto createZone(ZoneCreateRequest req, User actor) {
+        if (req == null || req.zoneCode() == null || req.zoneCode().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone code is required");
+        }
+
+        String code = req.zoneCode().trim().toUpperCase();
+        if (code.matches("^\\d+$")) {
+            code = "Z" + code;
+        }
+
+        String name = (req.zoneName() != null && !req.zoneName().trim().isEmpty())
+                ? req.zoneName().trim()
+                : ("Zone " + (code.startsWith("Z") ? code.substring(1) : code));
+
+        if (!code.matches("^[A-Z0-9]{2,5}$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone code must be 2-5 alphanumeric characters (e.g. Z5)");
+        }
+        if (name.length() > 30) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone name cannot exceed 30 characters");
+        }
+        if (zoneRepository.existsByZoneCode(code)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Zone code already exists: " + code);
+        }
+        if (zoneRepository.existsByZoneName(name)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Zone name already exists: " + name);
+        }
+
+        int capacity = (req.capacity() != null && req.capacity() > 0) ? req.capacity() : 500;
+
+        Zone zone = new Zone();
+        zone.setZoneCode(code);
+        zone.setZoneName(name);
+        zone.setCapacity(capacity);
+
+        Zone saved = zoneRepository.save(zone);
+        auditLogService.log(actor, "ZONE_CREATE", "Created zone " + saved.getZoneCode() + " (" + saved.getZoneName() + ", Capacity: " + capacity + ")");
+        return ZoneDto.fromEntity(saved, 0L, 0L);
+    }
+
+    @Transactional
+    public ApprovalRequestDto requestZoneCreate(ZoneCreateRequest req, User actor) {
+        if (req == null || req.zoneCode() == null || req.zoneCode().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone code is required");
+        }
+
+        String code = req.zoneCode().trim().toUpperCase();
+        if (code.matches("^\\d+$")) {
+            code = "Z" + code;
+        }
+
+        String name = (req.zoneName() != null && !req.zoneName().trim().isEmpty())
+                ? req.zoneName().trim()
+                : ("Zone " + (code.startsWith("Z") ? code.substring(1) : code));
+
+        if (!code.matches("^[A-Z0-9]{2,5}$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone code must be 2-5 alphanumeric characters (e.g. Z5)");
+        }
+        if (name.length() > 30) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone name cannot exceed 30 characters");
+        }
+        if (zoneRepository.existsByZoneCode(code)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Zone code already exists: " + code);
+        }
+        if (zoneRepository.existsByZoneName(name)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Zone name already exists: " + name);
+        }
+
+        List<ApprovalRequest> pendingCreates = approvalRequestRepository.findByRequestTypeAndStatus(
+                RequestType.ZONE_CREATE, ApprovalStatus.PENDING);
+        for (ApprovalRequest pending : pendingCreates) {
+            if (pending.getPayload() != null && pending.getPayload().contains("\"zoneCode\":\"" + code + "\"")) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "A pending request to create zone " + code + " already exists.");
+            }
+        }
+
+        int capacity = (req.capacity() != null && req.capacity() > 0) ? req.capacity() : 500;
+
+        Map<String, Object> payloadMap = new HashMap<>();
+        payloadMap.put("zoneCode", code);
+        payloadMap.put("zoneName", name);
+        payloadMap.put("capacity", capacity);
+        payloadMap.put("reason", "Request to create new warehouse zone " + code + " (" + name + ") with capacity of " + capacity + " units.");
+
+        String payloadJson;
+        try {
+            payloadJson = objectMapper.writeValueAsString(payloadMap);
+        } catch (JsonProcessingException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to serialize zone create payload");
+        }
+
+        String detail = "Create new zone: " + code + " (" + name + ") | Capacity: " + capacity + " Units";
+
+        ApprovalRequest saved = approvalRequestRepository.save(
+                ApprovalRequestService.buildPendingRequest(
+                        RequestType.ZONE_CREATE, TargetType.ZONE, null, payloadJson, detail, actor
+                )
+        );
+
+        auditLogService.log(actor, "REQUEST_SUBMIT",
+                "Requested creation of zone " + code + " (" + name + ", Capacity: " + capacity + " Units)");
+
+        return ApprovalRequestDto.fromEntity(saved);
+    }
+
+    @Transactional
+    public ZoneDto updateZone(String zoneCode, ZoneUpdateRequest req, User actor) {
+        if (zoneCode == null || zoneCode.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone code is required");
+        }
+        String code = zoneCode.trim().toUpperCase();
+        Zone zone = zoneRepository.findByZoneCode(code)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Zone not found: " + code));
+
+        if (req != null) {
+            if (req.zoneName() != null && !req.zoneName().trim().isEmpty()) {
+                String name = req.zoneName().trim();
+                if (name.length() > 30) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone name cannot exceed 30 characters");
+                }
+                zoneRepository.findByZoneName(name).ifPresent(existing -> {
+                    if (!existing.getZoneId().equals(zone.getZoneId())) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Zone name already in use: " + name);
+                    }
+                });
+                zone.setZoneName(name);
+            }
+
+            if (req.capacity() != null) {
+                if (req.capacity() <= 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone capacity must be greater than 0");
+                }
+                zone.setCapacity(req.capacity());
+            }
+        }
+
+        Zone saved = zoneRepository.save(zone);
+
+        List<Product> products = productRepository.findByIsActiveTrue();
+        long productCount = products.stream().filter(p -> p.getZone() != null && p.getZone().getZoneId().equals(saved.getZoneId())).count();
+        long totalUnits = products.stream().filter(p -> p.getZone() != null && p.getZone().getZoneId().equals(saved.getZoneId()))
+                .mapToLong(p -> p.getCurrentStock() != null ? p.getCurrentStock() : 0L).sum();
+
+        auditLogService.log(actor, "ZONE_UPDATE", "Updated zone " + saved.getZoneCode() + " (Capacity: " + saved.getCapacity() + ", Name: " + saved.getZoneName() + ")");
+        return ZoneDto.fromEntity(saved, productCount, totalUnits);
+    }
+
+    @Transactional
+    public ApprovalRequestDto requestZoneUpdate(String zoneCode, ZoneUpdateRequest req, User actor) {
+        if (zoneCode == null || zoneCode.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone code is required");
+        }
+        String code = zoneCode.trim().toUpperCase();
+        Zone zone = zoneRepository.findByZoneCode(code)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Zone not found: " + code));
+
+        String newName = zone.getZoneName();
+        if (req != null && req.zoneName() != null && !req.zoneName().trim().isEmpty()) {
+            newName = req.zoneName().trim();
+            if (newName.length() > 30) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone name cannot exceed 30 characters");
+            }
+            String finalName = newName;
+            zoneRepository.findByZoneName(finalName).ifPresent(existing -> {
+                if (!existing.getZoneId().equals(zone.getZoneId())) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Zone name already in use: " + finalName);
+                }
+            });
+        }
+
+        int oldCapacity = zone.getCapacity() != null ? zone.getCapacity() : 500;
+        int newCapacity = oldCapacity;
+        if (req != null && req.capacity() != null) {
+            if (req.capacity() <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone capacity must be greater than 0");
+            }
+            newCapacity = req.capacity();
+        }
+
+        if (Objects.equals(zone.getZoneName(), newName) && oldCapacity == newCapacity) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No changes detected. Please modify capacity before sending a request.");
+        }
+
+        if (approvalRequestRepository.existsByRequestTypeAndTargetIdAndStatus(
+                RequestType.ZONE_UPDATE, zone.getZoneId(), ApprovalStatus.PENDING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "A pending capacity update request already exists for zone " + zone.getZoneCode() + ".");
+        }
+
+        List<Product> zoneProducts = zone.getZoneId() != null
+                ? productRepository.findByZoneZoneIdAndIsActiveTrue(zone.getZoneId())
+                : List.of();
+        int storedUnits = zoneProducts != null
+                ? zoneProducts.stream().mapToInt(p -> p.getCurrentStock() != null ? p.getCurrentStock() : 0).sum()
+                : 0;
+
+        Map<String, Object> payloadMap = new HashMap<>();
+        payloadMap.put("zoneId", zone.getZoneId());
+        payloadMap.put("zoneCode", zone.getZoneCode());
+        payloadMap.put("zoneName", newName);
+        payloadMap.put("oldZoneName", zone.getZoneName());
+        payloadMap.put("capacity", newCapacity);
+        payloadMap.put("oldCapacity", oldCapacity);
+        payloadMap.put("storedUnits", storedUnits);
+        payloadMap.put("reason", "Request to update capacity of " + zone.getZoneCode() + " (" + newName + ") from " + oldCapacity + " to " + newCapacity + " units.");
+
+        String payloadJson;
+        try {
+            payloadJson = objectMapper.writeValueAsString(payloadMap);
+        } catch (JsonProcessingException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to serialize zone update payload");
+        }
+
+        String detail = "Edit Zone Capacity: " + zone.getZoneCode() + " (" + newName + ") | " + oldCapacity + " -> " + newCapacity + " Units";
+
+        ApprovalRequest saved = approvalRequestRepository.save(
+                ApprovalRequestService.buildPendingRequest(
+                        RequestType.ZONE_UPDATE, TargetType.ZONE, zone.getZoneId(), payloadJson, detail, actor
+                )
+        );
+
+        auditLogService.log(actor, "REQUEST_SUBMIT",
+                "Requested capacity update for zone " + zone.getZoneCode() + " (" + oldCapacity + " -> " + newCapacity + " Units)");
+
+        return ApprovalRequestDto.fromEntity(saved);
     }
 
     @Transactional(readOnly = true)

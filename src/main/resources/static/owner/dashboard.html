@@ -42,7 +42,7 @@
                     <span class="stat-label">Total Revenue</span>
                     <span class="stat-icon revenue-icon">฿</span>
                 </div>
-                <h2 class="stat-value">—</h2>
+                <h2 class="stat-value" id="owner-total-revenue">—</h2>
                 <span class="stat-description">Total business revenue</span>
             </article>
 
@@ -51,7 +51,7 @@
                     <span class="stat-label">Inventory Value</span>
                     <span class="stat-icon inventory-icon">▦</span>
                 </div>
-                <h2 class="stat-value">—</h2>
+                <h2 class="stat-value" id="owner-inventory-value">—</h2>
                 <span class="stat-description">Current inventory value</span>
             </article>
 
@@ -60,7 +60,7 @@
                     <span class="stat-label">Total Sale</span>
                     <span class="stat-icon sale-icon">↗</span>
                 </div>
-                <h2 class="stat-value">—</h2>
+                <h2 class="stat-value" id="owner-total-sale">—</h2>
                 <span class="stat-description">Number of sales transactions</span>
             </article>
 
@@ -69,7 +69,7 @@
                     <span class="stat-label">Total Export</span>
                     <span class="stat-icon export-icon">⇧</span>
                 </div>
-                <h2 class="stat-value">—</h2>
+                <h2 class="stat-value" id="owner-total-export">—</h2>
                 <span class="stat-description">Total exported product units</span>
             </article>
 
@@ -78,7 +78,7 @@
                     <span class="stat-label">Total Profit</span>
                     <span class="stat-icon profit-icon">◈</span>
                 </div>
-                <h2 class="stat-value">—</h2>
+                <h2 class="stat-value" id="owner-total-profit">—</h2>
                 <span class="stat-description">Total business profit</span>
             </article>
 
@@ -108,10 +108,12 @@
                         <span class="panel-tag">BEST SELLER</span>
                     </div>
 
-                    <div class="performance-empty">
-                        <div class="empty-icon">★</div>
-                        <h4>No sales data available</h4>
-                        <p>Best selling products will appear here.</p>
+                    <div id="hot-seller-container">
+                        <div class="performance-empty">
+                            <div class="empty-icon">★</div>
+                            <h4>Loading sales data...</h4>
+                            <p>Best selling products will appear here.</p>
+                        </div>
                     </div>
                 </article>
 
@@ -128,10 +130,12 @@
                         <span class="panel-tag">BEST IMPORT</span>
                     </div>
 
-                    <div class="performance-empty">
-                        <div class="empty-icon">▦</div>
-                        <h4>No import data available</h4>
-                        <p>Most imported products will appear here.</p>
+                    <div id="top-import-container">
+                        <div class="performance-empty">
+                            <div class="empty-icon">▦</div>
+                            <h4>Loading import data...</h4>
+                            <p>Most imported products will appear here.</p>
+                        </div>
                     </div>
                 </article>
 
@@ -147,6 +151,7 @@
 </div>
 
 <script src="../js/sidebar.js"></script>
+<script src="../js/owner-dashboard.js"></script>
 
 <script>
 (function checkAccess() {

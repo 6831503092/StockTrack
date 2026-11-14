@@ -1,6 +1,9 @@
 package com.sras.backend.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sras.backend.dto.ApprovalRequestDto;
+import com.sras.backend.dto.CustomerDto;
+import com.sras.backend.dto.CustomerRequest;
 import com.sras.backend.dto.SalesOrderCreateRequest;
 import com.sras.backend.dto.SalesOrderDto;
 import com.sras.backend.dto.SalesOrderItemRequest;
@@ -184,5 +187,111 @@ class SalesOrderServiceTest {
         assertThrows(ResponseStatusException.class, () ->
                 salesOrderService.createSalesOrder(request, currentUser)
         );
+    }
+
+    @Test
+    @DisplayName("Create customer successfully")
+    void createCustomer_success() {
+        CustomerRequest req = new CustomerRequest("New Corp Ltd.");
+        when(customerRepository.findByCustomerName("New Corp Ltd.")).thenReturn(Optional.empty());
+        when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> {
+            Customer c = invocation.getArgument(0);
+            c.setCustomerId(20);
+            return c;
+        });
+
+        CustomerDto result = salesOrderService.createCustomer(req, currentUser);
+
+        assertNotNull(result);
+        assertEquals(20, result.getCustomerId());
+        assertEquals("New Corp Ltd.", result.getCustomerName());
+        verify(customerRepository).save(any(Customer.class));
+        verify(auditLogService).log(eq(currentUser), eq("CUSTOMER_CREATE"), anyString());
+    }
+
+    @Test
+    @DisplayName("Update customer successfully")
+    void updateCustomer_success() {
+        Customer existing = Customer.builder().customerId(5).customerName("Old Name").isActive(true).build();
+        when(customerRepository.findById(5)).thenReturn(Optional.of(existing));
+        when(customerRepository.findByCustomerName("Updated Name")).thenReturn(Optional.empty());
+        when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CustomerDto result = salesOrderService.updateCustomer(5, new CustomerRequest("Updated Name"), currentUser);
+
+        assertNotNull(result);
+        assertEquals("Updated Name", result.getCustomerName());
+        verify(auditLogService).log(eq(currentUser), eq("CUSTOMER_UPDATE"), anyString());
+    }
+
+    @Test
+    @DisplayName("Delete customer marks isActive false")
+    void deleteCustomer_success() {
+        Customer existing = Customer.builder().customerId(5).customerName("To Delete").isActive(true).build();
+        when(customerRepository.findById(5)).thenReturn(Optional.of(existing));
+
+        salesOrderService.deleteCustomer(5, currentUser);
+
+        assertFalse(existing.getIsActive());
+        verify(customerRepository).save(existing);
+        verify(auditLogService).log(eq(currentUser), eq("CUSTOMER_DELETE"), anyString());
+    }
+
+    @Test
+    @DisplayName("Request customer create generates PENDING approval request")
+    void requestCustomerCreate_createsPendingApprovalRequest() {
+        CustomerRequest req = new CustomerRequest("Pending Retail Ltd.");
+        when(customerRepository.findByCustomerName("Pending Retail Ltd.")).thenReturn(Optional.empty());
+        when(approvalRequestRepository.save(any(ApprovalRequest.class))).thenAnswer(inv -> {
+            ApprovalRequest r = inv.getArgument(0);
+            r.setRequestId(888);
+            return r;
+        });
+
+        ApprovalRequestDto dto = salesOrderService.requestCustomerCreate(req, currentUser);
+
+        assertNotNull(dto);
+        assertEquals(888, dto.getRequestId());
+        assertEquals("PENDING", dto.getStatus());
+        verify(approvalRequestRepository).save(any(ApprovalRequest.class));
+        verify(auditLogService).log(eq(currentUser), eq("REQUEST_CREATE"), anyString());
+    }
+
+    @Test
+    @DisplayName("Request customer update generates PENDING approval request")
+    void requestCustomerUpdate_createsPendingApprovalRequest() {
+        Customer existing = Customer.builder().customerId(8).customerName("Old Customer").isActive(true).build();
+        when(customerRepository.findById(8)).thenReturn(Optional.of(existing));
+        when(approvalRequestRepository.save(any(ApprovalRequest.class))).thenAnswer(inv -> {
+            ApprovalRequest r = inv.getArgument(0);
+            r.setRequestId(889);
+            return r;
+        });
+
+        ApprovalRequestDto dto = salesOrderService.requestCustomerUpdate(8, new CustomerRequest("New Customer Name"), currentUser);
+
+        assertNotNull(dto);
+        assertEquals(889, dto.getRequestId());
+        assertEquals("PENDING", dto.getStatus());
+        verify(approvalRequestRepository).save(any(ApprovalRequest.class));
+    }
+
+    @Test
+    @DisplayName("Request customer deactivate generates PENDING approval request")
+    void requestCustomerDeactivate_createsPendingApprovalRequest() {
+        Customer existing = Customer.builder().customerId(8).customerName("To Deactivate").isActive(true).build();
+        when(customerRepository.findById(8)).thenReturn(Optional.of(existing));
+        when(approvalRequestRepository.save(any(ApprovalRequest.class))).thenAnswer(inv -> {
+            ApprovalRequest r = inv.getArgument(0);
+            r.setRequestId(890);
+            return r;
+        });
+
+        ApprovalRequestDto dto = salesOrderService.requestCustomerDeactivate(8, currentUser);
+
+        assertNotNull(dto);
+        assertEquals(890, dto.getRequestId());
+        assertEquals("PENDING", dto.getStatus());
+        verify(approvalRequestRepository).save(any(ApprovalRequest.class));
     }
 }

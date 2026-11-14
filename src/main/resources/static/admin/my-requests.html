@@ -187,7 +187,9 @@
                 return `
                     <tr>
                         <td class="cell-id">${escapeHtml(reqId)}</td>
-                        <td class="cell-medium">${escapeHtml(reqType)}</td>
+                        <td class="cell-medium">
+                            <div>${escapeHtml(reqType)}</div>
+                        </td>
                         <td>
                             <div><strong>${escapeHtml(requestedBy)}</strong></div>
                             <div class="cell-subtext">(${escapeHtml(role)})</div>
@@ -634,6 +636,187 @@
                     </div>
                 `;
                 reasonText = '';
+            } else if (typeUpper.startsWith('SUPPLIER_')) {
+                const supId = payload?.supplierId || req.targetId;
+                const compName = payload?.companyName || '-';
+                const oldCompName = payload?.oldCompanyName;
+                const cat = payload?.category || '-';
+                const oldCat = payload?.oldCategory;
+                const zCode = payload?.zoneCode || 'None';
+                const oldZCode = payload?.oldZoneCode;
+                const actionLabel = typeUpper === 'SUPPLIER_CREATE' ? 'Request to Add New Supplier'
+                    : typeUpper === 'SUPPLIER_UPDATE' ? 'Request to Edit Supplier' : 'Request to Delete Supplier';
+                const badgeOpColor = typeUpper === 'SUPPLIER_CREATE' ? '#0d9488'
+                    : typeUpper === 'SUPPLIER_UPDATE' ? '#2563eb' : '#dc2626';
+
+                extraGridHtml = `
+                    <div>
+                        <span>Operation</span>
+                        <strong style="color: ${badgeOpColor};">${escapeHtml(actionLabel)}</strong>
+                    </div>
+                    ${supId ? `
+                    <div>
+                        <span>Supplier ID</span>
+                        <strong>#${escapeHtml(String(supId))}</strong>
+                    </div>` : ''}
+                    <div>
+                        <span>Company Name</span>
+                        <strong>${escapeHtml(compName)} ${oldCompName && oldCompName !== compName ? `<span style="font-size: 0.8rem; color: #94a3b8; font-weight: normal;">(was ${escapeHtml(oldCompName)})</span>` : ''}</strong>
+                    </div>
+                `;
+
+                productTablesHtml = `
+                    <div style="margin-top: 14px;">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: #334155; display: block; margin-bottom: 8px;">
+                            Requested Supplier Details:
+                        </span>
+                        <div class="modal-transfer-table-wrapper">
+                            <table class="modal-transfer-table">
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Company Name</th>
+                                        <th>Products</th>
+                                        <th>Zone</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="font-weight: 700; color: ${badgeOpColor};">${escapeHtml(actionLabel)}</td>
+                                        <td class="font-medium">
+                                            ${escapeHtml(compName)}
+                                            ${oldCompName && oldCompName !== compName ? `<div style="font-size: 0.75rem; color: #94a3b8;">Previous: ${escapeHtml(oldCompName)}</div>` : ''}
+                                        </td>
+                                        <td>
+                                            ${escapeHtml(cat)}
+                                            ${oldCat !== undefined && oldCat !== '' && oldCat !== cat ? `<div style="font-size: 0.75rem; color: #94a3b8;">Previous: ${escapeHtml(oldCat)}</div>` : ''}
+                                        </td>
+                                        <td>
+                                            <span class="badge-role" style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem;">${escapeHtml(zCode)}</span>
+                                            ${oldZCode !== undefined && oldZCode !== '' && oldZCode !== zCode ? `<div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">Previous: ${escapeHtml(oldZCode)}</div>` : ''}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                reasonText = payload?.reason || detailText || '';
+            } else if (typeUpper.startsWith('CUSTOMER_')) {
+                const custId = payload?.customerId || req.targetId;
+                const custName = payload?.customerName || '-';
+                const oldCustName = payload?.oldCustomerName;
+                const actionLabel = typeUpper === 'CUSTOMER_CREATE' ? 'Request to Add New Customer'
+                    : typeUpper === 'CUSTOMER_UPDATE' ? 'Request to Edit Customer' : 'Request to Delete Customer';
+                const badgeOpColor = typeUpper === 'CUSTOMER_CREATE' ? '#0d9488'
+                    : typeUpper === 'CUSTOMER_UPDATE' ? '#2563eb' : '#dc2626';
+
+                extraGridHtml = `
+                    <div>
+                        <span>Operation</span>
+                        <strong style="color: ${badgeOpColor};">${escapeHtml(actionLabel)}</strong>
+                    </div>
+                    ${custId ? `
+                    <div>
+                        <span>Customer ID</span>
+                        <strong>#${escapeHtml(String(custId))}</strong>
+                    </div>` : ''}
+                    <div>
+                        <span>Customer Name</span>
+                        <strong>${escapeHtml(custName)} ${oldCustName && oldCustName !== custName ? `<span style="font-size: 0.8rem; color: #94a3b8; font-weight: normal;">(was ${escapeHtml(oldCustName)})</span>` : ''}</strong>
+                    </div>
+                `;
+
+                productTablesHtml = `
+                    <div style="margin-top: 14px;">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: #334155; display: block; margin-bottom: 8px;">
+                            Requested Customer Details:
+                        </span>
+                        <div class="modal-transfer-table-wrapper">
+                            <table class="modal-transfer-table">
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th style="width: 100px;">Customer ID</th>
+                                        <th>Customer Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="font-weight: 700; color: ${badgeOpColor};">${escapeHtml(actionLabel)}</td>
+                                        <td class="font-medium">${custId ? ('#' + escapeHtml(String(custId))) : 'New'}</td>
+                                        <td class="font-medium">
+                                            ${escapeHtml(custName)}
+                                            ${oldCustName && oldCustName !== custName ? `<div style="font-size: 0.75rem; color: #94a3b8;">Previous: ${escapeHtml(oldCustName)}</div>` : ''}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                reasonText = payload?.reason || detailText || '';
+            } else if (typeUpper === 'ZONE_CREATE' || typeUpper === 'ZONE_UPDATE') {
+                const isCreate = typeUpper === 'ZONE_CREATE';
+                const zCode = payload?.zoneCode || '-';
+                const zName = payload?.zoneName || '-';
+                const oldZName = payload?.oldZoneName;
+                const cap = payload?.capacity;
+                const oldCap = payload?.oldCapacity;
+                const stored = payload?.storedUnits;
+                const actionLabel = isCreate ? 'Request to Create New Zone' : 'Request to Edit Zone Capacity';
+                const badgeOpColor = isCreate ? '#0d9488' : '#2563eb';
+
+                extraGridHtml = `
+                    <div>
+                        <span>Operation</span>
+                        <strong style="color: ${badgeOpColor};">${escapeHtml(actionLabel)}</strong>
+                    </div>
+                    <div>
+                        <span>Zone</span>
+                        <strong>${escapeHtml(zCode)} - ${escapeHtml(zName)} ${oldZName && oldZName !== zName ? `<span style="font-size: 0.8rem; color: #94a3b8; font-weight: normal;">(was ${escapeHtml(oldZName)})</span>` : ''}</strong>
+                    </div>
+                    <div>
+                        <span>Requested Capacity</span>
+                        <strong>${Number(cap || 0).toLocaleString()} Units ${oldCap !== undefined && oldCap !== cap ? `<span style="font-size: 0.8rem; color: #94a3b8; font-weight: normal;">(was ${Number(oldCap).toLocaleString()} Units)</span>` : ''}</strong>
+                    </div>
+                `;
+
+                productTablesHtml = `
+                    <div style="margin-top: 14px;">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: #334155; display: block; margin-bottom: 8px;">
+                            Requested Zone Details:
+                        </span>
+                        <div class="modal-transfer-table-wrapper">
+                            <table class="modal-transfer-table">
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Zone Code</th>
+                                        <th>Zone Name</th>
+                                        <th>Capacity</th>
+                                        ${!isCreate && stored !== undefined ? '<th>Currently Stored</th>' : ''}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="font-weight: 700; color: ${badgeOpColor};">${escapeHtml(actionLabel)}</td>
+                                        <td>
+                                            <span class="badge-role" style="background: #e0f2fe; color: #0369a1; padding: 2px 10px; border-radius: 4px; font-weight: 600; font-size: 0.82rem;">${escapeHtml(zCode)}</span>
+                                        </td>
+                                        <td class="font-medium">${escapeHtml(zName)}</td>
+                                        <td class="font-medium">
+                                            <span style="color: #059669; font-weight: 700;">${Number(cap || 0).toLocaleString()} Units</span>
+                                            ${oldCap !== undefined && oldCap !== cap ? `<div style="font-size: 0.75rem; color: #94a3b8;">Previous: ${Number(oldCap).toLocaleString()} Units</div>` : ''}
+                                        </td>
+                                        ${!isCreate && stored !== undefined ? `<td>${Number(stored || 0).toLocaleString()} Units</td>` : ''}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                reasonText = payload?.reason || detailText || '';
             } else {
                 reasonText = detailText.includes('Reason:')
                     ? detailText.split(/Reason:\s*/i)[1]

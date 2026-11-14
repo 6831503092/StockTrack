@@ -305,8 +305,36 @@
             filterRoles();
         }
 
+        function checkCreateUserFormState() {
+            const btn = document.querySelector('#form-create-user button[type="submit"]');
+            if (!btn) return;
+            const fullName = (document.getElementById('new-fullname')?.value || '').trim();
+            const role = (document.getElementById('new-role')?.value || '').trim();
+            const password = document.getElementById('new-password')?.value || '';
+            btn.disabled = !fullName || !role || !password;
+        }
+
+        function checkChangeRoleFormState() {
+            const btn = document.querySelector('#form-change-role button[type="submit"]');
+            if (!btn) return;
+            const currentRole = (document.getElementById('modal-current-role')?.value || '').trim().toUpperCase();
+            const newRole = (document.getElementById('modal-new-role')?.value || '').trim().toUpperCase();
+            btn.disabled = !newRole || newRole === currentRole;
+        }
+
+        ['new-fullname', 'new-role', 'new-password'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', checkCreateUserFormState);
+                el.addEventListener('change', checkCreateUserFormState);
+            }
+        });
+
+        document.getElementById('modal-new-role')?.addEventListener('change', checkChangeRoleFormState);
+
         function openCreateUserModal() {
             document.getElementById('form-create-user').reset();
+            checkCreateUserFormState();
             AdminApp.openModal('modal-create-user');
         }
 
@@ -322,6 +350,14 @@
             const role = document.getElementById('new-role').value;
             const password = document.getElementById('new-password').value;
             const reason = document.getElementById('new-reason').value.trim();
+
+            if (!fullName || !role || !password) {
+                return AdminApp.showCenterAlert({
+                    title: 'Validation Error',
+                    message: 'Please fill in Full Name, Role, and Password.',
+                    type: 'error'
+                });
+            }
 
             try {
                 const res = await window.api.post('/api/requests/user-create', { fullName, role, password, reason });
@@ -349,6 +385,7 @@
             document.getElementById('modal-current-role').value = currentRole;
             document.getElementById('modal-role-reason').value = '';
             document.getElementById('modal-new-role').value = currentRole === 'Staff' ? 'Manager' : 'Staff';
+            checkChangeRoleFormState();
 
             AdminApp.openModal('modal-change-role');
         }
@@ -361,8 +398,17 @@
             e.preventDefault();
             const userId = parseInt(document.getElementById('modal-user-id').value, 10);
             const userName = document.getElementById('modal-user-name').value || 'User';
+            const currentRole = (document.getElementById('modal-current-role').value || '').trim();
             const newRole = document.getElementById('modal-new-role').value;
             const reason = document.getElementById('modal-role-reason').value.trim();
+
+            if (!newRole || newRole.trim().toUpperCase() === currentRole.toUpperCase()) {
+                return AdminApp.showCenterAlert({
+                    title: 'No Changes Detected',
+                    message: 'Please select a new role different from the current role before sending a request.',
+                    type: 'warning'
+                });
+            }
 
             try {
                 const res = await window.api.post('/api/requests/role-change', { userId, newRole, reason });

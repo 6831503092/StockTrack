@@ -1,10 +1,13 @@
 package com.sras.backend.config;
 
+import com.sras.backend.entity.AuditLog;
 import com.sras.backend.entity.Customer;
 import com.sras.backend.entity.Product;
 import com.sras.backend.entity.Supplier;
+import com.sras.backend.entity.User;
 import com.sras.backend.entity.Zone;
 import com.sras.backend.enums.Role;
+import com.sras.backend.repository.AuditLogRepository;
 import com.sras.backend.repository.CustomerRepository;
 import com.sras.backend.repository.ProductRepository;
 import com.sras.backend.repository.SupplierRepository;
@@ -17,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -28,6 +32,7 @@ public class DataInitializer implements CommandLineRunner {
     private final ProductRepository productRepository;
     private final SupplierRepository supplierRepository;
     private final CustomerRepository customerRepository;
+    private final AuditLogRepository auditLogRepository;
     private final JdbcTemplate jdbcTemplate;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -47,6 +52,7 @@ public class DataInitializer implements CommandLineRunner {
         seedProductsIfEmpty();
         seedSuppliersIfEmpty();
         seedCustomersIfEmpty();
+        seedAuditLogsIfEmpty();
     }
 
     private void seedCustomersIfEmpty() {
@@ -161,5 +167,36 @@ public class DataInitializer implements CommandLineRunner {
             productId, name, BigDecimal.valueOf(cost), BigDecimal.valueOf(price),
             stock, 20, 1, 100, 1, 50, zone.getZoneId(), true
         );
+    }
+
+    private void seedAuditLogsIfEmpty() {
+        if (auditLogRepository.count() > 0) {
+            return;
+        }
+
+        User admin = userRepository.findById(503092).orElse(null);
+        User manager = userRepository.findById(503069).orElse(null);
+        User staff = userRepository.findById(503080).orElse(null);
+
+        if (admin == null || manager == null || staff == null) {
+            return;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        List<AuditLog> initialLogs = List.of(
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType("RECEIVE_ACCEPT").detail("Accepted Receive for PO #1001 into warehouse (45 Office Desk to Zone Z1)").actionDatetime(now.minusHours(2)).build(),
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType("STOCK_OUT_CONFIRM").detail("Confirmed Stock Out for SO #2001 (15 Gaming Chair shipped)").actionDatetime(now.minusHours(4)).build(),
+                AuditLog.builder().user(manager).role(Role.MANAGER).actionType("REQUEST_APPROVE").detail("Approved PO_CREATE Request #102 for Supplier Thai Wood Supply Co.").actionDatetime(now.minusHours(7)).build(),
+                AuditLog.builder().user(admin).role(Role.ADMIN).actionType("SO_CREATE").detail("Created Sales Order #2002 (Customer: RWTcomp., 3 items)").actionDatetime(now.minusHours(11)).build(),
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType("TRANSFER_VERIFY").detail("Verified transfer for movement #3001 (20 Coffee Table from Z1 to Z2)").actionDatetime(now.minusDays(1).minusHours(1)).build(),
+                AuditLog.builder().user(admin).role(Role.ADMIN).actionType("PO_CREATE").detail("Created Purchase Order #1001 (Supplier: Thai Wood Supply Co.)").actionDatetime(now.minusDays(1).minusHours(4)).build(),
+                AuditLog.builder().user(manager).role(Role.MANAGER).actionType("PRODUCT_UPDATE").detail("Updated product ID 10008: Gaming Chair (Selling Price updated to 3000.00)").actionDatetime(now.minusDays(1).minusHours(8)).build(),
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType("RECEIVE_ACCEPT").detail("Accepted Receive for PO #998 into warehouse (30 Bookshelf to Zone Z4)").actionDatetime(now.minusDays(2)).build(),
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType("STOCK_OUT_CONFIRM").detail("Confirmed Stock Out for SO #1995 (10 Dining Table shipped)").actionDatetime(now.minusDays(2).minusHours(3)).build(),
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType("STOCK_OUT_REJECT").detail("Rejected Stock Out for SO #1994. Reason: Damaged packaging on inspection").actionDatetime(now.minusDays(3)).build()
+        );
+
+        auditLogRepository.saveAll(initialLogs);
     }
 }

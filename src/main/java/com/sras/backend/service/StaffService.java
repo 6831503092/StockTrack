@@ -340,17 +340,32 @@ public class StaffService {
         movement.setCountedQty(counted);
         stockMovementRepository.save(movement);
 
-        // Update product's zone location
-        Product product = movement.getProduct();
-        if (product != null && movement.getToZone() != null) {
+        // Move/swap all products between fromZone and toZone
+        if (movement.getFromZone() != null && movement.getToZone() != null) {
+            List<Product> fromProducts = productRepository.findByZoneZoneIdAndIsActiveTrue(movement.getFromZone().getZoneId());
+            List<Product> toProducts = productRepository.findByZoneZoneIdAndIsActiveTrue(movement.getToZone().getZoneId());
+
+            if (fromProducts != null && !fromProducts.isEmpty()) {
+                for (Product p : fromProducts) {
+                    p.setZone(movement.getToZone());
+                }
+                productRepository.saveAll(fromProducts);
+            }
+            if (toProducts != null && !toProducts.isEmpty()) {
+                for (Product p : toProducts) {
+                    p.setZone(movement.getFromZone());
+                }
+                productRepository.saveAll(toProducts);
+            }
+        } else if (movement.getProduct() != null && movement.getToZone() != null) {
+            Product product = movement.getProduct();
             product.setZone(movement.getToZone());
             productRepository.save(product);
         }
 
         auditLogService.log(staffUser, "TRANSFER_VERIFY",
-                "Verified stock transfer #" + movementId + " of " +
-                        (product != null ? product.getProductName() : "Product") +
-                        " from " + movement.getFromZone().getZoneName() + " to " + movement.getToZone().getZoneName());
+                "Verified stock transfer #" + movementId +
+                        " between " + movement.getFromZone().getZoneName() + " and " + movement.getToZone().getZoneName());
         log.info("Stock movement #{} verified by staff #{}", movementId, staffUser.getUserId());
     }
 

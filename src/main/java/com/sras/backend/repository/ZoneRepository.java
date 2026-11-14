@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface ZoneRepository extends JpaRepository<Zone, Integer> {
     Optional<Zone> findByZoneCode(String zoneCode);
     boolean existsByZoneCode(String zoneCode);
+    Optional<Zone> findByZoneName(String zoneName);
+    boolean existsByZoneName(String zoneName);
 }

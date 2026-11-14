@@ -40,6 +40,16 @@
                             Create Purchase Order
                         </button>
 
+                        <button type="button" class="btn-header-outline" id="btn-open-manage-suppliers" onclick="openManageSuppliersModal()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            Manage Suppliers
+                        </button>
+
                         <div class="requests-date-box" id="requests-date-box" title="Click to filter by date">
                             <input type="date" id="requests-date-input" aria-label="Filter by date">
                         </div>
@@ -150,7 +160,10 @@
 
                     <!-- Row 2: Supplier -->
                     <div class="po-wire-group">
-                        <label for="new-po-supplier" class="po-wire-label">Supplier</label>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label for="new-po-supplier" class="po-wire-label" style="margin-bottom: 0;">Supplier</label>
+                            
+                        </div>
                         <select id="new-po-supplier" class="po-wire-select" required onchange="handleSupplierChange(this.value)">
                             <option value="" disabled selected>Select Supplier</option>
                             <option value="JRScomp." data-zone="Z1">JRScomp.</option>
@@ -172,7 +185,7 @@
                         <div class="po-wire-items-list" id="po-items-container">
                             <div class="po-wire-item-row">
                                 <select class="po-wire-select po-item-product" onchange="handleProductChange(this)">
-                                    <option value="" disabled selected>Please select supplier first</option>
+                                    <option value="" disabled selected>select product</option>
                                 </select>
                                 <input type="number" min="1" class="po-wire-input po-item-qty" placeholder="" oninput="handleQtyChange(this)">
                                 <input type="text" class="po-wire-input-readonly po-item-unit-price" readonly placeholder="">
@@ -289,6 +302,94 @@
         </div>
     </div>
 
+    <!-- MODAL 3: Manage Suppliers Modal -->
+    <div class="modal-overlay" id="modal-manage-suppliers">
+        <div class="modal-box modal-po-wire modal-manage-suppliers-box">
+            <div class="po-wire-header">
+                <h2>Manage Suppliers</h2>
+                <button type="button" class="btn-close-modal" onclick="closeManageSuppliersModal()" aria-label="Close modal">&times;</button>
+            </div>
+
+            <!-- Add / Edit Supplier Form -->
+            <form id="form-supplier" class="po-wire-form-card" onsubmit="handleSupplierFormSubmit(event)">
+                <div class="po-wire-form-card-header">
+                    <span class="po-wire-form-title" id="supplier-form-title">Add New Supplier</span>
+                </div>
+                <input type="hidden" id="supplier-edit-id" value="">
+
+                <!-- Row 1: Company Name & Zone -->
+                <div class="po-wire-supplier-row-top">
+                    <div>
+                        <label for="supplier-name-input" class="po-wire-label">Company Name *</label>
+                        <input type="text" id="supplier-name-input" class="po-wire-input" placeholder="e.g. Thai Wood Supply" required maxlength="50">
+                    </div>
+                    <div>
+                        <label for="supplier-zone-select" class="po-wire-label">Zone</label>
+                        <select id="supplier-zone-select" class="po-wire-select">
+                            <option value="">None</option>
+                            <option value="Z1">Zone 1 (Z1)</option>
+                            <option value="Z2">Zone 2 (Z2)</option>
+                            <option value="Z3">Zone 3 (Z3)</option>
+                            <option value="Z4">Zone 4 (Z4)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Row 2: Products & Form Actions -->
+                <div class="po-wire-supplier-row-bottom">
+                    <div class="po-wire-supplier-cat-col">
+                        <label for="supplier-cat-select" class="po-wire-label">Products</label>
+                        <div id="supplier-cat-select-wrap">
+                            <select id="supplier-cat-select" class="po-wire-select" onchange="handleSupplierCategoryChange(this.value)">
+                                <option value="">Select Products</option>
+                                <option value="__custom__" style="color: #059669; font-weight: 700;">+ Create New Products (Custom)...</option>
+                            </select>
+                        </div>
+                        <div id="supplier-cat-custom-wrap" style="display: none;">
+                            <div class="po-wire-custom-cat-row">
+                                <input type="text" id="supplier-cat-custom-input" class="po-wire-input" placeholder="Enter products name..." maxlength="50" onkeydown="handleCustomCatKeydown(event)">
+                                <button type="button" class="po-wire-btn-save" style="height: 42px; padding: 0 18px; font-size: 0.9rem; white-space: nowrap;" onclick="applyCustomSupplierCategory()" title="Add to products list">Add</button>
+                                <button type="button" class="po-wire-btn-icon-cancel" onclick="toggleCustomSupplierCategory(false)" title="Back to products list">&times;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="po-wire-supplier-form-actions">
+                        <button type="button" class="po-wire-btn-cancel" id="btn-cancel-supplier-edit" style="display: none;" onclick="resetSupplierForm()">Cancel</button>
+                        <button type="submit" class="po-wire-btn-save" id="btn-save-supplier">Send Request</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Suppliers Table -->
+            <div class="po-wire-section-header">
+                <span class="po-wire-section-title">
+                    Current Active Suppliers
+                    <span class="po-wire-count-badge" id="suppliers-count">0</span>
+                </span>
+            </div>
+            <div class="po-wire-suppliers-table-wrap">
+                <table class="order-review-table">
+                    <thead>
+                        <tr>
+                            <th>Company Name</th>
+                            <th>Products</th>
+                            <th>Zone</th>
+                            <th style="width: 170px; white-space: nowrap;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manage-suppliers-tbody">
+                        <!-- Injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="po-wire-actions" style="margin-top: 24px;">
+                <button type="button" class="po-wire-btn-cancel" onclick="closeManageSuppliersModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="../js/sidebar.js"></script>
     <script src="../js/api.js"></script>
@@ -299,6 +400,7 @@
         let poData = [];
         let availableProducts = [];
         let availableSuppliers = [];
+        let pendingSubmittedCategories = [];
 
         const poTbody = document.getElementById('po-table-body');
         const emptyPOHtml = '';
@@ -316,7 +418,7 @@
             const zoneCode = filterZoneCode || getCurrentSupplierZone();
 
             if (!zoneCode) {
-                return `<option value="" disabled selected>Please select supplier first</option>`;
+                return `<option value="" disabled selected>supplier first</option>`;
             }
 
             const productsInZone = (availableProducts || []).filter(p => p.location === zoneCode);
@@ -347,6 +449,9 @@
 
             selects.forEach(sel => {
                 sel.innerHTML = optionsHtml;
+                if (typeof sel._syncCombobox === 'function') {
+                    sel._syncCombobox();
+                }
                 const row = sel.closest('.po-wire-item-row');
                 if (row) {
                     const qtyInput = row.querySelector('.po-item-qty');
@@ -360,15 +465,17 @@
                     if (totalPriceInput) totalPriceInput.value = '';
                 }
             });
+            AdminApp.syncProductSelects();
         }
 
         async function loadSuppliers() {
             try {
                 if (window.api && typeof window.api.get === 'function') {
                     const res = await window.api.get('/api/suppliers');
-                    if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+                    if (res && res.success && Array.isArray(res.data)) {
                         availableSuppliers = res.data;
                         const selectSupplier = document.getElementById('new-po-supplier');
+                        const currentVal = selectSupplier ? selectSupplier.value : '';
                         if (selectSupplier) {
                             selectSupplier.innerHTML = `
                                 <option value="" disabled selected>Select Supplier</option>
@@ -378,11 +485,437 @@
                                     </option>
                                 `).join('')}
                             `;
+                            if (currentVal && availableSuppliers.some(s => s.companyName === currentVal)) {
+                                selectSupplier.value = currentVal;
+                            }
                         }
+                        renderManageSuppliersTable();
+                        populateSupplierCategoryOptions();
                     }
                 }
             } catch (err) {
                 console.warn('Failed to load suppliers:', err);
+            }
+        }
+
+        async function loadZoneOptionsForSuppliers() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/zones');
+                    if (res?.success && Array.isArray(res.data) && res.data.length > 0) {
+                        const selectEl = document.getElementById('supplier-zone-select');
+                        if (selectEl) {
+                            const curVal = selectEl.value;
+                            selectEl.innerHTML = `
+                                <option value="">None</option>
+                                ${res.data.map(z => `<option value="${escapeHtml(z.zoneCode)}">${escapeHtml(z.zoneName || z.zoneCode)} (${escapeHtml(z.zoneCode)})</option>`).join('')}
+                            `;
+                            if (curVal) selectEl.value = curVal;
+                        }
+                    }
+                }
+            } catch (_) {}
+        }
+
+        function openManageSuppliersModal() {
+            resetSupplierForm();
+            loadZoneOptionsForSuppliers();
+            populateSupplierCategoryOptions();
+            renderManageSuppliersTable();
+            AdminApp.openModal('modal-manage-suppliers');
+        }
+
+        function closeManageSuppliersModal() {
+            AdminApp.closeModal('modal-manage-suppliers');
+        }
+
+        function getExistingSupplierCategories(excludeSupplierId = null) {
+            const standardCats = ['Tables', 'Chairs', 'Beds', 'Cabinets'];
+            const excludeIdStr = excludeSupplierId ? String(excludeSupplierId) : null;
+            const editingSupplier = excludeIdStr
+                ? (availableSuppliers || []).find(s => String(s.supplierId) === excludeIdStr)
+                : null;
+            const editingOwnCat = editingSupplier && editingSupplier.category
+                ? editingSupplier.category.trim().toLowerCase()
+                : null;
+
+            const existingSet = new Set();
+
+            standardCats.forEach(cat => {
+                if (cat.toLowerCase() !== editingOwnCat) {
+                    existingSet.add(cat.toLowerCase());
+                }
+            });
+
+            (availableSuppliers || []).forEach(s => {
+                if (excludeIdStr && String(s.supplierId) === excludeIdStr) return;
+                const cat = (s.category || '').trim();
+                if (cat) {
+                    existingSet.add(cat.toLowerCase());
+                }
+            });
+
+            (pendingSubmittedCategories || []).forEach(cat => {
+                const clean = (cat || '').trim().toLowerCase();
+                if (clean && clean !== editingOwnCat) {
+                    existingSet.add(clean);
+                }
+            });
+
+            return existingSet;
+        }
+
+        function isDuplicateSupplierCategory(categoryName, excludeSupplierId = null) {
+            const normalized = (categoryName || '').trim().toLowerCase();
+            if (!normalized) return false;
+            return getExistingSupplierCategories(excludeSupplierId).has(normalized);
+        }
+
+        function populateSupplierCategoryOptions(selectedValue) {
+            const select = document.getElementById('supplier-cat-select');
+            if (!select) return;
+
+            const resolvedVal = selectedValue !== undefined
+                ? (selectedValue || '').trim()
+                : ((select.value && select.value !== '__custom__') ? select.value.trim() : '');
+
+            let html = `<option value="">Select Products</option>`;
+            if (resolvedVal && resolvedVal !== '__custom__') {
+                html += `<option value="${escapeHtml(resolvedVal)}">${escapeHtml(resolvedVal)}</option>`;
+            }
+            html += `<option value="__custom__" style="color: #059669; font-weight: 700;">+ Create New Products (Custom)...</option>`;
+
+            select.innerHTML = html;
+            select.value = (resolvedVal && resolvedVal !== '__custom__') ? resolvedVal : '';
+            select.classList.toggle('is-placeholder', !select.value);
+        }
+
+        function toggleCustomSupplierCategory(show) {
+            const customWrap = document.getElementById('supplier-cat-custom-wrap');
+            const selectWrap = document.getElementById('supplier-cat-select-wrap');
+            const customInput = document.getElementById('supplier-cat-custom-input');
+            const toggleBtn = document.getElementById('btn-toggle-custom-cat');
+            const select = document.getElementById('supplier-cat-select');
+
+            if (show) {
+                if (selectWrap) selectWrap.style.display = 'none';
+                if (customWrap) customWrap.style.display = 'block';
+                if (toggleBtn) toggleBtn.style.display = 'none';
+                if (customInput) {
+                    customInput.value = '';
+                    customInput.focus();
+                }
+            } else {
+                if (selectWrap) selectWrap.style.display = 'block';
+                if (customWrap) customWrap.style.display = 'none';
+                if (toggleBtn) toggleBtn.style.display = 'inline';
+                if (customInput) customInput.value = '';
+                if (select && select.value === '__custom__') {
+                    select.value = '';
+                }
+            }
+        }
+
+        function handleSupplierCategoryChange(value) {
+            if (value === '__custom__') {
+                toggleCustomSupplierCategory(true);
+                checkSupplierFormState();
+                return;
+            }
+            toggleCustomSupplierCategory(false);
+
+            if (value) {
+                const zoneSelect = document.getElementById('supplier-zone-select');
+                if (zoneSelect && !zoneSelect.value) {
+                    const catMap = { 'Tables': 'Z1', 'Chairs': 'Z2', 'Beds': 'Z3', 'Cabinets': 'Z4' };
+                    if (catMap[value]) {
+                        zoneSelect.value = catMap[value];
+                    } else {
+                        const prod = (availableProducts || []).find(p => p.name === value);
+                        if (prod && prod.location) {
+                            zoneSelect.value = prod.location;
+                        }
+                    }
+                }
+            }
+            checkSupplierFormState();
+        }
+
+        function handleCustomCatKeydown(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                applyCustomSupplierCategory();
+            }
+        }
+
+        function saveCustomSupplierCategoryToStorage(cat) {
+            if (!cat) return;
+            try {
+                const list = JSON.parse(localStorage.getItem('sras_supplier_categories') || '[]');
+                if (!list.includes(cat)) {
+                    list.push(cat);
+                    localStorage.setItem('sras_supplier_categories', JSON.stringify(list));
+                }
+            } catch (_) {}
+        }
+
+        function applyCustomSupplierCategory() {
+            const input = document.getElementById('supplier-cat-custom-input');
+            const val = (input ? input.value : '').trim();
+            if (!val) {
+                AdminApp.showCenterAlert({
+                    title: 'Validation Error',
+                    message: 'Please enter a products name to create.',
+                    type: 'error'
+                });
+                input?.focus();
+                return;
+            }
+            if (isDuplicateSupplierCategory(val)) {
+                AdminApp.showCenterAlert({
+                    title: 'Duplicate Products',
+                    message: `Products "${val}" already exists and cannot be created.`,
+                    type: 'error'
+                });
+                input?.focus();
+                return;
+            }
+            populateSupplierCategoryOptions(val);
+            toggleCustomSupplierCategory(false);
+            const select = document.getElementById('supplier-cat-select');
+            if (select) {
+                select.value = val;
+                handleSupplierCategoryChange(val);
+            }
+        }
+
+        function getSelectedSupplierCategory() {
+            const customWrap = document.getElementById('supplier-cat-custom-wrap');
+            const isCustomActive = customWrap && customWrap.style.display !== 'none';
+            const customInput = document.getElementById('supplier-cat-custom-input');
+            const customVal = (customInput ? customInput.value : '').trim();
+            const select = document.getElementById('supplier-cat-select');
+            const selectVal = (select ? select.value : '').trim();
+
+            if (isCustomActive && customVal) {
+                return customVal;
+            }
+            if (selectVal && selectVal !== '__custom__') {
+                return selectVal;
+            }
+            if (customVal) {
+                return customVal;
+            }
+            return '';
+        }
+
+        function renderManageSuppliersTable() {
+            const tbody = document.getElementById('manage-suppliers-tbody');
+            const countEl = document.getElementById('suppliers-count');
+            if (countEl) countEl.textContent = availableSuppliers.length;
+            if (!tbody) return;
+
+            if (!availableSuppliers.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 28px; font-size: 0.9rem;">
+                            No active suppliers found. Add one above!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = availableSuppliers.map(s => `
+                <tr>
+                    <td class="cell-prod-name">${escapeHtml(s.companyName)}</td>
+                    <td style="color: #475569; font-weight: 500;">${escapeHtml(s.category || '—')}</td>
+                    <td>
+                        ${s.zoneCode ? `<span class="badge-role" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 3px 10px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;">${escapeHtml(s.zoneCode)}</span>` : '<span style="color: #94a3b8;">—</span>'}
+                    </td>
+                    <td style="white-space: nowrap;">
+                        <div class="action-buttons-group" style="flex-wrap: nowrap;">
+                            <button type="button" class="btn-action-detail" onclick="startEditSupplier(${s.supplierId})">
+                                Edit
+                            </button>
+                            <button type="button" class="btn-action-reason" onclick="confirmDeleteSupplier(${s.supplierId}, '${escapeHtml(s.companyName)}')">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function checkSupplierFormState() {
+            const saveBtn = document.getElementById('btn-save-supplier');
+            if (!saveBtn) return;
+
+            const editId = document.getElementById('supplier-edit-id')?.value;
+            const companyName = (document.getElementById('supplier-name-input')?.value || '').trim();
+            const category = getSelectedSupplierCategory();
+            const zoneCode = (document.getElementById('supplier-zone-select')?.value || '').trim();
+
+            if (!companyName) {
+                saveBtn.disabled = true;
+                return;
+            }
+
+            if (editId) {
+                const orig = availableSuppliers.find(item => String(item.supplierId) === String(editId));
+                if (orig) {
+                    const origName = (orig.companyName || '').trim();
+                    const origCat = (orig.category || '').trim();
+                    const origZone = (orig.zoneCode || '').trim();
+                    const hasChanges = companyName !== origName || category !== origCat || zoneCode !== origZone;
+                    saveBtn.disabled = !hasChanges;
+                    return;
+                }
+            }
+
+            saveBtn.disabled = false;
+        }
+
+        ['supplier-name-input', 'supplier-zone-select', 'supplier-cat-select', 'supplier-cat-custom-input'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', checkSupplierFormState);
+                el.addEventListener('change', checkSupplierFormState);
+            }
+        });
+
+        function startEditSupplier(supplierId) {
+            const s = availableSuppliers.find(item => item.supplierId === supplierId);
+            if (!s) return;
+
+            document.getElementById('supplier-edit-id').value = s.supplierId;
+            document.getElementById('supplier-name-input').value = s.companyName;
+            
+            toggleCustomSupplierCategory(false);
+            populateSupplierCategoryOptions(s.category || '');
+            const catSelect = document.getElementById('supplier-cat-select');
+            if (catSelect) catSelect.value = s.category || '';
+
+            document.getElementById('supplier-zone-select').value = s.zoneCode || '';
+
+            document.getElementById('supplier-form-title').textContent = 'Edit Supplier: ' + s.companyName;
+            document.getElementById('btn-save-supplier').textContent = 'Send Request';
+            document.getElementById('btn-cancel-supplier-edit').style.display = 'inline-flex';
+            checkSupplierFormState();
+            document.getElementById('supplier-name-input').focus();
+        }
+
+        function resetSupplierForm() {
+            const form = document.getElementById('form-supplier');
+            if (form) form.reset();
+            document.getElementById('supplier-edit-id').value = '';
+            toggleCustomSupplierCategory(false);
+            populateSupplierCategoryOptions('');
+            const catSelect = document.getElementById('supplier-cat-select');
+            if (catSelect) catSelect.value = '';
+            document.getElementById('supplier-form-title').textContent = 'Add New Supplier';
+            document.getElementById('btn-save-supplier').textContent = 'Send Request';
+            document.getElementById('btn-cancel-supplier-edit').style.display = 'none';
+            checkSupplierFormState();
+        }
+
+        async function handleSupplierFormSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('supplier-edit-id').value;
+            const companyName = (document.getElementById('supplier-name-input').value || '').trim();
+            const category = getSelectedSupplierCategory();
+            const zoneCode = (document.getElementById('supplier-zone-select').value || '').trim();
+
+            if (!companyName) {
+                return AdminApp.showCenterAlert({ title: 'Validation Error', message: 'Supplier Company Name is required.', type: 'error' });
+            }
+
+            if (editId) {
+                const orig = availableSuppliers.find(item => String(item.supplierId) === String(editId));
+                if (orig) {
+                    const origName = (orig.companyName || '').trim();
+                    const origCat = (orig.category || '').trim();
+                    const origZone = (orig.zoneCode || '').trim();
+                    if (companyName === origName && category === origCat && zoneCode === origZone) {
+                        return AdminApp.showCenterAlert({
+                            title: 'No Changes Detected',
+                            message: 'Please modify at least one field before sending a request.',
+                            type: 'warning'
+                        });
+                    }
+                }
+            }
+
+            if (category && isDuplicateSupplierCategory(category, editId)) {
+                return AdminApp.showCenterAlert({
+                    title: 'Duplicate Products',
+                    message: `Products "${category}" already exists and cannot be created.`,
+                    type: 'error'
+                });
+            }
+
+            const payload = { companyName, category, zoneCode };
+            const saveBtn = document.getElementById('btn-save-supplier');
+            if (saveBtn) saveBtn.disabled = true;
+
+            try {
+                if (editId) {
+                    const res = await window.api.put('/api/suppliers/' + editId, payload);
+                    AdminApp.showCenterAlert({
+                        title: 'Request Submitted',
+                        message: res?.message || `Update request for supplier "${companyName}" submitted for Manager approval.`,
+                        type: 'success'
+                    });
+                } else {
+                    const res = await window.api.post('/api/suppliers', payload);
+                    AdminApp.showCenterAlert({
+                        title: 'Request Submitted',
+                        message: res?.message || `Creation request for supplier "${companyName}" submitted for Manager approval.`,
+                        type: 'success'
+                    });
+                }
+                if (category) {
+                    pendingSubmittedCategories.push(category);
+                }
+                resetSupplierForm();
+                await loadSuppliers();
+            } catch (err) {
+                console.error('Failed to save supplier:', err);
+                AdminApp.showCenterAlert({
+                    title: 'Save Failed',
+                    message: err.message || 'Could not save supplier information.',
+                    type: 'error'
+                });
+            } finally {
+                checkSupplierFormState();
+            }
+        }
+
+        async function confirmDeleteSupplier(supplierId, companyName) {
+            const confirmed = await AdminApp.showConfirmDialog({
+                title: 'Delete Supplier?',
+                message: `Are you sure you want to request deactivation of supplier "${companyName}"? This request will be sent to the Manager for approval.`,
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                type: 'danger'
+            });
+            if (!confirmed) return;
+
+            try {
+                const res = await window.api.delete('/api/suppliers/' + supplierId);
+                AdminApp.showCenterAlert({
+                    title: 'Request Submitted',
+                    message: res?.message || `Deactivation request for supplier "${companyName}" submitted for Manager approval.`,
+                    type: 'success'
+                });
+                await loadSuppliers();
+            } catch (err) {
+                console.error('Failed to delete supplier:', err);
+                AdminApp.showCenterAlert({
+                    title: 'Request Failed',
+                    message: err.message || 'Could not submit supplier deactivation request.',
+                    type: 'error'
+                });
             }
         }
 
@@ -393,6 +926,7 @@
                     if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
                         availableProducts = res.data;
                         refreshProductSelects();
+                        populateSupplierCategoryOptions();
                     }
                 }
             } catch (err) {
@@ -579,7 +1113,9 @@
             newRow.className = 'po-wire-item-row';
             newRow.innerHTML = getPOItemRowInnerHtml(zoneCode);
             container.appendChild(newRow);
-            newRow.querySelector('.po-item-product')?.focus();
+            AdminApp.syncProductSelects(newRow);
+            const sel = newRow.querySelector('.po-item-product');
+            (sel?._comboInput || sel)?.focus();
         }
 
         function deleteLastPOItemRow() {
@@ -591,7 +1127,10 @@
             } else if (rows.length === 1) {
                 const row = rows[0];
                 const select = row.querySelector('.po-item-product');
-                if (select) select.selectedIndex = 0;
+                if (select) {
+                    select.selectedIndex = 0;
+                    if (typeof select._syncCombobox === 'function') select._syncCombobox();
+                }
                 row.querySelectorAll('input').forEach(input => input.value = '');
                 const unit = row.querySelector('.po-item-unit-price');
                 if (unit) unit.dataset.cost = '0';
@@ -631,6 +1170,7 @@
         }
 
         document.getElementById('btn-open-create-modal')?.addEventListener('click', openCreatePOModal);
+        document.getElementById('btn-open-manage-suppliers')?.addEventListener('click', openManageSuppliersModal);
 
         let pendingPOPayload = null;
 
@@ -673,7 +1213,7 @@
                         message: `Please select a product for Item row #${i + 1}.`,
                         type: 'error'
                     });
-                    selectEl?.focus();
+                    (selectEl?._comboInput || selectEl)?.focus();
                     return;
                 }
 
