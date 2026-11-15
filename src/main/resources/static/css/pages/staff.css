@@ -1060,61 +1060,61 @@ body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) 
 
 body.staff-dashboard.issue-workflow .staff-header {
   background:
-    radial-gradient(ellipse at 82% 18%, rgba(165, 190, 255, .26), transparent 34%),
-    linear-gradient(112deg, #1d315d 0%, #345da2 55%, #4778bd 100%);
+    radial-gradient(ellipse at 82% 18%, rgba(167, 243, 208, .26), transparent 34%),
+    linear-gradient(112deg, #064e3b 0%, #168a62 55%, #20b582 100%);
 }
 body.staff-dashboard.transfer-workflow .staff-header {
   background:
-    radial-gradient(ellipse at 82% 18%, rgba(217, 194, 255, .26), transparent 34%),
-    linear-gradient(112deg, #30254f 0%, #58458b 55%, #725aa8 100%);
+    radial-gradient(ellipse at 82% 18%, rgba(167, 243, 208, .26), transparent 34%),
+    linear-gradient(112deg, #064e3b 0%, #168a62 55%, #20b582 100%);
 }
 body.staff-dashboard.issue-workflow .issue-eyebrow {
-  border-color: #dce5fa;
-  background: #f0f4ff;
-  color: #355a9b;
+  border-color: #b7e4d3;
+  background: #eaf8f3;
+  color: #168a62;
 }
 body.staff-dashboard.transfer-workflow .transfer-eyebrow {
-  border-color: #e6def5;
-  background: #f5f1fc;
-  color: #624d97;
+  border-color: #b7e4d3;
+  background: #eaf8f3;
+  color: #168a62;
 }
 body.staff-dashboard.issue-workflow .issue-steps [aria-current="step"] {
-  background: #345da2;
-  box-shadow: 0 3px 8px rgba(52, 93, 162, .2);
+  background: #168a62;
+  box-shadow: 0 3px 8px rgba(22, 138, 98, .2);
 }
 body.staff-dashboard.transfer-workflow .transfer-steps [aria-current="step"] {
-  background: #58458b;
-  box-shadow: 0 3px 8px rgba(88, 69, 139, .2);
+  background: #168a62;
+  box-shadow: 0 3px 8px rgba(22, 138, 98, .2);
 }
-body.staff-dashboard.issue-workflow .issue-details { border-left-color: #4778bd; }
-body.staff-dashboard.transfer-workflow .transfer-details { border-left-color: #725aa8; }
+body.staff-dashboard.issue-workflow .issue-details { border-left-color: #20b582; }
+body.staff-dashboard.transfer-workflow .transfer-details { border-left-color: #20b582; }
 body.staff-dashboard.issue-workflow .issue-tip {
-  border-color: #dce5fa;
-  border-left-color: #4778bd;
-  background: linear-gradient(110deg, #f3f6ff, #fff);
+  border-color: #b7e4d3;
+  border-left-color: #20b582;
+  background: linear-gradient(110deg, #eaf8f3, #fff);
 }
 body.staff-dashboard.transfer-workflow .transfer-tip {
-  border-color: #e6def5;
-  border-left-color: #725aa8;
-  background: linear-gradient(110deg, #f7f4fc, #fff);
+  border-color: #b7e4d3;
+  border-left-color: #20b582;
+  background: linear-gradient(110deg, #eaf8f3, #fff);
 }
-body.staff-dashboard.issue-workflow .issue-tip h3 { color: #355a9b; }
-body.staff-dashboard.transfer-workflow .transfer-tip h3 { color: #624d97; }
+body.staff-dashboard.issue-workflow .issue-tip h3 { color: #168a62; }
+body.staff-dashboard.transfer-workflow .transfer-tip h3 { color: #168a62; }
 body.staff-dashboard.issue-workflow #issue-next {
-  background: linear-gradient(110deg, #345da2, #4778bd);
-  box-shadow: 0 6px 14px rgba(52, 93, 162, .2);
+  background: linear-gradient(110deg, #168a62, #20b582);
+  box-shadow: 0 6px 14px rgba(22, 138, 98, .2);
 }
 body.staff-dashboard.issue-workflow #issue-next:hover {
-  background: linear-gradient(110deg, #294d89, #3c69a7);
-  box-shadow: 0 8px 18px rgba(52, 93, 162, .24);
+  background: linear-gradient(110deg, #107554, #168a62);
+  box-shadow: 0 8px 18px rgba(22, 138, 98, .24);
 }
 body.staff-dashboard.transfer-workflow #transfer-next {
-  background: linear-gradient(110deg, #58458b, #725aa8);
-  box-shadow: 0 6px 14px rgba(88, 69, 139, .2);
+  background: linear-gradient(110deg, #168a62, #20b582);
+  box-shadow: 0 6px 14px rgba(22, 138, 98, .2);
 }
 body.staff-dashboard.transfer-workflow #transfer-next:hover {
-  background: linear-gradient(110deg, #493875, #624c96);
-  box-shadow: 0 8px 18px rgba(88, 69, 139, .24);
+  background: linear-gradient(110deg, #107554, #168a62);
+  box-shadow: 0 8px 18px rgba(22, 138, 98, .24);
 }
 
 /* Staff Reject Buttons and Modals */

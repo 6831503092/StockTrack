@@ -101,28 +101,45 @@ All accounts use password: **`12345678`** (or `1234`). You can log in using eith
 
 ---
 
-## Architecture & Technical Highlights
+## How to Verify CRUD Operations on H2 Database Console
 
-1. **Declarative Role-Based Security:** Method/Class-level authorization via `@RequireRoles({Role...})` interceptor and `@CurrentUser User` parameter injection, returning standardized `403 Forbidden` on unauthorized access.
-2. **Unified Approval Engine:** Dispatcher and Template Method patterns (`ApprovalDispatcher`, `BaseApprovalExecutor<T>`) handling 14 request types with JSON payloads and rollback-safe transaction boundaries.
-3. **Domain-Driven Services:** Clean separation of business domains (`ReceivingService`, `StockOutService`, `TransferService`, `StockMovementService`, `PurchaseOrderService`, `SalesOrderService`, `ZoneService`, `OwnerService`).
-4. **Deterministic Audit Logging:** Strongly-typed action catalog via `AuditAction` enum logging exact targets and actions into `AUDIT_LOGS` without fragile string regex matching.
-5. **Standardized Responses:** Unified API envelope `ApiResponse<T>` with centralized exception handling (`GlobalExceptionHandler`).
+### 1. Connect to H2 Console
+1. Ensure the backend server is running (`.\mvnw.cmd spring-boot:run` or `./mvnw spring-boot:run`).
+2. Open your browser and go to: [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
+3. Enter connection settings:
+   - **Driver Class:** `org.h2.Driver`
+   - **JDBC URL:** `jdbc:h2:mem:stocktrack_db` *(⚠️ Replace default `~/test` with `jdbc:h2:mem:stocktrack_db`)*
+   - **User Name:** `sa`
+   - **Password:** *(leave empty)*
+4. Click **Connect**.
 
----
+### 2. SQL Queries to Inspect Live CRUD Records
 
-## Automated Testing
+Execute these queries in the H2 SQL editor to inspect data created, updated, and deleted across roles:
 
-To run the full suite of unit and integration tests:
+```sql
+-- [USERS] Check user creation, roles, and status
+SELECT user_id, full_name, role, is_active FROM USERS;
 
-```bash
-# Windows
-.\mvnw.cmd test
+-- [PRODUCTS] Check product master data, current stock, and zone assignments
+SELECT product_id, product_name, default_cost, selling_price, current_stock, zone_code FROM PRODUCTS;
 
-# macOS / Linux
-./mvnw test
+-- [ZONES] Check warehouse storage zones
+SELECT zone_code, zone_name FROM ZONES;
+
+-- [SUPPLIERS] Check suppliers (Soft-delete reflected via is_active = false)
+SELECT supplier_id, company_name, zone_code, category, is_active FROM SUPPLIERS;
+
+-- [CUSTOMERS] Check customers (Soft-delete reflected via is_active = false)
+SELECT customer_id, customer_name, is_active FROM CUSTOMERS;
+
+-- [ORDERS] Check Purchase Orders (PO) & Sales Orders (SO) lifecycles
+SELECT po_id, supplier_id, total_amount, status, created_at FROM PURCHASE_ORDERS;
+SELECT so_id, customer_id, total_amount, status, created_at FROM SALES_ORDERS;
+
+-- [APPROVALS] Check pending/approved/rejected governance requests
+SELECT request_id, request_type, status, requester_id, detail, created_at FROM APPROVAL_REQUESTS ORDER BY request_id DESC;
+
+-- [AUDIT LOGS] Check complete sequential activity history
+SELECT log_id, user_id, action, target_type, target_id, details, created_at FROM AUDIT_LOGS ORDER BY created_at DESC;
 ```
-
-- **Role Security Tests (`SecurityRoleAccessControllerTest`):** Verifies role enforcement and permission denial across all controllers.
-- **Order Lifecycle Tests (`OrderLifecycleIntegrationTest`):** Verifies the complete end-to-end flow: `PO Create -> Approve -> Receive (+Stock)` and `SO Create -> Approve -> Stock-out (-Stock)`.
-- **Approval Executor Tests:** Validates payload parsing and business execution across all request types.
