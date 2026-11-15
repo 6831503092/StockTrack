@@ -95,9 +95,9 @@ The project runs out-of-the-box with an embedded **H2 In-Memory Database** (no M
   *(JDBC URL: `jdbc:h2:mem:stocktrack_db` | Username: `sa` | Password: leave empty)*
 
 ### Step 3: Test Login Accounts
-All accounts use password: **`12345678`** (or `1234`). You can log in using either the **User ID** or the **Username**:
+All accounts use password: **`12345678`** . You can log in using either the **User ID** or the **Full Name**:
 
-| Role | User ID (Numeric) | Username | Password | Default Landing Page |
+| Role | User ID (Numeric) | Full Name (Example) | Password | Default Landing Page |
 | :--- | :---: | :---: | :---: | :--- |
 | **Admin** | `503092` | `admin` | `12345678` | `/admin/my-requests.html` |
 | **Manager** | `503069` | `manager` | `12345678` | `/manager/dashboard.html` |
