@@ -900,7 +900,8 @@
 }
 
 .badge-pending { background-color: #fef08a; color: #854d0e; }
-.badge-approved { background-color: #a7f3d0; color: #065f46; }
+.badge-approved { background-color: #dcfce7; color: #15803d; }
+.badge-completed { background-color: #dcfce7; color: #15803d; }
 .badge-rejected { background-color: #fecdd3; color: #9f1239; }
 .badge-in-stock { background-color: #d1fae5; color: #065f46; }
 .badge-low-stock { background-color: #fee2e2; color: #b91c1c; }

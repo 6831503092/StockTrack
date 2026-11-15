@@ -1,4 +1,10 @@
 /* ==========================================
+   StockTrack - Base System Design Tokens & Components
+   ========================================== */
+@import 'base/tokens.css';
+@import 'base/components.css';
+
+/* ==========================================
    StockTrack - Modular Imports
    ========================================== */
 @import 'index.css';
@@ -7,90 +13,3 @@
 @import 'manager.css';
 @import 'owner.css';
 @import 'staff.css';
-
-/* ==========================================
-   StockTrack - Global Styles & Design Tokens
-   ========================================== */
-
-:root {
-    /* Brand Colors */
-    --primary-color: #27c690;
-    --primary-hover: #20b582;
-    --primary-active: #1aa072;
-    --primary-light: #e8f8f2;
-    --primary-glow: rgba(39, 198, 144, 0.2);
-
-    /* Left Panel Mint Shades */
-    --mint-bg: #edf8f3;
-    --mint-surface: #e2f4ec;
-    --mint-accent: #c7edd9;
-
-    /* Neutral Colors */
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-muted: #94a3b8;
-    --border-color: #e2e8f0;
-    --border-focus: #27c690;
-    --bg-white: #ffffff;
-    --bg-page: #f8fafc;
-
-    /* Typography */
-    --font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-    /* Transitions & Shadows */
-    --transition-fast: 0.15s ease;
-    --transition-normal: 0.25s ease;
-    --shadow-input-focus: 0 0 0 4px rgba(39, 198, 144, 0.15);
-    --shadow-button-hover: 0 8px 24px rgba(39, 198, 144, 0.28);
-}
-
-/* Base Reset */
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html,
-body {
-    height: 100%;
-    font-family: var(--font-family);
-    color: var(--text-primary);
-    background-color: var(--bg-white);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-input,
-button,
-select,
-textarea {
-    font-family: inherit;
-}
-
-/* Global muted guide/placeholder text for inputs, textareas, and unselected dropdowns */
-input::placeholder,
-textarea::placeholder {
-    color: #94a3b8 !important;
-    font-weight: 400 !important;
-    opacity: 1 !important;
-    text-transform: none;
-}
-
-select.is-placeholder,
-select:has(option[value=""]:checked) {
-    color: #94a3b8 !important;
-    font-weight: 400 !important;
-}
-
-select option {
-    color: #0f172a;
-    font-weight: 500;
-}
-
-select option[value=""] {
-    color: #94a3b8;
-    font-weight: 400;
-}

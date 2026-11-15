@@ -183,29 +183,12 @@
     </main>
 </div>
 
+<script src="../js/common/auth.js"></script>
+<script src="../js/common/format.js"></script>
+<script src="../js/common/ui.js"></script>
+<script src="../js/sidebar-config.js"></script>
 <script src="../js/sidebar.js"></script>
+<script src="../js/api.js"></script>
 <script src="../js/owner-dashboard.js"></script>
-
-<script>
-(function checkAccess() {
-    const raw = localStorage.getItem('stocktrack_user');
-
-    if (!raw) {
-        window.location.replace('../index.html');
-        return;
-    }
-
-    try {
-        const user = JSON.parse(raw);
-
-        if (!user || user.role !== 'OWNER') {
-            window.location.replace('../index.html');
-        }
-    } catch (err) {
-        localStorage.removeItem('stocktrack_user');
-        window.location.replace('../index.html');
-    }
-})();
-</script>
 </body>
 </html>

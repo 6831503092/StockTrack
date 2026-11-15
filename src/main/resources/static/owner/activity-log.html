@@ -71,13 +71,14 @@
                             <th>Description</th>
                             <th>Reference</th>
                             <th>Date & Time</th>
-                            <th>Status</th>
+                            <th style="width: 120px; text-align: center;">Status</th>
+                            <th style="width: 110px; text-align: center;">Action</th>
                         </tr>
                     </thead>
 
                     <tbody id="activity-table-body">
                         <tr>
-                            <td colspan="5" class="activity-no-data">
+                            <td colspan="6" class="activity-no-data">
                                 <div class="empty-icon">☰</div>
                                 <h3>No activity records available</h3>
                                 <p>Business activity records will appear here when available.</p>
@@ -89,6 +90,22 @@
 
         </section>
 
+        <!-- Activity Details Modal (Unified with Admin/Manager .modal-overlay & .modal-box) -->
+        <div class="modal-overlay" id="modal-activity-detail">
+            <div class="modal-box modal-activity-detail-box" style="max-width: 560px;">
+                <div class="modal-header-with-close">
+                    <h2 class="edit-product-title" style="margin-bottom: 0;">Activity Details</h2>
+                    <button type="button" class="btn-close-modal" id="btn-close-activity-modal">&times;</button>
+                </div>
+
+                <div id="owner-activity-detail" class="manager-request-detail-grid" style="margin-top: 20px;"></div>
+
+                <div class="manager-request-actions" style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                    <button type="button" class="btn-edit-cancel" id="btn-activity-close">Close</button>
+                </div>
+            </div>
+        </div>
+
         <footer class="owner-footer">
             <span>StockTrack</span>
             <span>Activity Log</span>
@@ -97,29 +114,12 @@
     </main>
 </div>
 
+<script src="../js/common/auth.js"></script>
+<script src="../js/common/format.js"></script>
+<script src="../js/common/ui.js"></script>
+<script src="../js/sidebar-config.js"></script>
 <script src="../js/sidebar.js"></script>
+<script src="../js/api.js"></script>
 <script src="../js/owner-activity.js"></script>
-
-<script>
-(function checkAccess() {
-    const raw = localStorage.getItem('stocktrack_user');
-
-    if (!raw) {
-        window.location.replace('../index.html');
-        return;
-    }
-
-    try {
-        const user = JSON.parse(raw);
-
-        if (!user || user.role !== 'OWNER') {
-            window.location.replace('../index.html');
-        }
-    } catch (err) {
-        localStorage.removeItem('stocktrack_user');
-        window.location.replace('../index.html');
-    }
-})();
-</script>
 </body>
 </html>

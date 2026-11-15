@@ -96,42 +96,87 @@
     function parseDateParts(dateVal) {
         if (!dateVal) return null;
         if (Array.isArray(dateVal) && dateVal.length >= 3) {
-            return { year: dateVal[0], month: dateVal[1], day: dateVal[2] };
+            return {
+                year: Number(dateVal[0]),
+                month: Number(dateVal[1]),
+                day: Number(dateVal[2]),
+                hour: dateVal.length >= 4 ? Number(dateVal[3]) : 0,
+                minute: dateVal.length >= 5 ? Number(dateVal[4]) : 0
+            };
         }
         if (typeof dateVal === 'string') {
             const str = dateVal.trim();
-            const dmyMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-            if (dmyMatch) {
-                return { day: parseInt(dmyMatch[1], 10), month: parseInt(dmyMatch[2], 10), year: parseInt(dmyMatch[3], 10) };
+            const writtenMatch = str.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})(?:[,\s]+(\d{1,2}):(\d{2}))?/);
+            if (writtenMatch) {
+                const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+                const mIdx = months.indexOf(writtenMatch[2].toLowerCase());
+                return {
+                    day: parseInt(writtenMatch[1], 10),
+                    month: mIdx !== -1 ? mIdx + 1 : 1,
+                    year: parseInt(writtenMatch[3], 10),
+                    hour: writtenMatch[4] ? parseInt(writtenMatch[4], 10) : 0,
+                    minute: writtenMatch[5] ? parseInt(writtenMatch[5], 10) : 0
+                };
             }
-            const isoMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            const dmyMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[,\s]+(\d{1,2}):(\d{2}))?/);
+            if (dmyMatch) {
+                return {
+                    day: parseInt(dmyMatch[1], 10),
+                    month: parseInt(dmyMatch[2], 10),
+                    year: parseInt(dmyMatch[3], 10),
+                    hour: dmyMatch[4] ? parseInt(dmyMatch[4], 10) : 0,
+                    minute: dmyMatch[5] ? parseInt(dmyMatch[5], 10) : 0
+                };
+            }
+            const isoMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s](\d{1,2}):(\d{2}))?/);
             if (isoMatch) {
-                return { year: parseInt(isoMatch[1], 10), month: parseInt(isoMatch[2], 10), day: parseInt(isoMatch[3], 10) };
+                return {
+                    year: parseInt(isoMatch[1], 10),
+                    month: parseInt(isoMatch[2], 10),
+                    day: parseInt(isoMatch[3], 10),
+                    hour: isoMatch[4] ? parseInt(isoMatch[4], 10) : 0,
+                    minute: isoMatch[5] ? parseInt(isoMatch[5], 10) : 0
+                };
             }
             const d = new Date(str);
             if (!isNaN(d.getTime())) {
-                return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
+                return {
+                    year: d.getFullYear(),
+                    month: d.getMonth() + 1,
+                    day: d.getDate(),
+                    hour: d.getHours(),
+                    minute: d.getMinutes()
+                };
             }
             return null;
         }
         if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
-            return { year: dateVal.getFullYear(), month: dateVal.getMonth() + 1, day: dateVal.getDate() };
+            return {
+                year: dateVal.getFullYear(),
+                month: dateVal.getMonth() + 1,
+                day: dateVal.getDate(),
+                hour: dateVal.getHours(),
+                minute: dateVal.getMinutes()
+            };
         }
         return null;
     }
 
     function formatDisplayDate(dateVal) {
         if (!dateVal) return '-';
-        if ( dateVal instanceof Date && isNaN(dateVal.getTime()) ) return '-';
+        if (typeof dateVal === 'string' && /^\d{1,2}\s+[A-Za-z]{3}\s+\d{4},\s*\d{2}:\d{2}$/.test(dateVal.trim())) {
+            return dateVal.trim();
+        }
+        if (dateVal instanceof Date && isNaN(dateVal.getTime())) return '-';
         const parts = parseDateParts(dateVal);
         if (!parts) return String(dateVal).trim() || '-';
-        return `${pad2(parts.day)}/${pad2(parts.month)}/${parts.year}`;
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const monthName = months[parts.month - 1] || pad2(parts.month);
+        return `${pad2(parts.day)} ${monthName} ${parts.year}, ${pad2(parts.hour || 0)}:${pad2(parts.minute || 0)}`;
     }
 
     function formatReviewDateTime(date = new Date()) {
-        const d = date instanceof Date ? date : new Date(date);
-        if (isNaN(d.getTime())) return '-';
-        return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+        return formatDisplayDate(date);
     }
 
     function formatDisplayStatus(statusVal) {

@@ -963,7 +963,7 @@
             poTbody.innerHTML = data.map(po => {
                 const statusClass = AdminApp.getStatusBadgeClass(po.status);
                 const displayId = po.id || po.poId;
-                const displayDate = po.date || (po.orderDatetime ? AdminApp.formatDisplayDate(po.orderDatetime) : '-');
+                const displayDate = AdminApp.formatDisplayDate(po.orderDatetime || po.date);
                 const supplierName = po.supplier || po.supplierName || '-';
                 const totalQty = po.totalQty !== undefined ? po.totalQty : (po.totalQuantity || 0);
                 const totalPrice = po.totalPrice !== undefined ? po.totalPrice : (po.totalAmount || 0);

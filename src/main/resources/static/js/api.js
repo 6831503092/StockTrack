@@ -21,10 +21,6 @@
 
         if (user && user.userId !== undefined && user.userId !== null) {
             headers['X-User-Id'] = String(user.userId);
-        } else if (user && user.role === 'MANAGER') {
-            headers['X-User-Id'] = '503069';
-        } else if (user && user.role === 'ADMIN') {
-            headers['X-User-Id'] = '503092';
         }
 
         const config = {
@@ -49,6 +45,18 @@
         }
 
         if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                const pathname = window.location.pathname;
+                const isLoginPage = pathname.endsWith('index.html') || pathname === '/' || pathname === '';
+                const isLoginEndpoint = typeof endpoint === 'string' && endpoint.includes('/api/login');
+                if (!isLoginPage && !isLoginEndpoint) {
+                    try {
+                        localStorage.removeItem('stocktrack_user');
+                    } catch (e) {}
+                    window.location.replace('../index.html');
+                }
+            }
+
             const message = (data && data.message) ? data.message : `HTTP Error ${response.status}`;
             const error = new Error(message);
             error.status = response.status;
@@ -68,4 +76,3 @@
         delete: (endpoint, options = {}) => request(endpoint, { ...options, method: 'DELETE' })
     };
 })();
-

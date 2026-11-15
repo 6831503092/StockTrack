@@ -621,3 +621,14 @@
     height: 200px;
   }
 }
+
+/* 8. Table Action and Status centering (Unified with Admin) */
+.requests-table td .badge-status,
+.po-table td .badge-status,
+.requests-table td .btn-action-detail,
+.po-table td .btn-action-edit,
+.requests-table td .btn-action-reason {
+  display: inline-flex;
+  margin-left: auto;
+  margin-right: auto;
+}

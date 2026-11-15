@@ -651,7 +651,7 @@
             soTbody.innerHTML = data.map(so => {
                 const statusClass = AdminApp.getStatusBadgeClass(so.status);
                 const displayId = so.id || so.soId;
-                const displayDate = so.date || (so.orderDatetime ? AdminApp.formatDisplayDate(so.orderDatetime) : '-');
+                const displayDate = AdminApp.formatDisplayDate(so.orderDatetime || so.date);
                 const customerName = so.customer || so.customerName || '-';
                 const totalQty = so.totalQty !== undefined ? so.totalQty : (so.totalQuantity || 0);
                 const totalPrice = so.totalPrice !== undefined ? so.totalPrice : (so.totalAmount || 0);

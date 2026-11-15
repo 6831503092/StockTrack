@@ -77,10 +77,13 @@
                 row.appendChild(cell);
             });
             const statusCell = document.createElement('td');
+            statusCell.style.textAlign = 'center';
             const badge = document.createElement('span');
             const isRejected = (activity.status || '').toLowerCase().includes('reject');
-            badge.className = 'badge-status ' + (isRejected ? 'badge-rejected' : 'badge-approved');
-            badge.textContent = activity.status || 'Completed';
+            const bClass = window.Format ? window.Format.getStatusBadgeClass(activity.status) : (isRejected ? 'badge-rejected' : 'badge-approved');
+            const dStatus = window.Format ? window.Format.formatDisplayStatus(activity.status || 'Completed') : (activity.status || 'Completed');
+            badge.className = `badge-status ${bClass}`;
+            badge.textContent = dStatus;
             statusCell.appendChild(badge);
             row.appendChild(statusCell);
             fragment.appendChild(row);

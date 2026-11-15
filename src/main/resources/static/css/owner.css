@@ -563,55 +563,96 @@
     color: var(--owner-muted);
 }
 
-/* Activity Badges */
+/* Activity Badges & Status (Unified with Admin .badge-status) */
 .activity-badge {
     display: inline-flex;
     align-items: center;
-    padding: 4px 10px;
-    border-radius: 16px;
-    font-size: 0.72rem;
-    font-weight: 700;
+    justify-content: center;
+    padding: 5px 14px;
+    border-radius: 8px;
+    font-size: 0.825rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    min-width: 80px;
     white-space: nowrap;
+    line-height: 1.35;
+    text-align: center;
 }
 
 .badge-sale {
     background: #EEF4FF;
     color: #3b82f6;
+    border: 1px solid #dbeafe;
+    min-width: auto;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
 }
 
 .badge-import {
     background: #E8FAF4;
     color: #10b981;
+    border: 1px solid #c7f4e3;
+    min-width: auto;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
 }
 
 .badge-export {
     background: #F3EEFF;
     color: #8b5cf6;
+    border: 1px solid #e9d5ff;
+    min-width: auto;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
 }
 
 .badge-other {
     background: #F1F5F9;
     color: #64748B;
+    border: 1px solid #e2e8f0;
+    min-width: auto;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
 }
 
-.badge-status-completed {
+.badge-status-completed,
+.badge-completed {
     background: #DCFCE7;
     color: #15803D;
+    border: 1px solid #bbf7d0;
 }
 
-.badge-status-approved {
-    background: #DBEAFE;
-    color: #1E40AF;
+.badge-status-approved,
+.badge-approved {
+    background: #DCFCE7;
+    color: #15803D;
+    border: 1px solid #bbf7d0;
 }
 
-.badge-status-rejected {
+.badge-status-rejected,
+.badge-rejected {
     background: #FEE2E2;
     color: #B91C1C;
+    border: 1px solid #fecaca;
 }
 
-.badge-status-pending {
+.badge-status-pending,
+.badge-pending {
     background: #FEF3C7;
     color: #B45309;
+    border: 1px solid #fde68a;
+}
+
+.activity-table td .badge-status,
+.activity-table td .activity-badge,
+.activity-table td .btn-action-detail {
+    display: inline-flex;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .activity-ref-code {
@@ -619,8 +660,9 @@
     font-weight: 600;
     color: #475569;
     background: #F1F5F9;
-    padding: 2px 7px;
+    padding: 3px 8px;
     border-radius: 6px;
-    font-size: 0.76rem;
+    font-size: 0.78rem;
+    border: 1px solid #e2e8f0;
 }
 

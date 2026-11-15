@@ -161,28 +161,35 @@ body.staff-dashboard :is(.receive-open, .issue-open, .transfer-open, .btn-action
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  background-color: #eaf8f3;
-  border: 1px solid #bbf0da;
-  color: #168a62;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 6px 14px;
-  border-radius: 8px;
+  padding: 5px 14px;
+  border-radius: 6px;
   line-height: 1.35;
   font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
   text-decoration: none;
 }
 body.staff-dashboard :is(.receive-open, .issue-open, .transfer-open, .btn-action-detail):hover {
-  background-color: #20b582;
-  color: #ffffff;
-  border-color: #20b582;
-  box-shadow: 0 4px 10px rgba(32, 181, 130, 0.25);
+  background-color: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+  box-shadow: 0 2px 5px rgba(21, 128, 61, 0.1);
   transform: translateY(-1px);
+}
+body.staff-dashboard :is(.receive-open, .issue-open, .transfer-open, .btn-action-detail):active {
+  background-color: #dcfce7;
+  border-color: #4ade80;
+  transform: translateY(0);
+  box-shadow: none;
 }
 body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) input[type="radio"] {
   appearance: none;
@@ -231,8 +238,47 @@ body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) 
 body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) :is(.receive-quantity, .issue-quantity, .transfer-quantity) { width: 90px; min-height: 42px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; color: var(--staff-ink); font: inherit; }
 body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) :is(.receive-notes-label, .issue-notes-label, .transfer-notes-label) { display: block; margin-top: 18px; font-size: 12px; }
 body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) textarea { display: block; width: 100%; min-height: 42px; margin-top: 8px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; color: var(--staff-ink); font: inherit; resize: vertical; }
-body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) :is(.receive-confirm-check, .issue-confirm-check, .transfer-confirm-check) { position: absolute; right: 0; bottom: calc(100% + 12px); display: flex; align-items: center; gap: 10px; width: max-content; max-width: calc(100vw - 48px); margin: 0; padding: 14px 16px; border: 1px solid #a1eccc; border-radius: 10px; background: #eaf8f3; color: #11684a; font-size: 14px; font-weight: 600; line-height: 1.5; box-shadow: 0 4px 12px rgba(32, 181, 130, .14); }
-body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) :is(.receive-confirm-check, .issue-confirm-check, .transfer-confirm-check) input { width: 18px; height: 18px; flex: 0 0 auto; margin-top: 0; accent-color: var(--staff-accent); }
+body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) .workflow-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+  width: 100%;
+}
+body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) :is(.receive-confirm-check, .issue-confirm-check, .transfer-confirm-check) {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 16px;
+  border: 1.5px solid #a1eccc;
+  border-radius: 9px;
+  background: #eaf8f3;
+  color: #11684a;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 2px 6px rgba(32, 181, 130, 0.08);
+  transition: all 0.18s ease;
+}
+body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) :is(.receive-confirm-check, .issue-confirm-check, .transfer-confirm-check):hover {
+  background: #def6ec;
+  border-color: var(--staff-accent);
+}
+body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) :is(.receive-confirm-check, .issue-confirm-check, .transfer-confirm-check) input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--staff-accent);
+}
 
 @media (min-width: 1200px) {
   body.staff-dashboard .main-content { padding-left: 90px; padding-right: 60px; }
@@ -275,7 +321,7 @@ body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) 
   body.staff-dashboard .staff-skip-link { left: 12px; }
   body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) :is(.receive-footer, .issue-footer, .transfer-footer) > div:last-child { gap: 8px; }
   body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) :is(#receive-next, #issue-next, #transfer-next) { min-width: 128px; }
-  body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) :is(.receive-confirm-check, .issue-confirm-check, .transfer-confirm-check) { width: min(360px, calc(100vw - 48px)); align-items: flex-start; white-space: normal; }
+  body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) :is(.receive-confirm-check, .issue-confirm-check, .transfer-confirm-check) { width: 100%; align-items: center; white-space: normal; }
 }
 @media (prefers-reduced-motion: reduce) {
   body.staff-dashboard .summary-card,
@@ -541,21 +587,6 @@ body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) 
   }
 }
 
-body.staff-dashboard.receive-workflow .staff-header {
-  background:
-    radial-gradient(ellipse at 82% 18%, rgba(32, 181, 130, .28), transparent 34%),
-    linear-gradient(112deg, #0e4433 0%, #168a62 54%, #20b582 100%);
-}
-body.staff-dashboard.issue-workflow .staff-header {
-  background:
-    radial-gradient(ellipse at 82% 18%, rgba(165, 190, 255, .26), transparent 34%),
-    linear-gradient(112deg, #1d315d 0%, #345da2 55%, #4778bd 100%);
-}
-body.staff-dashboard.transfer-workflow .staff-header {
-  background:
-    radial-gradient(ellipse at 82% 18%, rgba(217, 194, 255, .26), transparent 34%),
-    linear-gradient(112deg, #30254f 0%, #58458b 55%, #725aa8 100%);
-}
 body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) .workflow-hero-copy {
   max-width: 590px;
   padding-right: 160px;
@@ -579,53 +610,8 @@ body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) 
   width: 100%;
   filter: drop-shadow(0 10px 16px rgba(13, 30, 50, .18));
 }
-body.staff-dashboard.issue-workflow .issue-eyebrow {
-  border-color: #dce5fa;
-  background: #f0f4ff;
-  color: #355a9b;
-}
-body.staff-dashboard.transfer-workflow .transfer-eyebrow {
-  border-color: #e6def5;
-  background: #f5f1fc;
-  color: #624d97;
-}
-body.staff-dashboard.issue-workflow .issue-steps [aria-current="step"] {
-  background: #345da2;
-  box-shadow: 0 3px 8px rgba(52, 93, 162, .2);
-}
-body.staff-dashboard.transfer-workflow .transfer-steps [aria-current="step"] {
-  background: #58458b;
-  box-shadow: 0 3px 8px rgba(88, 69, 139, .2);
-}
-body.staff-dashboard.issue-workflow .issue-details { border-left-color: #4778bd; }
-body.staff-dashboard.transfer-workflow .transfer-details { border-left-color: #725aa8; }
-body.staff-dashboard.issue-workflow .issue-tip { border-color: #dce5fa; border-left-color: #4778bd; background: linear-gradient(110deg, #f3f6ff, #fff); }
-body.staff-dashboard.transfer-workflow .transfer-tip { border-color: #e6def5; border-left-color: #725aa8; background: linear-gradient(110deg, #f7f4fc, #fff); }
-body.staff-dashboard.issue-workflow .issue-tip h3 { color: #355a9b; }
-body.staff-dashboard.transfer-workflow .transfer-tip h3 { color: #624d97; }
-body.staff-dashboard.issue-workflow #issue-next {
-  background: linear-gradient(110deg, #345da2, #4778bd);
-  box-shadow: 0 6px 14px rgba(52, 93, 162, .2);
-}
-body.staff-dashboard.issue-workflow #issue-next:hover {
-  background: linear-gradient(110deg, #294d89, #3c69a7);
-  box-shadow: 0 8px 18px rgba(52, 93, 162, .24);
-}
-body.staff-dashboard.transfer-workflow #transfer-next {
-  background: linear-gradient(110deg, #58458b, #725aa8);
-  box-shadow: 0 6px 14px rgba(88, 69, 139, .2);
-}
-body.staff-dashboard.transfer-workflow #transfer-next:hover {
-  background: linear-gradient(110deg, #493875, #624c96);
-  box-shadow: 0 8px 18px rgba(88, 69, 139, .24);
-}
 
-@media (max-width: 560px) {
-  body.staff-dashboard.transfer-workflow #staff-main .staff-header h1 { font-size: 24px; }
-}
-@media (max-width: 560px) {
-  body.staff-dashboard.transfer-workflow .staff-header h1 { font-size: 24px; }
-}
+
 @media (max-width: 768px) {
   body.staff-dashboard:is(.receive-workflow, .issue-workflow, .transfer-workflow) .workflow-hero-copy {
     max-width: 72%;
