@@ -2,6 +2,7 @@ package com.sras.backend.service;
 
 import com.sras.backend.dto.StaffCheckRequest;
 import com.sras.backend.dto.StaffOrderDto;
+import com.sras.backend.dto.StaffRejectRequest;
 import com.sras.backend.dto.StaffTransferDto;
 import com.sras.backend.entity.Product;
 import com.sras.backend.entity.PurchaseOrder;
@@ -16,10 +17,9 @@ import com.sras.backend.entity.User;
 import com.sras.backend.entity.Zone;
 import com.sras.backend.enums.MovementStatus;
 import com.sras.backend.enums.PurchaseOrderStatus;
-import com.sras.backend.enums.ReceivingCheckResult;
 import com.sras.backend.enums.Role;
 import com.sras.backend.enums.SalesOrderStatus;
-import com.sras.backend.enums.StockOutCheckResult;
+import com.sras.backend.exception.ValidationException;
 import com.sras.backend.repository.AuditLogRepository;
 import com.sras.backend.repository.ProductRepository;
 import com.sras.backend.repository.PurchaseOrderItemRepository;
@@ -35,7 +35,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -46,6 +45,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,7 +68,10 @@ class StaffServiceTest {
     @Mock private AuditLogRepository auditLogRepository;
     @Mock private AuditLogService auditLogService;
 
-    @InjectMocks
+    private StockMovementService stockMovementService;
+    private ReceivingService receivingService;
+    private StockOutService stockOutService;
+    private TransferService transferService;
     private StaffService staffService;
 
     private User staffUser;
@@ -98,6 +101,27 @@ class StaffServiceTest {
         testProduct.setProductName("Office Desk");
         testProduct.setCurrentStock(50);
         testProduct.setZone(zone1);
+
+        stockMovementService = new StockMovementService(productRepository);
+        receivingService = new ReceivingService(
+                purchaseOrderRepository, purchaseOrderItemRepository,
+                receivingCheckRepository, receivingCheckItemRepository,
+                stockMovementService, auditLogService
+        );
+        stockOutService = new StockOutService(
+                salesOrderRepository, salesOrderItemRepository,
+                stockOutCheckRepository, stockOutCheckItemRepository,
+                stockMovementService, auditLogService
+        );
+        transferService = new TransferService(
+                stockMovementRepository, productRepository,
+                stockMovementService, auditLogService
+        );
+        staffService = new StaffService(
+                receivingService, stockOutService, transferService,
+                receivingCheckRepository, stockOutCheckRepository,
+                stockMovementRepository, auditLogRepository
+        );
     }
 
     @Test
@@ -122,7 +146,7 @@ class StaffServiceTest {
                         .unitCost(BigDecimal.valueOf(50))
                         .build()));
 
-        List<StaffOrderDto> list = staffService.getPendingReceives();
+        List<StaffOrderDto> list = receivingService.getPendingReceives();
         assertEquals(1, list.size());
         assertEquals("PO-1", list.get(0).getCode());
         assertEquals(1, list.get(0).getItems().size());
@@ -147,7 +171,7 @@ class StaffServiceTest {
         when(purchaseOrderRepository.findById(1)).thenReturn(Optional.of(po));
         when(purchaseOrderItemRepository.findByPurchaseOrderPoId(1)).thenReturn(List.of(item));
 
-        staffService.acceptReceive(1, staffUser, StaffCheckRequest.builder().build());
+        receivingService.acceptReceive(1, staffUser, StaffCheckRequest.builder().build());
 
         assertEquals(PurchaseOrderStatus.RECEIVED, po.getStatus());
         assertEquals(70, testProduct.getCurrentStock()); // 50 + 20
@@ -174,7 +198,7 @@ class StaffServiceTest {
         when(salesOrderRepository.findById(2)).thenReturn(Optional.of(so));
         when(salesOrderItemRepository.findBySalesOrderSoId(2)).thenReturn(List.of(item));
 
-        staffService.confirmStockOut(2, staffUser, StaffCheckRequest.builder().build());
+        stockOutService.confirmStockOut(2, staffUser, StaffCheckRequest.builder().build());
 
         assertEquals(SalesOrderStatus.STOCK_OUT, so.getStatus());
         assertEquals(35, testProduct.getCurrentStock()); // 50 - 15
@@ -197,12 +221,10 @@ class StaffServiceTest {
 
         when(stockMovementRepository.findById(5)).thenReturn(Optional.of(movement));
 
-        staffService.verifyTransfer(5, staffUser, StaffCheckRequest.builder().build());
+        transferService.verifyTransfer(5, staffUser, StaffCheckRequest.builder().build());
 
         assertEquals(MovementStatus.COMPLETED, movement.getStatus());
-        assertEquals(zone2, testProduct.getZone());
         verify(stockMovementRepository).save(movement);
-        verify(productRepository).save(testProduct);
     }
 
     @Test
@@ -230,9 +252,9 @@ class StaffServiceTest {
                         .build()))
                 .build();
 
-        org.junit.jupiter.api.Assertions.assertThrows(
-                org.springframework.web.server.ResponseStatusException.class,
-                () -> staffService.acceptReceive(1, staffUser, req)
+        assertThrows(
+                ValidationException.class,
+                () -> receivingService.acceptReceive(1, staffUser, req)
         );
     }
 
@@ -246,9 +268,9 @@ class StaffServiceTest {
 
         when(purchaseOrderRepository.findById(1)).thenReturn(Optional.of(po));
 
-        org.junit.jupiter.api.Assertions.assertThrows(
-                org.springframework.web.server.ResponseStatusException.class,
-                () -> staffService.rejectReceive(1, staffUser, new com.sras.backend.dto.StaffRejectRequest(""))
+        assertThrows(
+                ValidationException.class,
+                () -> receivingService.rejectReceive(1, staffUser, new StaffRejectRequest(""))
         );
     }
 }

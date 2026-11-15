@@ -9,6 +9,9 @@ import com.sras.backend.enums.PurchaseOrderStatus;
 import com.sras.backend.enums.RequestType;
 import com.sras.backend.enums.Role;
 import com.sras.backend.enums.TargetType;
+import com.sras.backend.exception.BusinessRuleException;
+import com.sras.backend.exception.NotFoundException;
+import com.sras.backend.exception.ValidationException;
 import com.sras.backend.repository.ApprovalRequestRepository;
 import com.sras.backend.repository.PurchaseOrderRepository;
 import com.sras.backend.repository.SalesOrderRepository;
@@ -17,10 +20,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,7 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,7 +57,6 @@ class ApprovalRequestServiceTest {
     @Mock
     private SalesOrderRepository salesOrderRepository;
 
-    @InjectMocks
     private ApprovalRequestService approvalRequestService;
 
     private User adminUser;
@@ -62,6 +65,15 @@ class ApprovalRequestServiceTest {
 
     @BeforeEach
     void setUp() {
+        approvalRequestService = new ApprovalRequestService(
+                approvalRequestRepository,
+                approvalDispatcher,
+                auditLogService,
+                purchaseOrderRepository,
+                salesOrderRepository,
+                (org.springframework.transaction.support.TransactionTemplate) null
+        );
+
         adminUser = new User();
         adminUser.setUserId(503092);
         adminUser.setFullName("Admin User");
@@ -152,6 +164,26 @@ class ApprovalRequestServiceTest {
     }
 
     @Test
+    @DisplayName("approveRequest: when execution fails, marks request FAILED and throws BusinessRuleException")
+    void testApproveRequest_Failure_MarksStatusFailed() {
+        when(approvalRequestRepository.findById(1)).thenReturn(Optional.of(sampleRequest));
+        doThrow(new NotFoundException("Source zone not found")).when(approvalDispatcher).dispatch(sampleRequest);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
+                () -> approvalRequestService.approveRequest(1, managerUser, "Approved by Manager"));
+
+        assertTrue(ex.getMessage().contains("Source zone not found"));
+
+        ArgumentCaptor<ApprovalRequest> captor = ArgumentCaptor.forClass(ApprovalRequest.class);
+        verify(approvalRequestRepository).save(captor.capture());
+
+        ApprovalRequest saved = captor.getValue();
+        assertEquals(ApprovalStatus.FAILED, saved.getStatus());
+        assertEquals(managerUser, saved.getDecidedBy());
+        assertTrue(saved.getDecisionReason().contains("Source zone not found"));
+    }
+
+    @Test
     @DisplayName("rejectRequest: sets status to REJECTED with mandatory reason")
     void testRejectRequest_Success() {
         ApprovalRequest poRequest = ApprovalRequest.builder()
@@ -181,10 +213,16 @@ class ApprovalRequestServiceTest {
     }
 
     @Test
-    @DisplayName("getRequestById: throws 404 when request is not found")
+    @DisplayName("rejectRequest: throws ValidationException when reason is blank")
+    void testRejectRequest_BlankReason_ThrowsValidationException() {
+        assertThrows(ValidationException.class, () -> approvalRequestService.rejectRequest(2, managerUser, "  "));
+    }
+
+    @Test
+    @DisplayName("getRequestById: throws NotFoundException when request is not found")
     void testGetRequestById_NotFound() {
         when(approvalRequestRepository.findById(999)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> approvalRequestService.getRequestById(999, adminUser));
+        assertThrows(NotFoundException.class, () -> approvalRequestService.getRequestById(999, adminUser));
     }
 }

@@ -107,4 +107,34 @@ class OwnerServiceTest {
         List<OwnerActivityDto> sales = ownerService.getActivities("sale", null, null);
         assertEquals(0, sales.size());
     }
+
+    @Test
+    @DisplayName("getActivities should use targetType and targetId directly without regex")
+    void getActivities_usesTargetTypeAndTargetIdDirectly() {
+        User admin = new User();
+        admin.setUserId(503092);
+        admin.setFullName("Admin User");
+        admin.setRole(Role.ADMIN);
+
+        AuditLog logWithTarget = AuditLog.builder()
+                .logId(99)
+                .user(admin)
+                .role(Role.ADMIN)
+                .actionType("CUSTOMER_CREATE")
+                .targetType("CUSTOMER")
+                .targetId("42")
+                .detail("Created customer without any regex pattern in detail text")
+                .actionDatetime(LocalDateTime.now())
+                .build();
+
+        when(auditLogRepository.findAllByOrderByActionDatetimeDesc()).thenReturn(List.of(logWithTarget));
+
+        List<OwnerActivityDto> list = ownerService.getActivities(null, null, null);
+        assertNotNull(list);
+        assertEquals(1, list.size());
+        assertEquals("Customer Created", list.get(0).getActivityName());
+        assertEquals("sale", list.get(0).getType());
+        assertEquals("CUST-42", list.get(0).getReference());
+        assertEquals("Completed", list.get(0).getStatus());
+    }
 }
