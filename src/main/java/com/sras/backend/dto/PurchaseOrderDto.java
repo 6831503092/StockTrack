@@ -13,13 +13,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PurchaseOrderDto {
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH);
 
     private Integer id;
     private Integer poId;
@@ -30,7 +31,7 @@ public class PurchaseOrderDto {
     private String createdBy;
     private String userId;
     private LocalDateTime orderDatetime;
-    private String date; // "dd/MM/yyyy"
+    private String date; // "dd MMM yyyy, HH:mm"
     private Integer totalQty;
     private BigDecimal totalPrice;
     private String status; // "Pending", "Approved", "Rejected", "Received"

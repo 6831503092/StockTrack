@@ -9,16 +9,21 @@ import com.sras.backend.enums.RequestType;
 import com.sras.backend.enums.Role;
 import com.sras.backend.enums.SalesOrderStatus;
 import com.sras.backend.enums.TargetType;
+import com.sras.backend.exception.BusinessRuleException;
+import com.sras.backend.exception.ForbiddenException;
+import com.sras.backend.exception.NotFoundException;
+import com.sras.backend.exception.ValidationException;
 import com.sras.backend.repository.ApprovalRequestRepository;
 import com.sras.backend.repository.PurchaseOrderRepository;
 import com.sras.backend.repository.SalesOrderRepository;
 import com.sras.backend.service.approval.ApprovalDispatcher;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,8 +35,6 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ApprovalRequestService {
 
     private static final DateTimeFormatter SLASH_DATE_FMT = DateTimeFormatter.ofPattern("d/M/yyyy");
@@ -41,7 +44,53 @@ public class ApprovalRequestService {
     private final AuditLogService auditLogService;
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final SalesOrderRepository salesOrderRepository;
+    private final TransactionTemplate transactionTemplate;
 
+    @Autowired
+    public ApprovalRequestService(
+            ApprovalRequestRepository approvalRequestRepository,
+            ApprovalDispatcher approvalDispatcher,
+            AuditLogService auditLogService,
+            PurchaseOrderRepository purchaseOrderRepository,
+            SalesOrderRepository salesOrderRepository,
+            PlatformTransactionManager transactionManager
+    ) {
+        this(
+                approvalRequestRepository,
+                approvalDispatcher,
+                auditLogService,
+                purchaseOrderRepository,
+                salesOrderRepository,
+                createTransactionTemplate(transactionManager)
+        );
+    }
+
+    private static TransactionTemplate createTransactionTemplate(PlatformTransactionManager transactionManager) {
+        if (transactionManager == null) {
+            return null;
+        }
+        TransactionTemplate template = new TransactionTemplate(transactionManager);
+        template.setPropagationBehavior(org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return template;
+    }
+
+    public ApprovalRequestService(
+            ApprovalRequestRepository approvalRequestRepository,
+            ApprovalDispatcher approvalDispatcher,
+            AuditLogService auditLogService,
+            PurchaseOrderRepository purchaseOrderRepository,
+            SalesOrderRepository salesOrderRepository,
+            TransactionTemplate transactionTemplate
+    ) {
+        this.approvalRequestRepository = approvalRequestRepository;
+        this.approvalDispatcher = approvalDispatcher;
+        this.auditLogService = auditLogService;
+        this.purchaseOrderRepository = purchaseOrderRepository;
+        this.salesOrderRepository = salesOrderRepository;
+        this.transactionTemplate = transactionTemplate;
+    }
+
+    @Transactional(readOnly = true)
     public List<ApprovalRequestDto> getAllRequests(String search, String dateStr, String statusStr) {
         return approvalRequestRepository
                 .findAllByOrderByRequestedDatetimeDesc()
@@ -53,6 +102,7 @@ public class ApprovalRequestService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ApprovalRequestDto> getMyRequests(User currentUser, String search, String dateStr, String statusStr) {
         return approvalRequestRepository
                 .findByRequestedByUserIdOrderByRequestedDatetimeDesc(currentUser.getUserId())
@@ -64,9 +114,10 @@ public class ApprovalRequestService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public ApprovalRequestDto getRequestById(Integer requestId, User currentUser) {
         ApprovalRequest request = approvalRequestRepository.findById(requestId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Approval request not found"));
+                .orElseThrow(() -> new NotFoundException("Approval request not found"));
 
         boolean isRequester = request.getRequestedBy() != null &&
                 request.getRequestedBy().getUserId().equals(currentUser.getUserId());
@@ -75,12 +126,13 @@ public class ApprovalRequestService {
                 currentUser.getRole() == Role.OWNER;
 
         if (!isRequester && !isPrivileged) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied to this request");
+            throw new ForbiddenException("Access denied to this request");
         }
 
         return ApprovalRequestDto.fromEntity(request);
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Long> getRequestKpis() {
         List<ApprovalRequest> all = approvalRequestRepository.findAll();
         long total = all.size();
@@ -96,53 +148,71 @@ public class ApprovalRequestService {
         return kpis;
     }
 
-    @Transactional
+    /**
+     * Approves request and executes the corresponding approval executor.
+     * Approve and Execute run together in the same transaction.
+     * If execution fails, partial changes are rolled back, and the request status is saved as FAILED.
+     */
     public ApprovalRequestDto approveRequest(Integer requestId, User managerUser, String reason) {
         ApprovalRequest request = approvalRequestRepository.findById(requestId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Approval request not found"));
+                .orElseThrow(() -> new NotFoundException("Approval request not found"));
 
         if (request.getStatus() != ApprovalStatus.PENDING) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending requests can be approved");
+            throw new ValidationException("Only pending requests can be approved");
         }
 
         try {
-            // Apply approved changes via dispatching to the matching executor
-            approvalDispatcher.dispatch(request);
+            return runInTransaction(status -> {
+                ApprovalRequest currentReq = approvalRequestRepository.findById(requestId).orElse(request);
 
-            request.setStatus(ApprovalStatus.APPROVED);
-            request.setDecidedBy(managerUser);
-            request.setDecidedDatetime(LocalDateTime.now());
-            request.setDecisionReason(reason != null && !reason.isBlank() ? reason.trim() : "Approved by Manager");
+                // Apply approved changes via dispatching to the matching executor
+                approvalDispatcher.dispatch(currentReq);
 
-            ApprovalRequest saved = approvalRequestRepository.save(request);
+                currentReq.setStatus(ApprovalStatus.APPROVED);
+                currentReq.setDecidedBy(managerUser);
+                currentReq.setDecidedDatetime(LocalDateTime.now());
+                currentReq.setDecisionReason(reason != null && !reason.isBlank() ? reason.trim() : "Approved by Manager");
 
-            auditLogService.log(managerUser, "REQUEST_APPROVE",
-                    "Approved request #" + requestId + " (" + request.getRequestType() + "): " + request.getDetail());
+                ApprovalRequest saved = approvalRequestRepository.save(currentReq);
+                approvalRequestRepository.flush();
 
-            return ApprovalRequestDto.fromEntity(saved);
+                String targetType = resolveAuditTargetType(currentReq);
+                Object targetId = resolveAuditTargetId(currentReq, requestId);
+
+                auditLogService.log(managerUser, com.sras.backend.enums.AuditAction.REQUEST_APPROVE,
+                        targetType, targetId,
+                        "Approved request #" + requestId + " (" + currentReq.getRequestType() + "): " + currentReq.getDetail());
+
+                return ApprovalRequestDto.fromEntity(saved);
+            });
         } catch (Exception e) {
             log.error("Failed to approve request #{}", requestId, e);
-            request.setStatus(ApprovalStatus.FAILED);
-            request.setDecidedBy(managerUser);
-            request.setDecidedDatetime(LocalDateTime.now());
-            request.setDecisionReason("Failed execution: " + e.getMessage());
-            approvalRequestRepository.save(request);
+            runInTransaction(status -> {
+                ApprovalRequest failedReq = approvalRequestRepository.findById(requestId).orElse(request);
+                failedReq.setStatus(ApprovalStatus.FAILED);
+                failedReq.setDecidedBy(managerUser);
+                failedReq.setDecidedDatetime(LocalDateTime.now());
+                failedReq.setDecisionReason("Failed execution: " + e.getMessage());
+                approvalRequestRepository.save(failedReq);
+                approvalRequestRepository.flush();
+                return null;
+            });
 
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Approval execution failed: " + e.getMessage());
+            throw new BusinessRuleException("Approval execution failed: " + e.getMessage());
         }
     }
 
     @Transactional
     public ApprovalRequestDto rejectRequest(Integer requestId, User managerUser, String reason) {
         if (reason == null || reason.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Decision reason is required to reject a request");
+            throw new ValidationException("Decision reason is required to reject a request");
         }
 
         ApprovalRequest request = approvalRequestRepository.findById(requestId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Approval request not found"));
+                .orElseThrow(() -> new NotFoundException("Approval request not found"));
 
         if (request.getStatus() != ApprovalStatus.PENDING) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending requests can be rejected");
+            throw new ValidationException("Only pending requests can be rejected");
         }
 
         // If this was an order, update order status to REJECTED
@@ -164,11 +234,38 @@ public class ApprovalRequestService {
         request.setDecisionReason(reason.trim());
 
         ApprovalRequest saved = approvalRequestRepository.save(request);
+        approvalRequestRepository.flush();
 
-        auditLogService.log(managerUser, "REQUEST_REJECT",
+        String targetType = resolveAuditTargetType(request);
+        Object targetId = resolveAuditTargetId(request, requestId);
+
+        auditLogService.log(managerUser, com.sras.backend.enums.AuditAction.REQUEST_REJECT,
+                targetType, targetId,
                 "Rejected request #" + requestId + " (" + request.getRequestType() + "). Reason: " + reason.trim());
 
         return ApprovalRequestDto.fromEntity(saved);
+    }
+
+    private String resolveAuditTargetType(ApprovalRequest req) {
+        if (req == null) return "REQUEST";
+        if (req.getRequestType() == RequestType.PO_CREATE) return "PO";
+        if (req.getRequestType() == RequestType.SO_CREATE) return "SO";
+        if (req.getRequestType() == RequestType.PRODUCT_MOVE) return "MOVEMENT";
+        return req.getTargetType() != null ? req.getTargetType().name() : "REQUEST";
+    }
+
+    private Object resolveAuditTargetId(ApprovalRequest req, Integer fallbackRequestId) {
+        if (req != null && req.getTargetId() != null && req.getTargetId() > 0) {
+            return req.getTargetId();
+        }
+        return fallbackRequestId;
+    }
+
+    private <T> T runInTransaction(TransactionCallback<T> action) {
+        if (transactionTemplate != null) {
+            return transactionTemplate.execute(action);
+        }
+        return action.doInTransaction(null);
     }
 
     public static ApprovalRequest buildPendingRequest(

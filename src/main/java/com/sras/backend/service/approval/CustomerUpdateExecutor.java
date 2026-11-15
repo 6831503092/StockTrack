@@ -1,22 +1,26 @@
 package com.sras.backend.service.approval;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sras.backend.dto.payload.CustomerPayload;
 import com.sras.backend.entity.ApprovalRequest;
 import com.sras.backend.entity.Customer;
 import com.sras.backend.enums.RequestType;
+import com.sras.backend.exception.NotFoundException;
+import com.sras.backend.exception.ValidationException;
 import com.sras.backend.repository.CustomerRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class CustomerUpdateExecutor implements ApprovalExecutor {
+public class CustomerUpdateExecutor extends BaseApprovalExecutor<CustomerPayload> {
 
     private final CustomerRepository customerRepository;
-    private final ObjectMapper objectMapper;
+
+    public CustomerUpdateExecutor(CustomerRepository customerRepository, ObjectMapper objectMapper) {
+        super(objectMapper);
+        this.customerRepository = customerRepository;
+    }
 
     @Override
     public RequestType supports() {
@@ -25,40 +29,23 @@ public class CustomerUpdateExecutor implements ApprovalExecutor {
 
     @Override
     public void execute(ApprovalRequest request) {
-        if (request.getPayload() == null || request.getPayload().isBlank()) {
-            throw new IllegalArgumentException("CUSTOMER_UPDATE payload is empty for request #" + request.getRequestId());
+        CustomerPayload payload = parsePayload(request, CustomerPayload.class);
+        int customerId = request.getTargetId() != null && request.getTargetId() > 0
+                ? request.getTargetId()
+                : (payload.customerId() != null ? payload.customerId() : 0);
+
+        if (customerId <= 0) {
+            throw new ValidationException("Valid customerId is required for CUSTOMER_UPDATE");
         }
 
-        try {
-            JsonNode node = objectMapper.readTree(request.getPayload());
-            int parsedCustomerId = request.getTargetId() != null ? request.getTargetId() : 0;
-            if (parsedCustomerId <= 0) {
-                parsedCustomerId = node.path("customerId").asInt(0);
-            }
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new NotFoundException("Customer not found with ID: " + customerId));
 
-            final int customerId = parsedCustomerId;
-            if (customerId <= 0) {
-                throw new IllegalArgumentException("Invalid customerId for CUSTOMER_UPDATE: " + supplierIdStr(customerId));
-            }
-
-            Customer customer = customerRepository.findById(customerId)
-                    .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + customerId));
-
-            String customerName = node.path("customerName").asText("").trim();
-            if (!customerName.isEmpty()) {
-                customer.setCustomerName(customerName);
-            }
-
-            customerRepository.save(customer);
-            log.info("CUSTOMER_UPDATE executed: updated customer #{} ({})", customer.getCustomerId(), customer.getCustomerName());
-        } catch (Exception e) {
-            log.error("Failed to execute CUSTOMER_UPDATE for request #{}", request.getRequestId(), e);
-            throw new RuntimeException("Failed to execute CUSTOMER_UPDATE: " + e.getMessage(), e);
+        if (payload.customerName() != null && !payload.customerName().isBlank()) {
+            customer.setCustomerName(payload.customerName().trim());
         }
-    }
 
-    private String supplierIdStr(int id) {
-        return String.valueOf(id);
+        customerRepository.save(customer);
+        log.info("CUSTOMER_UPDATE executed: updated customer #{} ({})", customer.getCustomerId(), customer.getCustomerName());
     }
 }
-

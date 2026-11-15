@@ -1,24 +1,25 @@
 package com.sras.backend.service.approval;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sras.backend.dto.payload.ProductUpdatePayload;
 import com.sras.backend.entity.ApprovalRequest;
 import com.sras.backend.entity.Product;
 import com.sras.backend.enums.RequestType;
+import com.sras.backend.exception.NotFoundException;
 import com.sras.backend.repository.ProductRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class ProductUpdateExecutor implements ApprovalExecutor {
+public class ProductUpdateExecutor extends BaseApprovalExecutor<ProductUpdatePayload> {
 
     private final ProductRepository productRepository;
-    private final ObjectMapper objectMapper;
+
+    public ProductUpdateExecutor(ProductRepository productRepository, ObjectMapper objectMapper) {
+        super(objectMapper);
+        this.productRepository = productRepository;
+    }
 
     @Override
     public RequestType supports() {
@@ -27,39 +28,31 @@ public class ProductUpdateExecutor implements ApprovalExecutor {
 
     @Override
     public void execute(ApprovalRequest request) {
-        if (request.getPayload() == null || request.getPayload().isBlank()) {
-            log.warn("PRODUCT_UPDATE payload is empty for request #{}", request.getRequestId());
-            return;
+        ProductUpdatePayload payload = parsePayload(request, ProductUpdatePayload.class);
+        int productId = payload.productId() != null && payload.productId() > 0
+                ? payload.productId()
+                : (request.getTargetId() != null ? request.getTargetId() : 0);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with ID: " + productId));
+
+        if (payload.productName() != null && !payload.productName().isBlank()) {
+            product.setProductName(payload.productName().trim());
+        }
+        if (payload.sellingPrice() != null) {
+            product.setSellingPrice(payload.sellingPrice());
+        }
+        if (payload.defaultCost() != null) {
+            product.setDefaultCost(payload.defaultCost());
+        }
+        if (payload.currentStock() != null) {
+            product.setCurrentStock(payload.currentStock());
+        }
+        if (payload.minStockAlert() != null) {
+            product.setMinStockAlert(payload.minStockAlert());
         }
 
-        try {
-            JsonNode node = objectMapper.readTree(request.getPayload());
-            int productId = node.path("productId").asInt(request.getTargetId() != null ? request.getTargetId() : 0);
-
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
-
-            if (node.hasNonNull("productName") && !node.get("productName").asText().isBlank()) {
-                product.setProductName(node.get("productName").asText().trim());
-            }
-            if (node.hasNonNull("sellingPrice")) {
-                product.setSellingPrice(new BigDecimal(node.get("sellingPrice").asText()));
-            }
-            if (node.hasNonNull("defaultCost")) {
-                product.setDefaultCost(new BigDecimal(node.get("defaultCost").asText()));
-            }
-            if (node.hasNonNull("currentStock")) {
-                product.setCurrentStock(node.get("currentStock").asInt());
-            }
-            if (node.hasNonNull("minStockAlert")) {
-                product.setMinStockAlert(node.get("minStockAlert").asInt());
-            }
-
-            productRepository.save(product);
-            log.info("PRODUCT_UPDATE executed: updated product #{} ({})", productId, product.getProductName());
-        } catch (Exception e) {
-            log.error("Failed to execute PRODUCT_UPDATE for request #{}", request.getRequestId(), e);
-            throw new RuntimeException("Failed to execute product update: " + e.getMessage(), e);
-        }
+        productRepository.save(product);
+        log.info("PRODUCT_UPDATE executed: updated product #{} ({})", productId, product.getProductName());
     }
 }

@@ -42,6 +42,8 @@ public class ZoneService {
     private final ZoneRepository zoneRepository;
     private final ProductRepository productRepository;
     private final ApprovalRequestRepository approvalRequestRepository;
+    private final ApprovalRequestFactory approvalRequestFactory;
+    private final ProductQueryService productQueryService;
     private final AuditLogService auditLogService;
     private final ObjectMapper objectMapper;
 
@@ -71,35 +73,15 @@ public class ZoneService {
                 .toList();
     }
 
+    // Delegated to ProductQueryService
     @Transactional(readOnly = true)
     public ZoneProductSummaryDto getZoneProductSummary() {
-        List<Zone> allZones = zoneRepository.findAll();
-        long activeZonesCount = allZones.size();
-        List<Product> products = productRepository.findByIsActiveTrue();
+        return productQueryService.getZoneProductSummary();
+    }
 
-        long storedUnits = 0;
-        long lowStockCount = 0;
-
-        for (Product p : products) {
-            int stock = p.getCurrentStock() != null ? p.getCurrentStock() : 0;
-            int minStock = p.getMinStockAlert() != null ? p.getMinStockAlert() : 20;
-            storedUnits += stock;
-            if (stock <= minStock) {
-                lowStockCount++;
-            }
-        }
-
-        long totalCapacity = allZones.stream()
-                .mapToLong(z -> z.getCapacity() != null ? z.getCapacity() : 500L)
-                .sum();
-
-        return ZoneProductSummaryDto.builder()
-                .activeZonesCount(activeZonesCount)
-                .storedUnits(storedUnits)
-                .totalProducts(products.size())
-                .lowStockCount(lowStockCount)
-                .totalCapacity(totalCapacity)
-                .build();
+    @Transactional(readOnly = true)
+    public List<ProductDto> getZoneProducts(String zoneCode, String search) {
+        return productQueryService.getZoneProducts(zoneCode, search);
     }
 
     @Transactional
@@ -138,7 +120,8 @@ public class ZoneService {
         zone.setCapacity(capacity);
 
         Zone saved = zoneRepository.save(zone);
-        auditLogService.log(actor, "ZONE_CREATE", "Created zone " + saved.getZoneCode() + " (" + saved.getZoneName() + ", Capacity: " + capacity + ")");
+        auditLogService.log(actor, com.sras.backend.enums.AuditAction.ZONE_CREATE, "ZONE", saved.getZoneCode(),
+                "Created zone " + saved.getZoneCode() + " (" + saved.getZoneName() + ", Capacity: " + capacity + ")");
         return ZoneDto.fromEntity(saved, 0L, 0L);
     }
 
@@ -196,13 +179,11 @@ public class ZoneService {
 
         String detail = "Create new zone: " + code + " (" + name + ") | Capacity: " + capacity + " Units";
 
-        ApprovalRequest saved = approvalRequestRepository.save(
-                ApprovalRequestService.buildPendingRequest(
-                        RequestType.ZONE_CREATE, TargetType.ZONE, null, payloadJson, detail, actor
-                )
+        ApprovalRequest saved = approvalRequestFactory.create(
+                RequestType.ZONE_CREATE, TargetType.ZONE, null, payloadJson, detail, actor
         );
 
-        auditLogService.log(actor, "REQUEST_SUBMIT",
+        auditLogService.log(actor, com.sras.backend.enums.AuditAction.REQUEST_SUBMIT, "ZONE", saved.getRequestId(),
                 "Requested creation of zone " + code + " (" + name + ", Capacity: " + capacity + " Units)");
 
         return ApprovalRequestDto.fromEntity(saved);
@@ -246,7 +227,8 @@ public class ZoneService {
         long totalUnits = products.stream().filter(p -> p.getZone() != null && p.getZone().getZoneId().equals(saved.getZoneId()))
                 .mapToLong(p -> p.getCurrentStock() != null ? p.getCurrentStock() : 0L).sum();
 
-        auditLogService.log(actor, "ZONE_UPDATE", "Updated zone " + saved.getZoneCode() + " (Capacity: " + saved.getCapacity() + ", Name: " + saved.getZoneName() + ")");
+        auditLogService.log(actor, com.sras.backend.enums.AuditAction.ZONE_UPDATE, "ZONE", saved.getZoneCode(),
+                "Updated zone " + saved.getZoneCode() + " (Capacity: " + saved.getCapacity() + ", Name: " + saved.getZoneName() + ")");
         return ZoneDto.fromEntity(saved, productCount, totalUnits);
     }
 
@@ -318,39 +300,14 @@ public class ZoneService {
 
         String detail = "Edit Zone Capacity: " + zone.getZoneCode() + " (" + newName + ") | " + oldCapacity + " -> " + newCapacity + " Units";
 
-        ApprovalRequest saved = approvalRequestRepository.save(
-                ApprovalRequestService.buildPendingRequest(
-                        RequestType.ZONE_UPDATE, TargetType.ZONE, zone.getZoneId(), payloadJson, detail, actor
-                )
+        ApprovalRequest saved = approvalRequestFactory.create(
+                RequestType.ZONE_UPDATE, TargetType.ZONE, zone.getZoneId(), payloadJson, detail, actor
         );
 
-        auditLogService.log(actor, "REQUEST_SUBMIT",
+        auditLogService.log(actor, com.sras.backend.enums.AuditAction.REQUEST_SUBMIT, "ZONE", saved.getRequestId(),
                 "Requested capacity update for zone " + zone.getZoneCode() + " (" + oldCapacity + " -> " + newCapacity + " Units)");
 
         return ApprovalRequestDto.fromEntity(saved);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProductDto> getZoneProducts(String zoneCode, String search) {
-        String q = search != null ? search.trim().toLowerCase() : "";
-        String zFilter = zoneCode != null ? zoneCode.trim() : "";
-
-        return productRepository.findByIsActiveTrue().stream()
-                .filter(p -> zFilter.isEmpty() || zFilter.equalsIgnoreCase("ALL") ||
-                        (p.getZone() != null && p.getZone().getZoneCode().equalsIgnoreCase(zFilter)))
-                .filter(p -> {
-                    if (q.isEmpty()) return true;
-                    boolean matchId = p.getProductId() != null && String.valueOf(p.getProductId()).contains(q);
-                    boolean matchName = p.getProductName() != null && p.getProductName().toLowerCase().contains(q);
-                    boolean matchZone = p.getZone() != null && (
-                            p.getZone().getZoneCode().toLowerCase().contains(q) ||
-                            p.getZone().getZoneName().toLowerCase().contains(q)
-                    );
-                    return matchId || matchName || matchZone;
-                })
-                .sorted(Comparator.comparing(Product::getProductId))
-                .map(ProductDto::fromEntity)
-                .toList();
     }
 
     @Transactional
@@ -436,17 +393,12 @@ public class ZoneService {
         String detail = isSwap
                 ? "Swap Zone " + sourceZone.getZoneCode() + " (" + sourceProducts.size() + " items) <-> Zone " + targetZone.getZoneCode() + " (" + targetProducts.size() + " items)"
                 : "Move entire Zone " + sourceZone.getZoneCode() + " (" + sourceProducts.size() + " items) -> Zone " + targetZone.getZoneCode();
-        if (detail.length() > 255) {
-            detail = detail.substring(0, 252) + "...";
-        }
 
-        ApprovalRequest saved = approvalRequestRepository.save(
-                ApprovalRequestService.buildPendingRequest(
-                        RequestType.PRODUCT_MOVE, TargetType.ZONE, sourceZone.getZoneId(), payloadJson, detail, adminUser
-                )
+        ApprovalRequest saved = approvalRequestFactory.create(
+                RequestType.PRODUCT_MOVE, TargetType.ZONE, sourceZone.getZoneId(), payloadJson, detail, adminUser
         );
 
-        auditLogService.log(adminUser, "REQUEST_SUBMIT",
+        auditLogService.log(adminUser, com.sras.backend.enums.AuditAction.REQUEST_SUBMIT, "ZONE", saved.getRequestId(),
                 (isSwap ? "Requested swap between Zone " : "Requested move of Zone ")
                 + sourceZone.getZoneCode() + " and Zone " + targetZone.getZoneCode());
 
@@ -507,13 +459,11 @@ public class ZoneService {
 
         String detail = "Edit Product #" + product.getProductId() + " (" + newName + ")";
 
-        ApprovalRequest saved = approvalRequestRepository.save(
-                ApprovalRequestService.buildPendingRequest(
-                        RequestType.PRODUCT_UPDATE, TargetType.PRODUCT, product.getProductId(), payloadJson, detail, adminUser
-                )
+        ApprovalRequest saved = approvalRequestFactory.create(
+                RequestType.PRODUCT_UPDATE, TargetType.PRODUCT, product.getProductId(), payloadJson, detail, adminUser
         );
 
-        auditLogService.log(adminUser, "REQUEST_SUBMIT",
+        auditLogService.log(adminUser, com.sras.backend.enums.AuditAction.REQUEST_SUBMIT, "PRODUCT", saved.getRequestId(),
                 "Requested edit for Product #" + product.getProductId() + " (" + newName + ")");
 
         return ApprovalRequestDto.fromEntity(saved);

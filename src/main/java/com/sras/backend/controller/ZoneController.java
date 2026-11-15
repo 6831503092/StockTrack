@@ -11,7 +11,10 @@ import com.sras.backend.dto.ZoneProductSummaryDto;
 import com.sras.backend.dto.ZoneUpdateRequest;
 import com.sras.backend.entity.User;
 import com.sras.backend.enums.Role;
+import com.sras.backend.security.CurrentUser;
+import com.sras.backend.security.RequireRoles;
 import com.sras.backend.service.AuthService;
+import com.sras.backend.service.ProductQueryService;
 import com.sras.backend.service.ZoneService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +37,7 @@ import java.util.List;
 public class ZoneController {
 
     private final ZoneService zoneService;
+    private final ProductQueryService productQueryService;
     private final AuthService authService;
 
     @GetMapping("/zones")
@@ -47,24 +51,22 @@ public class ZoneController {
     }
 
     @PostMapping("/zones")
+    @RequireRoles(Role.ADMIN)
     public ResponseEntity<ApiResponse<ApprovalRequestDto>> createZone(
             @RequestBody ZoneCreateRequest req,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User adminUser
     ) {
-        User adminUser = authService.requireRole(session, xUserId, Role.ADMIN);
         ApprovalRequestDto request = zoneService.requestZoneCreate(req, adminUser);
         return ResponseEntity.ok(ApiResponse.ok("Zone creation request (#" + request.getRequestId() + ") submitted for Manager approval", request));
     }
 
     @PutMapping("/zones/{zoneCode}")
+    @RequireRoles(Role.ADMIN)
     public ResponseEntity<ApiResponse<ApprovalRequestDto>> updateZone(
             @PathVariable("zoneCode") String zoneCode,
             @RequestBody ZoneUpdateRequest req,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User adminUser
     ) {
-        User adminUser = authService.requireRole(session, xUserId, Role.ADMIN);
         ApprovalRequestDto request = zoneService.requestZoneUpdate(zoneCode, req, adminUser);
         return ResponseEntity.ok(ApiResponse.ok("Zone capacity update request (#" + request.getRequestId() + ") submitted for Manager approval", request));
     }
@@ -75,7 +77,7 @@ public class ZoneController {
             @RequestHeader(value = "X-User-Id", required = false) String xUserId
     ) {
         authService.resolveCurrentUser(session, xUserId);
-        ZoneProductSummaryDto summary = zoneService.getZoneProductSummary();
+        ZoneProductSummaryDto summary = productQueryService.getZoneProductSummary();
         return ResponseEntity.ok(ApiResponse.ok("Zone product summary retrieved successfully", summary));
     }
 
@@ -87,28 +89,26 @@ public class ZoneController {
             @RequestHeader(value = "X-User-Id", required = false) String xUserId
     ) {
         authService.resolveCurrentUser(session, xUserId);
-        List<ProductDto> products = zoneService.getZoneProducts(zoneCode, search);
+        List<ProductDto> products = productQueryService.getZoneProducts(zoneCode, search);
         return ResponseEntity.ok(ApiResponse.ok("Zone products retrieved successfully", products));
     }
 
     @PostMapping("/requests/product-move")
+    @RequireRoles(Role.ADMIN)
     public ResponseEntity<ApiResponse<ApprovalRequestDto>> submitProductMove(
             @RequestBody ProductMoveRequest req,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User adminUser
     ) {
-        User adminUser = authService.requireRole(session, xUserId, Role.ADMIN);
         ApprovalRequestDto result = zoneService.submitProductMoveRequest(req, adminUser);
         return ResponseEntity.ok(ApiResponse.ok("Product move request submitted for approval", result));
     }
 
     @PostMapping("/requests/product-update")
+    @RequireRoles(Role.ADMIN)
     public ResponseEntity<ApiResponse<ApprovalRequestDto>> submitProductUpdate(
             @RequestBody ProductUpdateRequest req,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User adminUser
     ) {
-        User adminUser = authService.requireRole(session, xUserId, Role.ADMIN);
         ApprovalRequestDto result = zoneService.submitProductUpdateRequest(req, adminUser);
         return ResponseEntity.ok(ApiResponse.ok("Product edit request submitted for approval", result));
     }

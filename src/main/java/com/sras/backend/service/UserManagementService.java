@@ -33,6 +33,7 @@ public class UserManagementService {
 
     private final UserRepository userRepository;
     private final ApprovalRequestRepository approvalRequestRepository;
+    private final ApprovalRequestFactory approvalRequestFactory;
     private final AuditLogService auditLogService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
@@ -98,13 +99,11 @@ public class UserManagementService {
         String detail = truncate255("Create new user: " + fullName + " (" + assignedUserId +
                 ", Role: " + targetRole.name() + "). Reason: " + reason);
 
-        ApprovalRequest saved = approvalRequestRepository.save(
-                ApprovalRequestService.buildPendingRequest(
-                        RequestType.USER_CREATE, TargetType.USER, assignedUserId, payloadJson, detail, adminUser
-                )
+        ApprovalRequest saved = approvalRequestFactory.create(
+                RequestType.USER_CREATE, TargetType.USER, assignedUserId, payloadJson, detail, adminUser
         );
 
-        auditLogService.log(adminUser, "REQUEST_SUBMIT",
+        auditLogService.log(adminUser, com.sras.backend.enums.AuditAction.REQUEST_SUBMIT, "USER", saved.getRequestId(),
                 "Requested creation of user: " + fullName + " (ID: " + assignedUserId +
                 ", Role: " + targetRole.name() + "). Reason: " + reason);
 
@@ -156,13 +155,11 @@ public class UserManagementService {
         String detail = truncate255("Change role: " + targetUser.getFullName() +
                 " (" + targetUser.getRole().name() + " -> " + targetNewRole.name() + ")");
 
-        ApprovalRequest saved = approvalRequestRepository.save(
-                ApprovalRequestService.buildPendingRequest(
-                        RequestType.ROLE_CHANGE, TargetType.USER, targetUser.getUserId(), payloadJson, detail, adminUser
-                )
+        ApprovalRequest saved = approvalRequestFactory.create(
+                RequestType.ROLE_CHANGE, TargetType.USER, targetUser.getUserId(), payloadJson, detail, adminUser
         );
 
-        auditLogService.log(adminUser, "REQUEST_SUBMIT",
+        auditLogService.log(adminUser, com.sras.backend.enums.AuditAction.REQUEST_SUBMIT, "USER", saved.getRequestId(),
                 "Requested role change for user ID " + targetUser.getUserId() + " to " + targetNewRole.name());
 
         return ApprovalRequestDto.fromEntity(saved);

@@ -8,8 +8,11 @@ import com.sras.backend.dto.SupplierDto;
 import com.sras.backend.dto.SupplierRequest;
 import com.sras.backend.entity.User;
 import com.sras.backend.enums.Role;
+import com.sras.backend.security.CurrentUser;
+import com.sras.backend.security.RequireRoles;
 import com.sras.backend.service.AuthService;
 import com.sras.backend.service.PurchaseOrderService;
+import com.sras.backend.service.SupplierService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +35,7 @@ import java.util.List;
 public class PurchaseOrderController {
 
     private final PurchaseOrderService purchaseOrderService;
+    private final SupplierService supplierService;
     private final AuthService authService;
 
     @GetMapping("/suppliers")
@@ -40,41 +44,38 @@ public class PurchaseOrderController {
             @RequestHeader(value = "X-User-Id", required = false) String xUserId
     ) {
         authService.resolveCurrentUser(session, xUserId);
-        List<SupplierDto> suppliers = purchaseOrderService.getActiveSuppliers();
+        List<SupplierDto> suppliers = supplierService.getActiveSuppliers();
         return ResponseEntity.ok(ApiResponse.ok("Suppliers retrieved successfully", suppliers));
     }
 
     @PostMapping("/suppliers")
+    @RequireRoles({Role.ADMIN, Role.MANAGER, Role.OWNER})
     public ResponseEntity<ApiResponse<ApprovalRequestDto>> createSupplier(
             @RequestBody SupplierRequest req,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User user
     ) {
-        User user = authService.requireRole(session, xUserId, Role.ADMIN, Role.MANAGER, Role.OWNER);
-        ApprovalRequestDto request = purchaseOrderService.requestSupplierCreate(req, user);
+        ApprovalRequestDto request = supplierService.requestSupplierCreate(req, user);
         return ResponseEntity.ok(ApiResponse.ok("Supplier creation request (#" + request.getRequestId() + ") submitted for Manager approval", request));
     }
 
     @PutMapping("/suppliers/{id:[0-9]+}")
+    @RequireRoles({Role.ADMIN, Role.MANAGER, Role.OWNER})
     public ResponseEntity<ApiResponse<ApprovalRequestDto>> updateSupplier(
             @PathVariable("id") Integer id,
             @RequestBody SupplierRequest req,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User user
     ) {
-        User user = authService.requireRole(session, xUserId, Role.ADMIN, Role.MANAGER, Role.OWNER);
-        ApprovalRequestDto request = purchaseOrderService.requestSupplierUpdate(id, req, user);
+        ApprovalRequestDto request = supplierService.requestSupplierUpdate(id, req, user);
         return ResponseEntity.ok(ApiResponse.ok("Supplier update request (#" + request.getRequestId() + ") submitted for Manager approval", request));
     }
 
     @DeleteMapping("/suppliers/{id:[0-9]+}")
+    @RequireRoles({Role.ADMIN, Role.MANAGER, Role.OWNER})
     public ResponseEntity<ApiResponse<ApprovalRequestDto>> deleteSupplier(
             @PathVariable("id") Integer id,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User user
     ) {
-        User user = authService.requireRole(session, xUserId, Role.ADMIN, Role.MANAGER, Role.OWNER);
-        ApprovalRequestDto request = purchaseOrderService.requestSupplierDeactivate(id, user);
+        ApprovalRequestDto request = supplierService.requestSupplierDeactivate(id, user);
         return ResponseEntity.ok(ApiResponse.ok("Supplier deletion request (#" + request.getRequestId() + ") submitted for Manager approval", request));
     }
 
@@ -105,10 +106,8 @@ public class PurchaseOrderController {
     @PostMapping("/purchase-orders")
     public ResponseEntity<ApiResponse<PurchaseOrderDto>> createPurchaseOrder(
             @RequestBody PurchaseOrderCreateRequest req,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User currentUser
     ) {
-        User currentUser = authService.resolveCurrentUser(session, xUserId);
         PurchaseOrderDto created = purchaseOrderService.createPurchaseOrder(req, currentUser);
         return ResponseEntity.ok(ApiResponse.ok("Purchase order created successfully", created));
     }

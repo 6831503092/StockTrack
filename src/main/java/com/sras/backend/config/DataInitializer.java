@@ -184,16 +184,16 @@ public class DataInitializer implements CommandLineRunner {
         LocalDateTime now = LocalDateTime.now();
 
         List<AuditLog> initialLogs = List.of(
-                AuditLog.builder().user(staff).role(Role.STAFF).actionType("RECEIVE_ACCEPT").detail("Accepted Receive for PO #1001 into warehouse (45 Office Desk to Zone Z1)").actionDatetime(now.minusHours(2)).build(),
-                AuditLog.builder().user(staff).role(Role.STAFF).actionType("STOCK_OUT_CONFIRM").detail("Confirmed Stock Out for SO #2001 (15 Gaming Chair shipped)").actionDatetime(now.minusHours(4)).build(),
-                AuditLog.builder().user(manager).role(Role.MANAGER).actionType("REQUEST_APPROVE").detail("Approved PO_CREATE Request #102 for Supplier Thai Wood Supply Co.").actionDatetime(now.minusHours(7)).build(),
-                AuditLog.builder().user(admin).role(Role.ADMIN).actionType("SO_CREATE").detail("Created Sales Order #2002 (Customer: RWTcomp., 3 items)").actionDatetime(now.minusHours(11)).build(),
-                AuditLog.builder().user(staff).role(Role.STAFF).actionType("TRANSFER_VERIFY").detail("Verified transfer for movement #3001 (20 Coffee Table from Z1 to Z2)").actionDatetime(now.minusDays(1).minusHours(1)).build(),
-                AuditLog.builder().user(admin).role(Role.ADMIN).actionType("PO_CREATE").detail("Created Purchase Order #1001 (Supplier: Thai Wood Supply Co.)").actionDatetime(now.minusDays(1).minusHours(4)).build(),
-                AuditLog.builder().user(manager).role(Role.MANAGER).actionType("PRODUCT_UPDATE").detail("Updated product ID 10008: Gaming Chair (Selling Price updated to 3000.00)").actionDatetime(now.minusDays(1).minusHours(8)).build(),
-                AuditLog.builder().user(staff).role(Role.STAFF).actionType("RECEIVE_ACCEPT").detail("Accepted Receive for PO #998 into warehouse (30 Bookshelf to Zone Z4)").actionDatetime(now.minusDays(2)).build(),
-                AuditLog.builder().user(staff).role(Role.STAFF).actionType("STOCK_OUT_CONFIRM").detail("Confirmed Stock Out for SO #1995 (10 Dining Table shipped)").actionDatetime(now.minusDays(2).minusHours(3)).build(),
-                AuditLog.builder().user(staff).role(Role.STAFF).actionType("STOCK_OUT_REJECT").detail("Rejected Stock Out for SO #1994. Reason: Damaged packaging on inspection").actionDatetime(now.minusDays(3)).build()
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType(com.sras.backend.enums.AuditAction.RECEIVE_ACCEPT.name()).targetType("PO").targetId("1001").detail("Accepted Receive for PO #1001 into warehouse (45 Office Desk to Zone Z1)").actionDatetime(now.minusHours(2)).build(),
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType(com.sras.backend.enums.AuditAction.STOCK_OUT_CONFIRM.name()).targetType("SO").targetId("2001").detail("Confirmed Stock Out for SO #2001 (15 Gaming Chair shipped)").actionDatetime(now.minusHours(4)).build(),
+                AuditLog.builder().user(manager).role(Role.MANAGER).actionType(com.sras.backend.enums.AuditAction.REQUEST_APPROVE.name()).targetType("PO").targetId("102").detail("Approved PO_CREATE Request #102 for Supplier Thai Wood Supply Co.").actionDatetime(now.minusHours(7)).build(),
+                AuditLog.builder().user(admin).role(Role.ADMIN).actionType(com.sras.backend.enums.AuditAction.SO_CREATE.name()).targetType("SO").targetId("2002").detail("Created Sales Order #2002 (Customer: RWTcomp., 3 items)").actionDatetime(now.minusHours(11)).build(),
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType(com.sras.backend.enums.AuditAction.TRANSFER_VERIFY.name()).targetType("MOVEMENT").targetId("3001").detail("Verified transfer for movement #3001 (20 Coffee Table from Z1 to Z2)").actionDatetime(now.minusDays(1).minusHours(1)).build(),
+                AuditLog.builder().user(admin).role(Role.ADMIN).actionType(com.sras.backend.enums.AuditAction.PO_CREATE.name()).targetType("PO").targetId("1001").detail("Created Purchase Order #1001 (Supplier: Thai Wood Supply Co.)").actionDatetime(now.minusDays(1).minusHours(4)).build(),
+                AuditLog.builder().user(manager).role(Role.MANAGER).actionType(com.sras.backend.enums.AuditAction.PRODUCT_UPDATE.name()).targetType("PRODUCT").targetId("10008").detail("Updated product ID 10008: Gaming Chair (Selling Price updated to 3000.00)").actionDatetime(now.minusDays(1).minusHours(8)).build(),
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType(com.sras.backend.enums.AuditAction.RECEIVE_ACCEPT.name()).targetType("PO").targetId("998").detail("Accepted Receive for PO #998 into warehouse (30 Bookshelf to Zone Z4)").actionDatetime(now.minusDays(2)).build(),
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType(com.sras.backend.enums.AuditAction.STOCK_OUT_CONFIRM.name()).targetType("SO").targetId("1995").detail("Confirmed Stock Out for SO #1995 (10 Dining Table shipped)").actionDatetime(now.minusDays(2).minusHours(3)).build(),
+                AuditLog.builder().user(staff).role(Role.STAFF).actionType(com.sras.backend.enums.AuditAction.STOCK_OUT_REJECT.name()).targetType("SO").targetId("1994").detail("Rejected Stock Out for SO #1994. Reason: Damaged packaging on inspection").actionDatetime(now.minusDays(3)).build()
         );
 
         auditLogRepository.saveAll(initialLogs);

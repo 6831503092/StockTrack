@@ -42,8 +42,14 @@ public class AuditLog {
     @Column(name = "role", length = 10, nullable = false)
     private Role role;
 
-    @Column(name = "action_type", length = 20, nullable = false)
+    @Column(name = "action_type", length = 30, nullable = false)
     private String actionType;
+
+    @Column(name = "target_type", length = 30)
+    private String targetType;
+
+    @Column(name = "target_id", length = 50)
+    private String targetId;
 
     @Column(name = "detail", length = 255, nullable = false)
     private String detail;

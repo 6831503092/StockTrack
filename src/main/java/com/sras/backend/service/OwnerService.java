@@ -31,9 +31,6 @@ public class OwnerService {
     private final SalesOrderItemRepository salesOrderItemRepository;
     private final AuditLogRepository auditLogRepository;
 
-    private static final DateTimeFormatter DISPLAY_DT_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
-    private static final DateTimeFormatter ISO_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final Pattern REF_PATTERN = Pattern.compile("(?:PO|SO|Request|movement|product ID|customer|supplier|zone)\\s*#?([0-9]+|[A-Za-z0-9]+)", Pattern.CASE_INSENSITIVE);
 
     @Transactional(readOnly = true)
     public OwnerDashboardDto getDashboard() {
@@ -108,7 +105,7 @@ public class OwnerService {
         List<OwnerActivityDto> result = new ArrayList<>();
 
         for (AuditLog al : logs) {
-            OwnerActivityDto dto = mapToActivityDto(al);
+            OwnerActivityDto dto = OwnerActivityDto.fromEntity(al);
 
             // Filter by type if provided ("all", "sale", "import", "export")
             if (type != null && !type.isBlank() && !type.equalsIgnoreCase("all")) {
@@ -143,106 +140,6 @@ public class OwnerService {
     }
 
     private OwnerActivityDto mapToActivityDto(AuditLog al) {
-        String action = al.getActionType() != null ? al.getActionType() : "UNKNOWN";
-        String detail = al.getDetail() != null ? al.getDetail() : "";
-        String activityName = "Activity";
-        String type = "other";
-        String status = "Completed";
-        String refPrefix = "ACT";
-
-        if (action.startsWith("RECEIVE_")) {
-            activityName = "Receive Items";
-            type = "import";
-            refPrefix = "RCV";
-            status = action.endsWith("REJECT") ? "Rejected" : "Completed";
-        } else if (action.startsWith("STOCK_OUT_")) {
-            activityName = "Stock Out";
-            type = "export";
-            refPrefix = "SO";
-            status = action.endsWith("REJECT") ? "Rejected" : "Completed";
-        } else if (action.startsWith("TRANSFER_")) {
-            activityName = "Transfer Product";
-            type = "export";
-            refPrefix = "MOV";
-            status = action.endsWith("REJECT") ? "Rejected" : "Completed";
-        } else if ("PO_CREATE".equalsIgnoreCase(action)) {
-            activityName = "Purchase Order";
-            type = "import";
-            refPrefix = "PO";
-            status = "Completed";
-        } else if ("SO_CREATE".equalsIgnoreCase(action)) {
-            activityName = "Sales Order";
-            type = "sale";
-            refPrefix = "SO";
-            status = "Completed";
-        } else if ("REQUEST_APPROVE".equalsIgnoreCase(action)) {
-            activityName = "Request Approved";
-            type = detail.contains("SO") ? "sale" : (detail.contains("PO") ? "import" : "other");
-            refPrefix = "REQ";
-            status = "Approved";
-        } else if ("REQUEST_REJECT".equalsIgnoreCase(action)) {
-            activityName = "Request Rejected";
-            type = detail.contains("SO") ? "sale" : (detail.contains("PO") ? "import" : "other");
-            refPrefix = "REQ";
-            status = "Rejected";
-        } else if ("REQUEST_SUBMIT".equalsIgnoreCase(action)) {
-            activityName = "Request Submitted";
-            type = detail.contains("SO") ? "sale" : (detail.contains("PO") ? "import" : "other");
-            refPrefix = "REQ";
-            status = "Pending";
-        } else if ("PRODUCT_UPDATE".equalsIgnoreCase(action)) {
-            activityName = "Product Update";
-            type = "other";
-            refPrefix = "PRD";
-            status = "Completed";
-        } else if (action.startsWith("CUSTOMER_")) {
-            activityName = "Customer " + (action.endsWith("CREATE") ? "Created" : action.endsWith("UPDATE") ? "Updated" : "Deactivated");
-            type = "sale";
-            refPrefix = "CUST";
-            status = "Completed";
-        } else if (action.startsWith("SUPPLIER_")) {
-            activityName = "Supplier " + (action.endsWith("CREATE") ? "Created" : action.endsWith("UPDATE") ? "Updated" : "Deactivated");
-            type = "import";
-            refPrefix = "SUP";
-            status = "Completed";
-        } else if (action.startsWith("ZONE_")) {
-            activityName = "Zone " + (action.endsWith("CREATE") ? "Created" : "Updated");
-            type = "other";
-            refPrefix = "ZN";
-            status = "Completed";
-        } else if ("REQUEST_CREATE".equalsIgnoreCase(action)) {
-            activityName = "Request Submitted";
-            type = detail.contains("SO") ? "sale" : (detail.contains("PO") ? "import" : "other");
-            refPrefix = "REQ";
-            status = "Pending";
-        }
-
-        // Extract reference number from detail if available
-        String reference = null;
-        Matcher m = REF_PATTERN.matcher(detail);
-        if (m.find()) {
-            reference = refPrefix + "-" + m.group(1);
-        } else {
-            reference = refPrefix + "-" + al.getLogId();
-        }
-
-        String dtStr = al.getActionDatetime() != null ? al.getActionDatetime().format(DISPLAY_DT_FORMATTER) : "—";
-        String isoDate = al.getActionDatetime() != null ? al.getActionDatetime().format(ISO_DATE_FORMATTER) : "";
-
-        String actorName = al.getUser() != null ? al.getUser().getFullName() : "System";
-        String actorRole = al.getRole() != null ? al.getRole().name() : "";
-
-        return OwnerActivityDto.builder()
-                .id(al.getLogId())
-                .activityName(activityName)
-                .type(type)
-                .description(detail)
-                .reference(reference)
-                .dateTime(dtStr)
-                .isoDate(isoDate)
-                .status(status)
-                .actorName(actorName)
-                .actorRole(actorRole)
-                .build();
+        return OwnerActivityDto.fromEntity(al);
     }
 }

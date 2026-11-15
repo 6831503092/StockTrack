@@ -4,6 +4,8 @@ import com.sras.backend.entity.ApprovalRequest;
 import com.sras.backend.entity.PurchaseOrder;
 import com.sras.backend.enums.PurchaseOrderStatus;
 import com.sras.backend.enums.RequestType;
+import com.sras.backend.exception.BusinessRuleException;
+import com.sras.backend.exception.NotFoundException;
 import com.sras.backend.repository.PurchaseOrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +34,11 @@ public class PoCreateExecutor implements ApprovalExecutor {
         }
 
         if (po == null) {
-            log.warn("Purchase Order not found for PO_CREATE request #{}", request.getRequestId());
-            return;
+            throw new NotFoundException("Purchase Order not found for PO_CREATE request #" + request.getRequestId());
+        }
+
+        if (po.getStatus() != PurchaseOrderStatus.PENDING) {
+            throw new BusinessRuleException("Purchase Order #" + po.getPoId() + " is not in PENDING state (current: " + po.getStatus() + ")");
         }
 
         po.setStatus(PurchaseOrderStatus.APPROVED);

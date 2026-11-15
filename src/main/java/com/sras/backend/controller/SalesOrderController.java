@@ -8,7 +8,10 @@ import com.sras.backend.dto.SalesOrderCreateRequest;
 import com.sras.backend.dto.SalesOrderDto;
 import com.sras.backend.entity.User;
 import com.sras.backend.enums.Role;
+import com.sras.backend.security.CurrentUser;
+import com.sras.backend.security.RequireRoles;
 import com.sras.backend.service.AuthService;
+import com.sras.backend.service.CustomerService;
 import com.sras.backend.service.SalesOrderService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ import java.util.List;
 public class SalesOrderController {
 
     private final SalesOrderService salesOrderService;
+    private final CustomerService customerService;
     private final AuthService authService;
 
     @GetMapping("/customers")
@@ -40,41 +44,38 @@ public class SalesOrderController {
             @RequestHeader(value = "X-User-Id", required = false) String xUserId
     ) {
         authService.resolveCurrentUser(session, xUserId);
-        List<CustomerDto> customers = salesOrderService.getActiveCustomers();
+        List<CustomerDto> customers = customerService.getActiveCustomers();
         return ResponseEntity.ok(ApiResponse.ok("Customers retrieved successfully", customers));
     }
 
     @PostMapping("/customers")
+    @RequireRoles({Role.ADMIN, Role.MANAGER, Role.OWNER})
     public ResponseEntity<ApiResponse<ApprovalRequestDto>> createCustomer(
             @RequestBody CustomerRequest req,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User user
     ) {
-        User user = authService.requireRole(session, xUserId, Role.ADMIN, Role.MANAGER, Role.OWNER);
-        ApprovalRequestDto request = salesOrderService.requestCustomerCreate(req, user);
+        ApprovalRequestDto request = customerService.requestCustomerCreate(req, user);
         return ResponseEntity.ok(ApiResponse.ok("Customer creation request (#" + request.getRequestId() + ") submitted for Manager approval", request));
     }
 
     @PutMapping("/customers/{id:[0-9]+}")
+    @RequireRoles({Role.ADMIN, Role.MANAGER, Role.OWNER})
     public ResponseEntity<ApiResponse<ApprovalRequestDto>> updateCustomer(
             @PathVariable("id") Integer id,
             @RequestBody CustomerRequest req,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User user
     ) {
-        User user = authService.requireRole(session, xUserId, Role.ADMIN, Role.MANAGER, Role.OWNER);
-        ApprovalRequestDto request = salesOrderService.requestCustomerUpdate(id, req, user);
+        ApprovalRequestDto request = customerService.requestCustomerUpdate(id, req, user);
         return ResponseEntity.ok(ApiResponse.ok("Customer update request (#" + request.getRequestId() + ") submitted for Manager approval", request));
     }
 
     @DeleteMapping("/customers/{id:[0-9]+}")
+    @RequireRoles({Role.ADMIN, Role.MANAGER, Role.OWNER})
     public ResponseEntity<ApiResponse<ApprovalRequestDto>> deleteCustomer(
             @PathVariable("id") Integer id,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User user
     ) {
-        User user = authService.requireRole(session, xUserId, Role.ADMIN, Role.MANAGER, Role.OWNER);
-        ApprovalRequestDto request = salesOrderService.requestCustomerDeactivate(id, user);
+        ApprovalRequestDto request = customerService.requestCustomerDeactivate(id, user);
         return ResponseEntity.ok(ApiResponse.ok("Customer deletion request (#" + request.getRequestId() + ") submitted for Manager approval", request));
     }
 
@@ -105,10 +106,8 @@ public class SalesOrderController {
     @PostMapping("/sales-orders")
     public ResponseEntity<ApiResponse<SalesOrderDto>> createSalesOrder(
             @RequestBody SalesOrderCreateRequest req,
-            HttpSession session,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId
+            @CurrentUser User currentUser
     ) {
-        User currentUser = authService.resolveCurrentUser(session, xUserId);
         SalesOrderDto created = salesOrderService.createSalesOrder(req, currentUser);
         return ResponseEntity.ok(ApiResponse.ok("Sales order created successfully", created));
     }

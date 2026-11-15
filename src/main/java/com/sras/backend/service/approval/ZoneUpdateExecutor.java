@@ -1,22 +1,25 @@
 package com.sras.backend.service.approval;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sras.backend.dto.payload.ZoneUpdatePayload;
 import com.sras.backend.entity.ApprovalRequest;
 import com.sras.backend.entity.Zone;
 import com.sras.backend.enums.RequestType;
+import com.sras.backend.exception.NotFoundException;
 import com.sras.backend.repository.ZoneRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 
+@Slf4j
 @Component
-@RequiredArgsConstructor
-public class ZoneUpdateExecutor implements ApprovalExecutor {
+public class ZoneUpdateExecutor extends BaseApprovalExecutor<ZoneUpdatePayload> {
 
     private final ZoneRepository zoneRepository;
-    private final ObjectMapper objectMapper;
+
+    public ZoneUpdateExecutor(ZoneRepository zoneRepository, ObjectMapper objectMapper) {
+        super(objectMapper);
+        this.zoneRepository = zoneRepository;
+    }
 
     @Override
     public RequestType supports() {
@@ -25,50 +28,35 @@ public class ZoneUpdateExecutor implements ApprovalExecutor {
 
     @Override
     public void execute(ApprovalRequest request) {
-        String payload = request.getPayload();
-        if (payload == null || payload.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing payload for ZONE_UPDATE");
+        ZoneUpdatePayload payload = parsePayload(request, ZoneUpdatePayload.class);
+
+        Integer targetId = request.getTargetId();
+        if (targetId == null && payload.zoneId() != null) {
+            targetId = payload.zoneId();
         }
 
-        try {
-            JsonNode root = objectMapper.readTree(payload);
-            Integer targetId = request.getTargetId();
-            if (targetId == null && root.hasNonNull("zoneId")) {
-                targetId = root.get("zoneId").asInt();
-            }
+        String zoneCode = payload.zoneCode() != null ? payload.zoneCode().trim().toUpperCase() : "";
 
-            String zoneCode = root.hasNonNull("zoneCode") ? root.get("zoneCode").asText().trim().toUpperCase() : "";
-
-            Zone zone = null;
-            if (targetId != null) {
-                zone = zoneRepository.findById(targetId).orElse(null);
-            }
-            if (zone == null && !zoneCode.isEmpty()) {
-                zone = zoneRepository.findByZoneCode(zoneCode).orElse(null);
-            }
-            if (zone == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Target zone not found for ZONE_UPDATE");
-            }
-
-            if (root.hasNonNull("zoneName")) {
-                String newName = root.get("zoneName").asText().trim();
-                if (!newName.isEmpty()) {
-                    zone.setZoneName(newName);
-                }
-            }
-
-            if (root.hasNonNull("capacity")) {
-                int newCap = root.get("capacity").asInt();
-                if (newCap > 0) {
-                    zone.setCapacity(newCap);
-                }
-            }
-
-            zoneRepository.save(zone);
-        } catch (ResponseStatusException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to parse ZONE_UPDATE payload: " + e.getMessage());
+        Zone zone = null;
+        if (targetId != null && targetId > 0) {
+            zone = zoneRepository.findById(targetId).orElse(null);
         }
+        if (zone == null && !zoneCode.isEmpty()) {
+            zone = zoneRepository.findByZoneCode(zoneCode).orElse(null);
+        }
+        if (zone == null) {
+            throw new NotFoundException("Target zone not found for ZONE_UPDATE request #" + request.getRequestId());
+        }
+
+        if (payload.zoneName() != null && !payload.zoneName().isBlank()) {
+            zone.setZoneName(payload.zoneName().trim());
+        }
+
+        if (payload.capacity() != null && payload.capacity() > 0) {
+            zone.setCapacity(payload.capacity());
+        }
+
+        zoneRepository.save(zone);
+        log.info("ZONE_UPDATE executed: updated zone #{} ({})", zone.getZoneId(), zone.getZoneCode());
     }
 }

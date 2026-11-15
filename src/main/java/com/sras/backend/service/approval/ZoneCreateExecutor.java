@@ -1,22 +1,26 @@
 package com.sras.backend.service.approval;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sras.backend.dto.payload.ZoneCreatePayload;
 import com.sras.backend.entity.ApprovalRequest;
 import com.sras.backend.entity.Zone;
 import com.sras.backend.enums.RequestType;
+import com.sras.backend.exception.ConflictException;
+import com.sras.backend.exception.ValidationException;
 import com.sras.backend.repository.ZoneRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 
+@Slf4j
 @Component
-@RequiredArgsConstructor
-public class ZoneCreateExecutor implements ApprovalExecutor {
+public class ZoneCreateExecutor extends BaseApprovalExecutor<ZoneCreatePayload> {
 
     private final ZoneRepository zoneRepository;
-    private final ObjectMapper objectMapper;
+
+    public ZoneCreateExecutor(ZoneRepository zoneRepository, ObjectMapper objectMapper) {
+        super(objectMapper);
+        this.zoneRepository = zoneRepository;
+    }
 
     @Override
     public RequestType supports() {
@@ -25,43 +29,33 @@ public class ZoneCreateExecutor implements ApprovalExecutor {
 
     @Override
     public void execute(ApprovalRequest request) {
-        String payload = request.getPayload();
-        if (payload == null || payload.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing payload for ZONE_CREATE");
+        ZoneCreatePayload payload = parsePayload(request, ZoneCreatePayload.class);
+
+        String zoneCode = payload.zoneCode() != null ? payload.zoneCode().trim().toUpperCase() : "";
+        if (zoneCode.isEmpty()) {
+            throw new ValidationException("Zone code is required in ZONE_CREATE payload");
         }
 
-        try {
-            JsonNode root = objectMapper.readTree(payload);
-            String zoneCode = root.hasNonNull("zoneCode") ? root.get("zoneCode").asText().trim().toUpperCase() : "";
-            String zoneName = root.hasNonNull("zoneName") ? root.get("zoneName").asText().trim() : "";
-            int capacity = root.hasNonNull("capacity") ? root.get("capacity").asInt(500) : 500;
+        String zoneName = payload.zoneName() != null && !payload.zoneName().isBlank()
+                ? payload.zoneName().trim()
+                : "Zone " + zoneCode.replace("Z", "");
 
-            if (zoneCode.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone code is required in ZONE_CREATE payload");
-            }
+        int capacity = payload.capacity() != null && payload.capacity() > 0 ? payload.capacity() : 500;
 
-            if (zoneName.isEmpty()) {
-                zoneName = "Zone " + zoneCode.replace("Z", "");
-            }
-
-            if (zoneRepository.existsByZoneCode(zoneCode)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone code '" + zoneCode + "' already exists");
-            }
-            if (zoneRepository.existsByZoneName(zoneName)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zone name '" + zoneName + "' already exists");
-            }
-
-            Zone zone = new Zone();
-            zone.setZoneCode(zoneCode);
-            zone.setZoneName(zoneName);
-            zone.setCapacity(capacity > 0 ? capacity : 500);
-
-            Zone saved = zoneRepository.save(zone);
-            request.setTargetId(saved.getZoneId());
-        } catch (ResponseStatusException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to parse ZONE_CREATE payload: " + e.getMessage());
+        if (zoneRepository.existsByZoneCode(zoneCode)) {
+            throw new ConflictException("Zone code '" + zoneCode + "' already exists");
         }
+        if (zoneRepository.existsByZoneName(zoneName)) {
+            throw new ConflictException("Zone name '" + zoneName + "' already exists");
+        }
+
+        Zone zone = new Zone();
+        zone.setZoneCode(zoneCode);
+        zone.setZoneName(zoneName);
+        zone.setCapacity(capacity);
+
+        Zone saved = zoneRepository.save(zone);
+        request.setTargetId(saved.getZoneId());
+        log.info("ZONE_CREATE executed: created zone #{} ({})", saved.getZoneId(), saved.getZoneCode());
     }
 }

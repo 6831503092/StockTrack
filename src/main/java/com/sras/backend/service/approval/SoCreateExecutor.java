@@ -4,6 +4,8 @@ import com.sras.backend.entity.ApprovalRequest;
 import com.sras.backend.entity.SalesOrder;
 import com.sras.backend.enums.RequestType;
 import com.sras.backend.enums.SalesOrderStatus;
+import com.sras.backend.exception.BusinessRuleException;
+import com.sras.backend.exception.NotFoundException;
 import com.sras.backend.repository.SalesOrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +34,11 @@ public class SoCreateExecutor implements ApprovalExecutor {
         }
 
         if (so == null) {
-            log.warn("Sales Order not found for SO_CREATE request #{}", request.getRequestId());
-            return;
+            throw new NotFoundException("Sales Order not found for SO_CREATE request #" + request.getRequestId());
+        }
+
+        if (so.getStatus() != SalesOrderStatus.PENDING) {
+            throw new BusinessRuleException("Sales Order #" + so.getSoId() + " is not in PENDING state (current: " + so.getStatus() + ")");
         }
 
         so.setStatus(SalesOrderStatus.APPROVED);
