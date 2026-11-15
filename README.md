@@ -98,11 +98,11 @@ git checkout -b feature/frontend-staff   # ตัวอย่างสำหร�
 
 | หน้าที่ / Role | หน้าจอ HTML (`static/<role>/`) | สคริปต์ JavaScript (`static/js/`) | ไฟล์ CSS (`static/css/`) |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `my-requests.html`<br>`product-management.html`<br>`purchase-order.html`<br>`role-management.html`<br>`sales-order.html`<br>`warehouse-zones.html`<br>`zone-product.html` | `admin/role-management.js`<br>`admin.js` | `css/admin.css` |
-| **Manager** | `dashboard.html`<br>`requests.html` | `manager-dashboard.js`<br>`manager-requests.js`<br>`manager.js` (Facade) | `css/manager.css` |
-| **Staff** | `dashboard.html`<br>`receive-items.html`<br>`stock-out.html`<br>`transfer-items.html` | `receive-items.js`<br>`stock-out.js`<br>`transfer-items.js` | `css/staff.css` |
-| **Owner** | `dashboard.html`<br>`activity-log.html` | `owner-dashboard.js`<br>`owner-activity.js` | `css/owner.css` |
-| **Shared** | `index.html` (Login) | `common/auth.js`<br>`common/format.js`<br>`common/ui.js`<br>`common/table.js`<br>`api.js`, `sidebar.js` | `base/tokens.css`<br>`base/components.css`<br>`style.css` |
+| **Admin** | `my-requests.html`<br>`product-management.html`<br>`purchase-order.html`<br>`role-management.html`<br>`sales-order.html`<br>`warehouse-zones.html`<br>`zone-product.html` | `admin/admin.js`<br>`admin/role-management.js` | `pages/admin.css` |
+| **Manager** | `dashboard.html`<br>`requests.html` | `manager/manager-dashboard.js`<br>`manager/manager-requests.js`<br>`manager/manager.js` (Facade) | `pages/manager.css` |
+| **Staff** | `dashboard.html`<br>`receive-items.html`<br>`stock-out.html`<br>`transfer-items.html` | `staff/staff-dashboard.js`<br>`staff/receive-items.js`<br>`staff/stock-out.js`<br>`staff/transfer-items.js`<br>`staff/staff-wizard.js` | `pages/staff.css` |
+| **Owner** | `dashboard.html`<br>`activity-log.html` | `owner/owner-dashboard.js`<br>`owner/owner-activity.js` | `pages/owner.css` |
+| **Shared** | `index.html` (Login) | `common/api.js`<br>`common/auth.js`<br>`common/format.js`<br>`common/ui.js`<br>`common/table.js`<br>`common/sidebar.js`<br>`common/sidebar-config.js` | `base/tokens.css`<br>`base/components.css`<br>`layout/sidebar.css`<br>`style.css` |
 
 ---
 
@@ -130,10 +130,10 @@ var(--border-color)     /* #e2e8f0 เส้นขอบการ์ด/ตา�
 ทุกหน้า Dashboard เชื่อมโยงกับ Sidebar อัตโนมัติผ่านแท็ก:
 ```html
 <div id="sidebar-container" data-role="ADMIN" data-active-menu="my-requests"></div>
-<script src="../js/sidebar-config.js"></script>
-<script src="../js/sidebar.js"></script>
+<script src="../js/common/sidebar-config.js"></script>
+<script src="../js/common/sidebar.js"></script>
 ```
-คอนฟิกเมนูและไอคอน SVG ถูกแยกเป็นระเบียบไว้ที่ `static/js/sidebar-config.js` ทำให้ปรับแต่งและขยายเมนูใหม่ได้ง่ายโดยไม่กระทบโครงสร้างหลัก
+คอนฟิกเมนูและไอคอน SVG ถูกแยกเป็นระเบียบไว้ที่ `static/js/common/sidebar-config.js` ทำให้ปรับแต่งและขยายเมนูใหม่ได้ง่ายโดยไม่กระทบโครงสร้างหลัก
 
 ---
 

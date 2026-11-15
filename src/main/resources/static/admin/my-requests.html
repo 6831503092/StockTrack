@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StockTrack - My Requests</title>
-    <link rel="icon" type="image/png" href="../picture/favicon/favicon.png">
+    <link rel="icon" type="image/png" href="../assets/favicon/favicon.png">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -137,9 +137,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="../js/sidebar.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/admin.js"></script>
+    <script src="../js/common/sidebar.js"></script>
+    <script src="../js/common/api.js"></script>
+    <script src="../js/admin/admin.js"></script>
     <script>
         AdminApp.checkAdminAccess();
 
@@ -305,7 +305,7 @@
                                     return `
                                         <tr>
                                             <td style="width: 50px; padding: 4px;">
-                                                <img src="${escapeHtml(imgUrl)}" class="transfer-thumb-img" onerror="this.src='../picture/favicon/favicon.png'">
+                                                <img src="${escapeHtml(imgUrl)}" class="transfer-thumb-img" onerror="this.src='../assets/favicon/favicon.png'">
                                             </td>
                                             <td class="font-medium">${escapeHtml(String(p.productId || p.id))}</td>
                                             <td class="font-medium">${escapeHtml(pName)}</td>
@@ -578,7 +578,7 @@
                                             return `
                                                 <tr>
                                                     <td style="width: 50px; padding: 4px;">
-                                                        <img src="${escapeHtml(imgUrl)}" class="transfer-thumb-img" onerror="this.src='../picture/favicon/favicon.png'">
+                                                        <img src="${escapeHtml(imgUrl)}" class="transfer-thumb-img" onerror="this.src='../assets/favicon/favicon.png'">
                                                     </td>
                                                     <td class="font-medium">${escapeHtml(String(it.productId || '-'))}</td>
                                                     <td class="font-medium">${escapeHtml(pName)}</td>
@@ -628,7 +628,7 @@
 
                 productTablesHtml = `
                     <div style="margin-top: 14px; display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                        <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(prodName)}" style="width: 58px; height: 42px; object-fit: contain; border-radius: 4px;" onerror="this.src='../picture/favicon/favicon.png'">
+                        <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(prodName)}" style="width: 58px; height: 42px; object-fit: contain; border-radius: 4px;" onerror="this.src='../assets/favicon/favicon.png'">
                         <div>
                             <div style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">${escapeHtml(prodName)}</div>
                             <div style="font-size: 0.82rem; color: #64748b;">Cost: ฿${formatMoney(cost || 0)} • Zone: ${escapeHtml(zoneCode)}</div>
@@ -886,3 +886,5 @@
 </body>
 
 </html>
+
+

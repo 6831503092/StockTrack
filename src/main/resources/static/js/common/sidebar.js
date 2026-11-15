@@ -14,7 +14,7 @@
                              window.location.pathname.includes('/manager/') ||
                              window.location.pathname.includes('/owner/') ||
                              window.location.pathname.includes('/staff/');
-            script.src = inSubdir ? '../js/sidebar-config.js' : 'js/sidebar-config.js';
+            script.src = inSubdir ? '../js/common/sidebar-config.js' : 'js/common/sidebar-config.js';
             script.onload = () => resolve(window.STOCKTRACK_ROLE_CONFIGS);
             script.onerror = () => resolve(null);
             document.head.appendChild(script);

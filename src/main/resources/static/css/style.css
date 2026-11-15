@@ -5,11 +5,11 @@
 @import 'base/components.css';
 
 /* ==========================================
-   StockTrack - Modular Imports
+   StockTrack - Modular Layout & Pages
    ========================================== */
-@import 'index.css';
-@import 'sidebar.css';
-@import 'admin.css';
-@import 'manager.css';
-@import 'owner.css';
-@import 'staff.css';
+@import 'layout/sidebar.css';
+@import 'pages/index.css';
+@import 'pages/admin.css';
+@import 'pages/manager.css';
+@import 'pages/owner.css';
+@import 'pages/staff.css';

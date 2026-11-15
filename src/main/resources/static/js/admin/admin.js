@@ -23,33 +23,33 @@
     };
 
     const PRODUCT_IMAGE_MAP = {
-        'officedesk': '../picture/zone1/OfficeDesk.webp',
-        'diningtable': '../picture/zone1/DiningTable.webp',
-        'coffeetable': '../picture/zone1/cofeetable.webp',
-        'computerdesk': '../picture/zone1/computer-desk.webp',
-        'meetingtable': '../picture/zone1/meetingtable.webp',
-        'officechair': '../picture/zone2/OfficeChair.webp',
-        'diningchair': '../picture/zone2/dinningchair.webp',
-        'gamingchair': '../picture/zone2/GamingChair.webp',
-        'foldingchair': '../picture/zone2/FoldingChair.webp',
-        'sofachair': '../picture/zone2/SofaChair.webp',
-        'singlebed': '../picture/zone3/SingleBed.webp',
-        'queenbed': '../picture/zone3/queenbed.webp',
-        'kingbed': '../picture/zone3/KingBed.webp',
-        'bunkbed': '../picture/zone3/BunkBed.webp',
-        'foldingbed': '../picture/zone3/FoldingBed.webp',
-        'wardrobe': '../picture/zone4/Wardrobe.webp',
-        'shoecabinet': '../picture/zone4/ShoeCabinet.webp',
-        'bookshelf': '../picture/zone4/bookshelf.webp',
-        'tvcabinet': '../picture/zone4/TVCabinet.webp',
-        'drawercabinet': '../picture/zone4/DrawerCabinet.webp'
+        'officedesk': '../assets/images/zone1/OfficeDesk.webp',
+        'diningtable': '../assets/images/zone1/DiningTable.webp',
+        'coffeetable': '../assets/images/zone1/cofeetable.webp',
+        'computerdesk': '../assets/images/zone1/computer-desk.webp',
+        'meetingtable': '../assets/images/zone1/meetingtable.webp',
+        'officechair': '../assets/images/zone2/OfficeChair.webp',
+        'diningchair': '../assets/images/zone2/dinningchair.webp',
+        'gamingchair': '../assets/images/zone2/GamingChair.webp',
+        'foldingchair': '../assets/images/zone2/FoldingChair.webp',
+        'sofachair': '../assets/images/zone2/SofaChair.webp',
+        'singlebed': '../assets/images/zone3/SingleBed.webp',
+        'queenbed': '../assets/images/zone3/queenbed.webp',
+        'kingbed': '../assets/images/zone3/KingBed.webp',
+        'bunkbed': '../assets/images/zone3/BunkBed.webp',
+        'foldingbed': '../assets/images/zone3/FoldingBed.webp',
+        'wardrobe': '../assets/images/zone4/Wardrobe.webp',
+        'shoecabinet': '../assets/images/zone4/ShoeCabinet.webp',
+        'bookshelf': '../assets/images/zone4/bookshelf.webp',
+        'tvcabinet': '../assets/images/zone4/TVCabinet.webp',
+        'drawercabinet': '../assets/images/zone4/DrawerCabinet.webp'
     };
 
     const ZONE_FALLBACK_IMAGES = {
-        Z1: '../picture/zone1/OfficeDesk.webp',
-        Z2: '../picture/zone2/OfficeChair.webp',
-        Z3: '../picture/zone3/SingleBed.webp',
-        Z4: '../picture/zone4/bookshelf.webp'
+        Z1: '../assets/images/zone1/OfficeDesk.webp',
+        Z2: '../assets/images/zone2/OfficeChair.webp',
+        Z3: '../assets/images/zone3/SingleBed.webp',
+        Z4: '../assets/images/zone4/bookshelf.webp'
     };
 
     const CAL_MONTHS = [
@@ -776,7 +776,7 @@
     }
 
     function getProductImageUrl(productName, zoneCode) {
-        if (!productName) return '../picture/favicon/favicon.png';
+        if (!productName) return '../assets/favicon/favicon.png';
         const clean = String(productName).toLowerCase().replace(/[^a-z0-9]/g, '');
 
         if (PRODUCT_IMAGE_MAP[clean]) {
@@ -790,7 +790,7 @@
         }
 
         const z = String(zoneCode || '').toUpperCase();
-        return ZONE_FALLBACK_IMAGES[z] || '../picture/favicon/favicon.png';
+        return ZONE_FALLBACK_IMAGES[z] || '../assets/favicon/favicon.png';
     }
 
     function renderOrderReviewRows(items) {
