@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Component
@@ -189,7 +190,7 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Bangkok"));
 
         List<AuditLog> initialLogs = List.of(
                 AuditLog.builder().user(staff).role(Role.STAFF).actionType(com.sras.backend.enums.AuditAction.RECEIVE_ACCEPT.name()).targetType("PO").targetId("1001").detail("Accepted Receive for PO #1001 into warehouse (45 Office Desk to Zone Z1)").actionDatetime(now.minusHours(2)).build(),

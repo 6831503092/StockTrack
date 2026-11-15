@@ -60,10 +60,20 @@
     const pad2 = (n) => String(n).padStart(2, '0');
 
     function getCurrentUser() {
-        const raw = localStorage.getItem('stocktrack_user');
-        if (!raw) return null;
+        if (window.Auth && typeof window.Auth.getUser === 'function') {
+            return window.Auth.getUser();
+        }
         try {
-            return JSON.parse(raw);
+            const sessionRaw = sessionStorage.getItem('stocktrack_user');
+            if (sessionRaw) {
+                return JSON.parse(sessionRaw);
+            }
+            const localRaw = localStorage.getItem('stocktrack_user');
+            if (localRaw) {
+                sessionStorage.setItem('stocktrack_user', localRaw);
+                return JSON.parse(localRaw);
+            }
+            return null;
         } catch {
             return null;
         }
@@ -72,7 +82,14 @@
     function checkAdminAccess() {
         const user = getCurrentUser();
         if (!user || user.role !== 'ADMIN') {
-            if (!user) localStorage.removeItem('stocktrack_user');
+            if (!user) {
+                if (window.Auth && typeof window.Auth.clearUser === 'function') {
+                    window.Auth.clearUser();
+                } else {
+                    sessionStorage.removeItem('stocktrack_user');
+                    localStorage.removeItem('stocktrack_user');
+                }
+            }
             window.location.replace('../index.html');
             return false;
         }
@@ -806,7 +823,7 @@
                 <tr>
                     <td>${idx + 1}</td>
                     <td class="col-thumb">
-                        <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(pName)}" class="order-product-thumb" onerror="this.src='../picture/favicon/favicon.png'">
+                        <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(pName)}" class="order-product-thumb" onerror="this.onerror=null;this.src='../assets/favicon/favicon.png'">
                     </td>
                     <td>${escapeHtml(pId)}</td>
                     <td class="cell-prod-name">${escapeHtml(pName)}</td>

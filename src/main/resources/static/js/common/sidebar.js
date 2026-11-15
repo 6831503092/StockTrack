@@ -36,7 +36,12 @@
             credentials: 'include'
         }).catch(() => { }).finally(() => {
             try {
-                localStorage.removeItem('stocktrack_user');
+                if (window.Auth && typeof window.Auth.clearUser === 'function') {
+                    window.Auth.clearUser();
+                } else {
+                    sessionStorage.removeItem('stocktrack_user');
+                    localStorage.removeItem('stocktrack_user');
+                }
             } catch (err) { }
             window.location.href = '../index.html';
         });
@@ -58,12 +63,16 @@
 
         let storedUser = null;
         try {
-            const raw = localStorage.getItem('stocktrack_user');
-            if (raw) {
-                storedUser = JSON.parse(raw);
-                if (storedUser && storedUser.role && !userRole) {
-                    userRole = storedUser.role.toUpperCase();
+            if (window.Auth && typeof window.Auth.getUser === 'function') {
+                storedUser = window.Auth.getUser();
+            } else {
+                const raw = sessionStorage.getItem('stocktrack_user') || localStorage.getItem('stocktrack_user');
+                if (raw) {
+                    storedUser = JSON.parse(raw);
                 }
+            }
+            if (storedUser && storedUser.role && !userRole) {
+                userRole = storedUser.role.toUpperCase();
             }
         } catch (err) { }
 

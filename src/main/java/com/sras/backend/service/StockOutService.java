@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StockOutService {
 
+    private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
     private final SalesOrderRepository salesOrderRepository;
     private final SalesOrderItemRepository salesOrderItemRepository;
     private final StockOutCheckRepository stockOutCheckRepository;
@@ -88,7 +90,7 @@ public class StockOutService {
         StockOutCheck check = StockOutCheck.builder()
                 .salesOrder(so)
                 .checkedBy(staffUser)
-                .checkedDatetime(LocalDateTime.now())
+                .checkedDatetime(LocalDateTime.now(BANGKOK_ZONE))
                 .result(StockOutCheckResult.STOCK_OUT)
                 .rejectReason(null)
                 .build();
@@ -144,7 +146,7 @@ public class StockOutService {
         StockOutCheck check = StockOutCheck.builder()
                 .salesOrder(so)
                 .checkedBy(staffUser)
-                .checkedDatetime(LocalDateTime.now())
+                .checkedDatetime(LocalDateTime.now(BANGKOK_ZONE))
                 .result(StockOutCheckResult.REJECTED)
                 .rejectReason(reason)
                 .build();

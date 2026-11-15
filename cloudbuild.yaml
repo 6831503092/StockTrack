@@ -23,6 +23,8 @@ steps:
       - 'managed'
       - '--port'
       - '8080'
+      - '--set-env-vars'
+      - 'TZ=Asia/Bangkok'
 
 images:
   - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/webdev-dockers/stocktrack'

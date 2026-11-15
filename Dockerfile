@@ -8,6 +8,7 @@ RUN mvn clean package -DskipTests
 # Package stage
 FROM eclipse-temurin:17-jre
 WORKDIR /usr/local/lib
+ENV TZ=Asia/Bangkok
 COPY --from=build /home/app/target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Duser.timezone=Asia/Bangkok", "-jar", "app.jar"]

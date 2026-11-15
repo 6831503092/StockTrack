@@ -1,14 +1,28 @@
 /**
  * StockTrack - Common Authentication & Role Guard Module
- * Centralizes user state in localStorage and role-based route guarding.
+ * Manages tab-isolated user state (sessionStorage with localStorage fallback)
+ * and role-based route guarding.
  */
 (function () {
     const STORAGE_KEY = 'stocktrack_user';
 
     function getUser() {
         try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            return raw ? JSON.parse(raw) : null;
+            // 1. Prefer sessionStorage for strict per-tab session isolation
+            const sessionRaw = sessionStorage.getItem(STORAGE_KEY);
+            if (sessionRaw) {
+                return JSON.parse(sessionRaw);
+            }
+
+            // 2. Fallback to localStorage (e.g. freshly opened tab or cross-tab restore)
+            const localRaw = localStorage.getItem(STORAGE_KEY);
+            if (localRaw) {
+                // Seed this tab's sessionStorage so changes in other tabs don't affect this tab
+                sessionStorage.setItem(STORAGE_KEY, localRaw);
+                return JSON.parse(localRaw);
+            }
+
+            return null;
         } catch (e) {
             console.error('Failed to parse stored user:', e);
             return null;
@@ -21,7 +35,9 @@
             return;
         }
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+            const serialized = JSON.stringify(user);
+            sessionStorage.setItem(STORAGE_KEY, serialized);
+            localStorage.setItem(STORAGE_KEY, serialized);
         } catch (e) {
             console.error('Failed to save user in storage:', e);
         }
@@ -29,6 +45,7 @@
 
     function clearUser() {
         try {
+            sessionStorage.removeItem(STORAGE_KEY);
             localStorage.removeItem(STORAGE_KEY);
         } catch (e) {
             console.error('Failed to clear user storage:', e);

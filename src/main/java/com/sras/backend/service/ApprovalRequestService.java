@@ -27,6 +27,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import java.util.Map;
 @Service
 public class ApprovalRequestService {
 
+    public static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
     private static final DateTimeFormatter SLASH_DATE_FMT = DateTimeFormatter.ofPattern("d/M/yyyy");
 
     private final ApprovalRequestRepository approvalRequestRepository;
@@ -170,7 +172,7 @@ public class ApprovalRequestService {
 
                 currentReq.setStatus(ApprovalStatus.APPROVED);
                 currentReq.setDecidedBy(managerUser);
-                currentReq.setDecidedDatetime(LocalDateTime.now());
+                currentReq.setDecidedDatetime(LocalDateTime.now(BANGKOK_ZONE));
                 currentReq.setDecisionReason(reason != null && !reason.isBlank() ? reason.trim() : "Approved by Manager");
 
                 ApprovalRequest saved = approvalRequestRepository.save(currentReq);
@@ -191,7 +193,7 @@ public class ApprovalRequestService {
                 ApprovalRequest failedReq = approvalRequestRepository.findById(requestId).orElse(request);
                 failedReq.setStatus(ApprovalStatus.FAILED);
                 failedReq.setDecidedBy(managerUser);
-                failedReq.setDecidedDatetime(LocalDateTime.now());
+                failedReq.setDecidedDatetime(LocalDateTime.now(BANGKOK_ZONE));
                 failedReq.setDecisionReason("Failed execution: " + e.getMessage());
                 approvalRequestRepository.save(failedReq);
                 approvalRequestRepository.flush();
@@ -230,7 +232,7 @@ public class ApprovalRequestService {
 
         request.setStatus(ApprovalStatus.REJECTED);
         request.setDecidedBy(managerUser);
-        request.setDecidedDatetime(LocalDateTime.now());
+        request.setDecidedDatetime(LocalDateTime.now(BANGKOK_ZONE));
         request.setDecisionReason(reason.trim());
 
         ApprovalRequest saved = approvalRequestRepository.save(request);
@@ -284,7 +286,7 @@ public class ApprovalRequestService {
                 .detail(detail)
                 .status(ApprovalStatus.PENDING)
                 .requestedBy(requestedBy)
-                .requestedDatetime(LocalDateTime.now())
+                .requestedDatetime(LocalDateTime.now(BANGKOK_ZONE))
                 .build();
     }
 

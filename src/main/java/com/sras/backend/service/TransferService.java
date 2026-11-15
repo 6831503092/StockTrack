@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TransferService {
 
+    private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
     private final StockMovementRepository stockMovementRepository;
     private final ProductRepository productRepository;
     private final StockMovementService stockMovementService;
@@ -57,7 +59,7 @@ public class TransferService {
 
         movement.setStatus(MovementStatus.COMPLETED);
         movement.setVerifiedBy(staffUser);
-        movement.setVerifiedDatetime(LocalDateTime.now());
+        movement.setVerifiedDatetime(LocalDateTime.now(BANGKOK_ZONE));
         movement.setCountedQty(counted);
         stockMovementRepository.save(movement);
 
@@ -94,7 +96,7 @@ public class TransferService {
 
         movement.setStatus(MovementStatus.REJECTED);
         movement.setVerifiedBy(staffUser);
-        movement.setVerifiedDatetime(LocalDateTime.now());
+        movement.setVerifiedDatetime(LocalDateTime.now(BANGKOK_ZONE));
         movement.setRejectReason(reason);
         stockMovementRepository.save(movement);
 
@@ -110,7 +112,7 @@ public class TransferService {
                 : "Admin";
         String date = m.getRequest() != null && m.getRequest().getRequestedDatetime() != null
                 ? m.getRequest().getRequestedDatetime().format(DATE_FORMATTER)
-                : LocalDateTime.now().format(DATE_FORMATTER);
+                : LocalDateTime.now(BANGKOK_ZONE).format(DATE_FORMATTER);
 
         return StaffTransferDto.builder()
                 .movementId(m.getMovementId())

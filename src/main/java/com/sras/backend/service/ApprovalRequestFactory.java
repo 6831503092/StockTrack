@@ -12,11 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Component
 @RequiredArgsConstructor
 public class ApprovalRequestFactory {
 
+    private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
     private final ApprovalRequestRepository approvalRequestRepository;
     private final ObjectMapper objectMapper;
 
@@ -53,7 +55,7 @@ public class ApprovalRequestFactory {
                 .detail(truncatedDetail)
                 .status(ApprovalStatus.PENDING)
                 .requestedBy(requestedBy)
-                .requestedDatetime(LocalDateTime.now())
+                .requestedDatetime(LocalDateTime.now(BANGKOK_ZONE))
                 .build();
 
         return approvalRequestRepository.save(request);

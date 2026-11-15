@@ -15,36 +15,36 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDto {
-    private static final String DEFAULT_IMAGE = "../picture/favicon/favicon.png";
+    private static final String DEFAULT_IMAGE = "../assets/favicon/favicon.png";
 
     private static final Map<String, String> PRODUCT_IMAGES = Map.ofEntries(
-            Map.entry("officedesk", "../picture/zone1/OfficeDesk.webp"),
-            Map.entry("diningtable", "../picture/zone1/DiningTable.webp"),
-            Map.entry("coffeetable", "../picture/zone1/cofeetable.webp"),
-            Map.entry("computerdesk", "../picture/zone1/computer-desk.webp"),
-            Map.entry("meetingtable", "../picture/zone1/meetingtable.webp"),
-            Map.entry("officechair", "../picture/zone2/OfficeChair.webp"),
-            Map.entry("diningchair", "../picture/zone2/dinningchair.webp"),
-            Map.entry("gamingchair", "../picture/zone2/GamingChair.webp"),
-            Map.entry("foldingchair", "../picture/zone2/FoldingChair.webp"),
-            Map.entry("sofachair", "../picture/zone2/SofaChair.webp"),
-            Map.entry("singlebed", "../picture/zone3/SingleBed.webp"),
-            Map.entry("queenbed", "../picture/zone3/queenbed.webp"),
-            Map.entry("kingbed", "../picture/zone3/KingBed.webp"),
-            Map.entry("bunkbed", "../picture/zone3/BunkBed.webp"),
-            Map.entry("foldingbed", "../picture/zone3/FoldingBed.webp"),
-            Map.entry("wardrobe", "../picture/zone4/Wardrobe.webp"),
-            Map.entry("shoecabinet", "../picture/zone4/ShoeCabinet.webp"),
-            Map.entry("bookshelf", "../picture/zone4/bookshelf.webp"),
-            Map.entry("tvcabinet", "../picture/zone4/TVCabinet.webp"),
-            Map.entry("drawercabinet", "../picture/zone4/DrawerCabinet.webp")
+            Map.entry("officedesk", "../assets/images/zone1/OfficeDesk.webp"),
+            Map.entry("diningtable", "../assets/images/zone1/DiningTable.webp"),
+            Map.entry("coffeetable", "../assets/images/zone1/cofeetable.webp"),
+            Map.entry("computerdesk", "../assets/images/zone1/computer-desk.webp"),
+            Map.entry("meetingtable", "../assets/images/zone1/meetingtable.webp"),
+            Map.entry("officechair", "../assets/images/zone2/OfficeChair.webp"),
+            Map.entry("diningchair", "../assets/images/zone2/dinningchair.webp"),
+            Map.entry("gamingchair", "../assets/images/zone2/GamingChair.webp"),
+            Map.entry("foldingchair", "../assets/images/zone2/FoldingChair.webp"),
+            Map.entry("sofachair", "../assets/images/zone2/SofaChair.webp"),
+            Map.entry("singlebed", "../assets/images/zone3/SingleBed.webp"),
+            Map.entry("queenbed", "../assets/images/zone3/queenbed.webp"),
+            Map.entry("kingbed", "../assets/images/zone3/KingBed.webp"),
+            Map.entry("bunkbed", "../assets/images/zone3/BunkBed.webp"),
+            Map.entry("foldingbed", "../assets/images/zone3/FoldingBed.webp"),
+            Map.entry("wardrobe", "../assets/images/zone4/Wardrobe.webp"),
+            Map.entry("shoecabinet", "../assets/images/zone4/ShoeCabinet.webp"),
+            Map.entry("bookshelf", "../assets/images/zone4/bookshelf.webp"),
+            Map.entry("tvcabinet", "../assets/images/zone4/TVCabinet.webp"),
+            Map.entry("drawercabinet", "../assets/images/zone4/DrawerCabinet.webp")
     );
 
     private static final Map<String, String> ZONE_DEFAULT_IMAGES = Map.of(
-            "Z1", "../picture/zone1/OfficeDesk.webp",
-            "Z2", "../picture/zone2/OfficeChair.webp",
-            "Z3", "../picture/zone3/SingleBed.webp",
-            "Z4", "../picture/zone4/bookshelf.webp"
+            "Z1", "../assets/images/zone1/OfficeDesk.webp",
+            "Z2", "../assets/images/zone2/OfficeChair.webp",
+            "Z3", "../assets/images/zone3/SingleBed.webp",
+            "Z4", "../assets/images/zone4/bookshelf.webp"
     );
 
     private Integer id;

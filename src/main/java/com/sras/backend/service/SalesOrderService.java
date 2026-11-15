@@ -31,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,8 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class SalesOrderService {
+
+    private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
 
     private final SalesOrderRepository salesOrderRepository;
     private final SalesOrderItemRepository salesOrderItemRepository;
@@ -206,7 +209,7 @@ public class SalesOrderService {
                 .customer(customer)
                 .createdBy(currentUser)
                 .request(approvalRequest)
-                .orderDatetime(LocalDateTime.now())
+                .orderDatetime(LocalDateTime.now(BANGKOK_ZONE))
                 .totalAmount(totalAmount)
                 .status(SalesOrderStatus.PENDING)
                 .build());

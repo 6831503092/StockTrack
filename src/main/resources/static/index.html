@@ -268,7 +268,9 @@
                 const data = await res.json();
 
                 if (res.ok && data.success) {
-                    localStorage.setItem('stocktrack_user', JSON.stringify(data.user));
+                    const userStr = JSON.stringify(data.user);
+                    sessionStorage.setItem('stocktrack_user', userStr);
+                    localStorage.setItem('stocktrack_user', userStr);
                     const role = (data.user.role || '').toUpperCase();
                     if (role === 'ADMIN') {
                         window.location.href = 'admin/my-requests.html';

@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +36,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ReceivingService {
+
+    private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
 
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final PurchaseOrderItemRepository purchaseOrderItemRepository;
@@ -63,7 +66,7 @@ public class ReceivingService {
         ReceivingCheck check = ReceivingCheck.builder()
                 .purchaseOrder(po)
                 .checkedBy(staffUser)
-                .checkedDatetime(LocalDateTime.now())
+                .checkedDatetime(LocalDateTime.now(BANGKOK_ZONE))
                 .result(ReceivingCheckResult.ACCEPTED)
                 .rejectReason(null)
                 .build();
@@ -149,7 +152,7 @@ public class ReceivingService {
         ReceivingCheck check = ReceivingCheck.builder()
                 .purchaseOrder(po)
                 .checkedBy(staffUser)
-                .checkedDatetime(LocalDateTime.now())
+                .checkedDatetime(LocalDateTime.now(BANGKOK_ZONE))
                 .result(ReceivingCheckResult.REJECTED)
                 .rejectReason(reason)
                 .build();

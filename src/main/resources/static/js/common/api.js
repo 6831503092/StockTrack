@@ -4,9 +4,20 @@
  */
 (function () {
     function getStoredUser() {
+        if (window.Auth && typeof window.Auth.getUser === 'function') {
+            return window.Auth.getUser();
+        }
         try {
-            const raw = localStorage.getItem('stocktrack_user');
-            return raw ? JSON.parse(raw) : null;
+            const sessionRaw = sessionStorage.getItem('stocktrack_user');
+            if (sessionRaw) {
+                return JSON.parse(sessionRaw);
+            }
+            const localRaw = localStorage.getItem('stocktrack_user');
+            if (localRaw) {
+                sessionStorage.setItem('stocktrack_user', localRaw);
+                return JSON.parse(localRaw);
+            }
+            return null;
         } catch (err) {
             return null;
         }
@@ -45,15 +56,25 @@
         }
 
         if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
+            // Only redirect on 401 Unauthorized (unauthenticated/expired session)
+            // 403 Forbidden means insufficient permission for that specific endpoint, not session loss
+            if (response.status === 401) {
                 const pathname = window.location.pathname;
                 const isLoginPage = pathname.endsWith('index.html') || pathname === '/' || pathname === '';
                 const isLoginEndpoint = typeof endpoint === 'string' && endpoint.includes('/api/login');
                 if (!isLoginPage && !isLoginEndpoint) {
                     try {
-                        localStorage.removeItem('stocktrack_user');
+                        if (window.Auth && typeof window.Auth.clearUser === 'function') {
+                            window.Auth.clearUser();
+                        } else {
+                            sessionStorage.removeItem('stocktrack_user');
+                            localStorage.removeItem('stocktrack_user');
+                        }
                     } catch (e) {}
-                    window.location.replace('../index.html');
+                    const redirectTarget = pathname.includes('/admin/') || pathname.includes('/manager/') || pathname.includes('/staff/') || pathname.includes('/owner/')
+                        ? '../index.html'
+                        : 'index.html';
+                    window.location.replace(redirectTarget);
                 }
             }
 

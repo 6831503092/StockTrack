@@ -8,11 +8,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Service
 @RequiredArgsConstructor
 public class AuditLogService {
 
+    public static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
     private final AuditLogRepository auditLogRepository;
 
     public void log(User user, AuditAction action, String targetType, Object targetId, String detail) {
@@ -31,7 +33,7 @@ public class AuditLogService {
                 .targetType(resolvedTargetType)
                 .targetId(resolvedTargetId)
                 .detail(detail != null && detail.length() > 255 ? detail.substring(0, 255) : detail)
-                .actionDatetime(LocalDateTime.now())
+                .actionDatetime(LocalDateTime.now(BANGKOK_ZONE))
                 .build();
         auditLogRepository.save(auditLog);
     }
