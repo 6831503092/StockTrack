@@ -1,55 +1,196 @@
+﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StockTrack - Owner Dashboard</title>
-    <link rel="icon" type="image/png" href="../picture/favicon/favicon.png">
-    <!-- Google Fonts -->
+
+    <link rel="icon" href="../assets/favicon/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Stylesheet -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
-    <div class="app-layout">
-        <!-- Sidebar Navigation (Modular Component) -->
-        <div id="sidebar-container" data-role="OWNER" data-active-menu="dashboard"></div>
 
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <header class="content-header">
-                <h1>Owner Executive Dashboard</h1>
-                <p>Welcome back, Owner. High-level business metrics, executive approvals, and store insights.</p>
-            </header>
+<body class="owner-dashboard">
+<div class="app-layout">
 
-            <section class="placeholder-card">
-                <p style="color: #64748b;">พื้นที่ส่วนแสดงผลข้อมูลหลักของหน้า Owner (เช่น สรุปผลประกอบการ ยอดขาย และรายงานภาพรวม)</p>
-            </section>
-        </main>
-    </div>
+    <div id="sidebar-container"
+         data-role="OWNER"
+         data-active-menu="dashboard"></div>
 
-    <!-- Scripts -->
-    <script src="../js/sidebar.js"></script>
-    <script>
-        (function checkAccess() {
-            const raw = localStorage.getItem('stocktrack_user');
-            if (!raw) {
-                window.location.replace('../index.html');
-                return;
-            }
-            try {
-                const user = JSON.parse(raw);
-                if (!user || user.role !== 'OWNER') {
-                    window.location.replace('../index.html');
-                }
-            } catch (err) {
-                localStorage.removeItem('stocktrack_user');
-                window.location.replace('../index.html');
-            }
-        })();
-    </script>
+    <main class="main-content owner-main">
+
+        <header class="owner-header">
+            <div>
+                <span class="owner-eyebrow">BUSINESS OVERVIEW</span>
+                <h1>Owner Dashboard</h1>
+                <p>Monitor your business performance and inventory.</p>
+            </div>
+            <div class="owner-status">
+                <span class="status-dot"></span>
+                Owner Overview
+            </div>
+        </header>
+
+        <!-- KPI CARDS (Unified with Admin .po-stats-grid & .po-stat-card) -->
+        <section class="po-stats-grid owner-po-stats-grid" aria-label="Business overview metrics">
+
+            <!-- 1. Total Revenue (Mint) -->
+            <div class="po-stat-card">
+                <div class="po-stat-icon mint">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <div class="po-stat-info">
+                    <span class="stat-label">Total Revenue</span>
+                    <span class="stat-value mint" id="owner-total-revenue">—</span>
+                    <span class="stat-description">Total business revenue</span>
+                </div>
+            </div>
+
+            <!-- 2. Inventory Value (Blue) -->
+            <div class="po-stat-card">
+                <div class="po-stat-icon blue">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <div class="po-stat-info">
+                    <span class="stat-label">Inventory Value</span>
+                    <span class="stat-value blue" id="owner-inventory-value">—</span>
+                    <span class="stat-description">Current inventory value</span>
+                </div>
+            </div>
+
+            <!-- 3. Total Sale (Amber) -->
+            <div class="po-stat-card">
+                <div class="po-stat-icon amber">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                        <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                </div>
+                <div class="po-stat-info">
+                    <span class="stat-label">Total Sale</span>
+                    <span class="stat-value amber" id="owner-total-sale">—</span>
+                    <span class="stat-description">Number of sales transactions</span>
+                </div>
+            </div>
+
+            <!-- 4. Total Export (Purple) -->
+            <div class="po-stat-card">
+                <div class="po-stat-icon purple">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13"></rect>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg>
+                </div>
+                <div class="po-stat-info">
+                    <span class="stat-label">Total Export</span>
+                    <span class="stat-value purple" id="owner-total-export">—</span>
+                    <span class="stat-description">Total exported product units</span>
+                </div>
+            </div>
+
+            <!-- 5. Total Profit (Emerald/Mint) -->
+            <div class="po-stat-card">
+                <div class="po-stat-icon mint">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        <circle cx="12" cy="12" r="10"></circle>
+                    </svg>
+                </div>
+                <div class="po-stat-info">
+                    <span class="stat-label">Total Profit</span>
+                    <span class="stat-value mint" id="owner-total-profit">—</span>
+                    <span class="stat-description">Total business profit</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- PRODUCT PERFORMANCE -->
+        <section class="owner-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Product Performance</h2>
+                    <p>Discover your best performing products.</p>
+                </div>
+            </div>
+
+            <div class="owner-content-grid">
+
+                <!-- HOT SELLER -->
+                <article class="owner-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <span class="performance-icon hot-icon">★</span>
+                            <div>
+                                <h3>Hot Seller</h3>
+                                <p>Top selling products</p>
+                            </div>
+                        </div>
+                        <span class="panel-tag">BEST SELLER</span>
+                    </div>
+
+                    <div id="hot-seller-container">
+                        <div class="performance-empty">
+                            <div class="empty-icon">★</div>
+                            <h4>Loading sales data...</h4>
+                            <p>Best selling products will appear here.</p>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- TOP IMPORT -->
+                <article class="owner-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <span class="performance-icon import-icon">⇩</span>
+                            <div>
+                                <h3>Top Import</h3>
+                                <p>Most imported products</p>
+                            </div>
+                        </div>
+                        <span class="panel-tag">BEST IMPORT</span>
+                    </div>
+
+                    <div id="top-import-container">
+                        <div class="performance-empty">
+                            <div class="empty-icon">▦</div>
+                            <h4>Loading import data...</h4>
+                            <p>Most imported products will appear here.</p>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <footer class="owner-footer">
+            <span>StockTrack</span>
+            <span>Owner Dashboard</span>
+        </footer>
+
+    </main>
+</div>
+
+<script src="../js/common/auth.js"></script>
+<script src="../js/common/format.js"></script>
+<script src="../js/common/ui.js"></script>
+<script src="../js/common/sidebar-config.js"></script>
+<script src="../js/common/sidebar.js"></script>
+<script src="../js/common/api.js"></script>
+<script src="../js/owner/owner-dashboard.js"></script>
 </body>
 </html>
+
 

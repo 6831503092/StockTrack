@@ -9,10 +9,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByUserIdAndIsActiveTrue(Integer userId);
 
-    Optional<User> findByUsernameAndIsActiveTrue(String username);
+    Optional<User> findByFullNameIgnoreCaseAndIsActiveTrue(String fullName);
 
-    Optional<User> findByUserIdAndUsernameAndIsActiveTrue(Integer userId, String username);
-
-    boolean existsByUsername(String username);
+    boolean existsByFullNameIgnoreCase(String fullName);
 }
-

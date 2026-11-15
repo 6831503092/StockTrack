@@ -112,3 +112,15 @@
   background-color: var(--primary-hover, #20b582);
 }
 
+{
+  "_id": "SKU-1024",
+  "name": "Gaming Laptop",
+  "category": "Electronics",
+  "price": 35000,
+  "specifications": {
+    "brand": "ASUS",
+    "RAM": "16GB",
+    "storage": "1TB SSD"
+  },
+  "colors": ["Black", "Silver"]
+}

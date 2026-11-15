@@ -7,7 +7,7 @@
     <title>StockTrack</title>
     <meta name="description" content="StockTrack - Smart Inventory and Purchase Order Management System">
     <meta name="theme-color" content="#27c690">
-    <link rel="icon" type="image/png" href="picture/favicon/favicon.png">
+    <link rel="icon" type="image/png" href="assets/favicon/favicon.png">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -121,7 +121,7 @@
                 </div>
 
                 <!-- Main Warehouse Image -->
-                <img src="picture/login-picture.png" alt="StockTrack Login Illustration" class="login-illustration">
+                <img src="assets/images/login-picture.png" alt="StockTrack Login Illustration" class="login-illustration">
             </div>
         </section>
 
@@ -133,17 +133,39 @@
                     <p>Manage your inventory smarter</p>
                 </header>
 
-                <form class="login-form" action="#" method="POST">
+                <form class="login-form" action="#" method="POST" novalidate>
+                    <!-- Custom Validation Tooltip (Replaces default browser bubble) -->
+                    <div class="custom-validation-tooltip" id="custom-validation-tooltip" style="display: none;">
+                        <div class="tooltip-arrow"></div>
+                        <div class="tooltip-content">
+                            <div class="tooltip-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="13"></line>
+                                    <circle cx="12" cy="18" r="1.5" fill="currentColor"></circle>
+                                </svg>
+                            </div>
+                            <span class="tooltip-text" id="custom-tooltip-text">Please fill out this field.</span>
+                        </div>
+                    </div>
+
+                    <!-- Inline Red Error Message -->
+                    <div id="login-error-banner" class="login-error-banner" style="display: none;" role="alert">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span id="login-error-text">Invalid User ID or password</span>
+                    </div>
+
                     <div class="form-group">
                         <label for="userId">User ID</label>
-                        <input type="text" id="userId" name="userId" placeholder="Your ID or Username" required
-                            autocomplete="username">
+                        <input type="text" id="userId" name="userId" placeholder="User ID or Full Name" autocomplete="off">
                     </div>
 
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" placeholder="Password" required
-                            autocomplete="current-password">
+                        <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password">
                     </div>
 
                     <button type="submit" class="btn-submit">Get started</button>
@@ -153,11 +175,87 @@
     </main>
 
     <script>
-        document.querySelector('.login-form').addEventListener('submit', async function (e) {
-            e.preventDefault();
+        const loginForm = document.querySelector('.login-form');
+        const errorBanner = document.getElementById('login-error-banner');
+        const errorText = document.getElementById('login-error-text');
+        const userIdInput = document.getElementById('userId');
+        const passwordInput = document.getElementById('password');
+        const tooltip = document.getElementById('custom-validation-tooltip');
+        const tooltipText = document.getElementById('custom-tooltip-text');
 
-            const userId = document.getElementById('userId').value.trim();
-            const password = document.getElementById('password').value;
+        function showFieldTooltip(inputEl, message = 'Please fill out this field.') {
+            if (!tooltip || !inputEl) return;
+            tooltipText.textContent = message;
+            inputEl.parentElement.appendChild(tooltip);
+            tooltip.style.display = 'block';
+            inputEl.classList.add('input-warning');
+            inputEl.focus();
+
+            requestAnimationFrame(() => {
+                tooltip.classList.add('active');
+            });
+        }
+
+        function hideFieldTooltip() {
+            if (!tooltip) return;
+            tooltip.classList.remove('active');
+            userIdInput?.classList.remove('input-warning');
+            passwordInput?.classList.remove('input-warning');
+            setTimeout(() => {
+                if (!tooltip.classList.contains('active')) {
+                    tooltip.style.display = 'none';
+                }
+            }, 180);
+        }
+
+        function showError(message) {
+            hideFieldTooltip();
+            if (errorText) errorText.textContent = message;
+            if (errorBanner) {
+                errorBanner.style.display = 'flex';
+                errorBanner.style.animation = 'none';
+                void errorBanner.offsetWidth; // trigger reflow for shake
+                errorBanner.style.animation = 'shakeError 0.35s ease-in-out';
+            }
+            userIdInput?.classList.add('input-error');
+            passwordInput?.classList.add('input-error');
+            passwordInput?.focus();
+            passwordInput?.select();
+        }
+
+        function clearError() {
+            hideFieldTooltip();
+            if (errorBanner) errorBanner.style.display = 'none';
+            userIdInput?.classList.remove('input-error');
+            passwordInput?.classList.remove('input-error');
+        }
+
+        userIdInput?.addEventListener('input', clearError);
+        passwordInput?.addEventListener('input', clearError);
+        document.addEventListener('click', (e) => {
+            if (!loginForm.contains(e.target)) {
+                hideFieldTooltip();
+            }
+        });
+
+        loginForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            clearError();
+
+            const userId = userIdInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!userId) {
+                showFieldTooltip(userIdInput, 'Please fill out this field.');
+                return;
+            }
+
+            if (!password) {
+                showFieldTooltip(passwordInput, 'Please fill out this field.');
+                return;
+            }
+
+            hideFieldTooltip();
 
             try {
                 const res = await fetch('/api/login', {
@@ -173,7 +271,7 @@
                     localStorage.setItem('stocktrack_user', JSON.stringify(data.user));
                     const role = (data.user.role || '').toUpperCase();
                     if (role === 'ADMIN') {
-                        window.location.href = 'admin/dashboard.html';
+                        window.location.href = 'admin/my-requests.html';
                     } else if (role === 'MANAGER') {
                         window.location.href = 'manager/dashboard.html';
                     } else if (role === 'OWNER') {
@@ -181,14 +279,14 @@
                     } else if (role === 'STAFF') {
                         window.location.href = 'staff/dashboard.html';
                     } else {
-                        window.location.href = 'admin/dashboard.html';
+                        window.location.href = 'admin/my-requests.html';
                     }
                 } else {
-                    alert(data.message || 'Invalid ID or password');
+                    showError(data.message || 'Invalid User ID or password');
                 }
             } catch (err) {
                 console.error('Login error:', err);
-                alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบว่าเปิดรัน Spring Boot แล้ว');
+                showError('Unable to connect to the server. Please check that Spring Boot is running.');
             }
         });
     </script>

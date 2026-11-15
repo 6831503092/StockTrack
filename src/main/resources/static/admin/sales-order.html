@@ -1,0 +1,1111 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrack - Sales Order</title>
+    <link rel="icon" type="image/png" href="../assets/favicon/favicon.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation (Modular Component) -->
+        <div id="sidebar-container" data-role="ADMIN" data-active-menu="sales-order"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-content dashboard-main-layout">
+            <!-- 1. Top Header Row -->
+            <header class="requests-header-row">
+                <div class="requests-header-left">
+                    <h1>Sales Order</h1>
+                    <p>view and create sales orders</p>
+                </div>
+
+                <div class="requests-header-right">
+                    <div class="po-create-btn-row">
+                        <button type="button" class="btn-create-po" id="btn-open-create-so-modal">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Create Sales Order
+                        </button>
+
+                        <button type="button" class="btn-header-outline" id="btn-open-manage-customers" onclick="openManageCustomersModal()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                            </svg>
+                            Manage Customers
+                        </button>
+
+                        <div class="requests-date-box" id="requests-date-box" title="Click to filter by date">
+                            <input type="date" id="requests-date-input" aria-label="Filter by date">
+                        </div>
+                    </div>
+
+                    <div class="po-header-filters-row">
+                        <div class="po-search-box">
+                            <input type="text" id="so-search-input" placeholder="search...">
+                            <span class="search-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <select id="so-status-filter" class="po-status-select">
+                            <option value="ALL">All status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 2. KPI / Summary Cards -->
+            <section class="po-stats-grid">
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Total Sales Orders</span>
+                        <span class="stat-value mint" id="kpi-total-so">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Pending Approval</span>
+                        <span class="stat-value amber" id="kpi-pending-so">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Approved Orders</span>
+                        <span class="stat-value blue" id="kpi-approved-so">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Main Data Card: Table Container -->
+            <section class="po-card">
+                <div class="po-table-wrapper">
+                    <table class="po-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>SO ID</th>
+                                <th>Customer</th>
+                                <th>Total Qty</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="so-table-body">
+                            
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table Footer / Pagination -->
+                <div class="po-pagination">
+                    <span id="so-pagination-info">Showing 0 of 0 entries</span>
+                    <div class="pagination-controls">
+                        <button type="button" class="btn-page" id="btn-prev-page" disabled>&lt;</button>
+                        <button type="button" class="btn-page active">1</button>
+                        <button type="button" class="btn-page" id="btn-next-page" disabled>&gt;</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL 1: Create Sales Order Modal (Wireframe Reference Match) -->
+    <div class="modal-overlay" id="modal-create-so">
+        <div class="modal-box modal-po-wire" id="so-modal-box">
+            <!-- STEP 1: Form Input -->
+            <div id="so-create-step-1">
+                <div class="po-wire-header">
+                    <h2>Create Sales Order</h2>
+                    <button type="button" class="btn-close-modal" aria-label="Close modal">&times;</button>
+                </div>
+
+                <form id="form-create-so" onsubmit="handleSOStep1Next(event)">
+                    <!-- Row 1: Created by & UserID -->
+                    <div class="po-wire-grid-2">
+                        <div>
+                            <label for="new-so-created-by" class="po-wire-label">Created by</label>
+                            <input type="text" id="new-so-created-by" class="po-wire-input-readonly" readonly placeholder="User Name">
+                        </div>
+                        <div>
+                            <label for="new-so-user-id" class="po-wire-label">UserID</label>
+                            <input type="text" id="new-so-user-id" class="po-wire-input-readonly" readonly placeholder="User ID">
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Customer -->
+                    <div class="po-wire-group">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label for="new-so-customer" class="po-wire-label" style="margin-bottom: 0;">Customer</label>
+                            
+                        </div>
+                        <select id="new-so-customer" class="po-wire-select" required>
+                            <option value="" disabled selected>Select Customer</option>
+                            <option value="RWTcomp.">RWTcomp.</option>
+                            <option value="Office Pro Thailand">Office Pro Thailand</option>
+                            <option value="Bangkok Modern Living">Bangkok Modern Living</option>
+                            <option value="Siam Retail Group">Siam Retail Group</option>
+                        </select>
+                    </div>
+
+                    <!-- Row 3: Product Items Section -->
+                    <div class="po-wire-items-section">
+                        <div class="po-wire-items-header">
+                            <span>Product name</span>
+                            <span>Quantity</span>
+                            <span>Unit price</span>
+                            <span>Total price</span>
+                        </div>
+
+                        <div class="po-wire-items-list" id="so-items-container">
+                            <div class="po-wire-item-row">
+                                <select class="po-wire-select so-item-product" onchange="handleSOProductChange(this)">
+                                    <option value="" disabled selected>Select Product</option>
+                                </select>
+                                <input type="number" min="1" class="po-wire-input so-item-qty" placeholder="" oninput="handleSOQtyChange(this)">
+                                <input type="text" class="po-wire-input-readonly so-item-unit-price" readonly placeholder="">
+                                <input type="text" class="po-wire-input-readonly so-item-total-price" readonly placeholder="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: + Add Item / - Delete Item -->
+                    <div class="po-wire-item-actions">
+                        <button type="button" class="po-wire-btn-text" id="btn-add-so-item" onclick="addSOItemRow()">+ Add Item</button>
+                        <button type="button" class="po-wire-btn-text delete" id="btn-delete-so-item" onclick="deleteLastSOItemRow()">- Delete Item</button>
+                    </div>
+
+                    <!-- Row 5: Action Buttons (Changed Save to Next) -->
+                    <div class="po-wire-actions">
+                        <button type="button" class="po-wire-btn-cancel" data-close-modal>Cancel</button>
+                        <button type="submit" class="po-wire-btn-save" id="btn-so-step1-next">Next</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- STEP 2: Detail Confirmation View (Matches Mockup Reference) -->
+            <div id="so-create-step-2" style="display: none; position: relative;">
+                <button type="button" class="btn-close-modal" data-close-modal aria-label="Close modal">&times;</button>
+                <div class="order-review-container">
+                    <div class="order-review-header">
+                        <h2>Sales Order Detail</h2>
+                        <div class="order-review-subtitle">
+                            <span>Date: <span id="so-step2-date">-</span></span>
+                            <span>•</span>
+                            <span>Status: <span class="status-tag">[ pending ]</span></span>
+                        </div>
+                    </div>
+
+                    <div class="order-info-card">
+                        <h4>Information</h4>
+                        <div class="order-info-grid">
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Created by:</span>
+                                    <span class="order-info-value" id="so-step2-created-by">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">User ID:</span>
+                                    <span class="order-info-value" id="so-step2-user-id">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Role:</span>
+                                    <span class="order-info-value" id="so-step2-role">Admin</span>
+                                </div>
+                            </div>
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Customer Name:</span>
+                                    <span class="order-info-value" id="so-step2-customer-name">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Customer ID:</span>
+                                    <span class="order-info-value" id="so-step2-customer-id">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-review-table-wrapper">
+                        <table class="order-review-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 38px;">#</th>
+                                    <th class="col-thumb">Image</th>
+                                    <th>Product ID</th>
+                                    <th>Product name</th>
+                                    <th>Zone</th>
+                                    <th>Qty</th>
+                                    <th>Unit Price</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="so-step2-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="order-review-summary-card">
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Quantity:</span>
+                            <span class="order-summary-val" id="so-step2-total-qty">0 Units</span>
+                        </div>
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Price:</span>
+                            <span class="order-summary-val" id="so-step2-total-price">0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="order-review-bottom-bar">
+                        <div class="order-review-actions">
+                            <button type="button" class="po-wire-btn-cancel" onclick="goBackToSOStep1()">Cancel</button>
+                            <button type="button" class="po-wire-btn-save" id="btn-submit-final-so" onclick="submitFinalSO()">Create</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Sales Order Details Modal -->
+    <div class="modal-overlay" id="modal-so-detail">
+        <div class="modal-box modal-order-flow" id="so-detail-modal-box">
+            <button type="button" class="btn-close-modal" data-close-modal aria-label="Close modal">&times;</button>
+            <div id="detail-modal-body">
+                <!-- Dynamically filled by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Manage Customers Modal -->
+    <div class="modal-overlay" id="modal-manage-customers">
+        <div class="modal-box modal-po-wire modal-manage-suppliers-box" style="max-width: 680px;">
+            <div class="po-wire-header">
+                <h2>Manage Customers</h2>
+                <button type="button" class="btn-close-modal" onclick="closeManageCustomersModal()" aria-label="Close modal">&times;</button>
+            </div>
+            
+            <!-- Add / Edit Customer Form -->
+            <form id="form-customer" class="po-wire-form-card" onsubmit="handleCustomerFormSubmit(event)">
+                <div class="po-wire-form-card-header">
+                    <span class="po-wire-form-title" id="customer-form-title">Add New Customer</span>
+                </div>
+                <input type="hidden" id="customer-edit-id" value="">
+                
+                <div class="po-wire-supplier-row-bottom">
+                    <div class="po-wire-supplier-cat-col">
+                        <label for="customer-name-input" class="po-wire-label">Customer Name *</label>
+                        <input type="text" id="customer-name-input" class="po-wire-input" placeholder="e.g. Siam Retail Group" required maxlength="50">
+                    </div>
+                    <div class="po-wire-supplier-form-actions">
+                        <button type="button" class="po-wire-btn-cancel" id="btn-cancel-customer-edit" style="display: none;" onclick="resetCustomerForm()">Cancel</button>
+                        <button type="submit" class="po-wire-btn-save" id="btn-save-customer">Send Request</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Customers Table -->
+            <div class="po-wire-section-header">
+                <span class="po-wire-section-title">
+                    Current Active Customers
+                    <span class="po-wire-count-badge" id="customers-count">0</span>
+                </span>
+            </div>
+            <div class="po-wire-suppliers-table-wrap">
+                <table class="order-review-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">ID</th>
+                            <th>Customer Name</th>
+                            <th style="width: 170px; white-space: nowrap;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manage-customers-tbody">
+                        <!-- Injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="po-wire-actions" style="margin-top: 24px;">
+                <button type="button" class="po-wire-btn-cancel" onclick="closeManageCustomersModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/common/sidebar.js"></script>
+    <script src="../js/common/api.js"></script>
+    <script src="../js/admin/admin.js"></script>
+    <script>
+        AdminApp.checkAdminAccess();
+
+        let soData = [];
+        let availableProducts = [];
+        let availableCustomers = [];
+
+        const soTbody = document.getElementById('so-table-body');
+        const emptySOHtml = '';
+        const formatMoney = AdminApp.formatMoney;
+        const escapeHtml = AdminApp.escapeHtml;
+
+        function getSOProductOptionsHtml() {
+            if (!availableProducts || availableProducts.length === 0) {
+                return `<option value="" disabled selected>No products available</option>`;
+            }
+
+            return `
+                <option value="" disabled selected>Select Product</option>
+                ${availableProducts.map(p => {
+                    const price = p.sellingPrice || p.price || 0;
+                    const stock = p.currentStock !== undefined ? p.currentStock : (p.stock || 0);
+                    const zone = p.location || p.zoneCode || '';
+                    return `<option value="${p.id}" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${price}" data-zone="${escapeHtml(zone)}" data-stock="${stock}">${escapeHtml(p.name)}</option>`;
+                }).join('')}
+            `;
+        }
+
+        function refreshSOProductSelects() {
+            const selects = document.querySelectorAll('.so-item-product');
+            const optionsHtml = getSOProductOptionsHtml();
+            selects.forEach(sel => {
+                sel.innerHTML = optionsHtml;
+                if (typeof sel._syncCombobox === 'function') {
+                    sel._syncCombobox();
+                }
+            });
+            AdminApp.syncProductSelects();
+        }
+
+        async function loadCustomers() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/customers');
+                    if (res && res.success && Array.isArray(res.data)) {
+                        availableCustomers = res.data;
+                        const selectCust = document.getElementById('new-so-customer');
+                        const currentVal = selectCust ? selectCust.value : '';
+                        if (selectCust) {
+                            selectCust.innerHTML = `
+                                <option value="" disabled selected>Select Customer</option>
+                                ${availableCustomers.map(c => `
+                                    <option value="${escapeHtml(c.customerName)}" data-id="${c.customerId}">
+                                        ${escapeHtml(c.customerName)}
+                                    </option>
+                                `).join('')}
+                            `;
+                            if (currentVal && availableCustomers.some(c => c.customerName === currentVal)) {
+                                selectCust.value = currentVal;
+                            }
+                        }
+                        renderManageCustomersTable();
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load customers:', err);
+            }
+        }
+
+        function openManageCustomersModal() {
+            resetCustomerForm();
+            renderManageCustomersTable();
+            AdminApp.openModal('modal-manage-customers');
+        }
+
+        function closeManageCustomersModal() {
+            AdminApp.closeModal('modal-manage-customers');
+        }
+
+        function renderManageCustomersTable() {
+            const tbody = document.getElementById('manage-customers-tbody');
+            const countEl = document.getElementById('customers-count');
+            if (countEl) countEl.textContent = availableCustomers.length;
+            if (!tbody) return;
+
+            if (!availableCustomers.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: #94a3b8; padding: 28px; font-size: 0.9rem;">
+                            No active customers found. Add one above!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = availableCustomers.map(c => `
+                <tr>
+                    <td style="font-weight: 600; color: #64748b;">#${c.customerId}</td>
+                    <td class="cell-prod-name">${escapeHtml(c.customerName)}</td>
+                    <td>
+                        <div class="action-buttons-group">
+                            <button type="button" class="btn-action-detail" onclick="startEditCustomer(${c.customerId})">
+                                Edit
+                            </button>
+                            <button type="button" class="btn-action-reason" onclick="confirmDeleteCustomer(${c.customerId}, '${escapeHtml(c.customerName)}')">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function checkCustomerFormState() {
+            const saveBtn = document.getElementById('btn-save-customer');
+            if (!saveBtn) return;
+
+            const editId = document.getElementById('customer-edit-id')?.value;
+            const customerName = (document.getElementById('customer-name-input')?.value || '').trim();
+
+            if (!customerName) {
+                saveBtn.disabled = true;
+                return;
+            }
+
+            if (editId) {
+                const orig = availableCustomers.find(item => String(item.customerId) === String(editId));
+                if (orig) {
+                    const origName = (orig.customerName || '').trim();
+                    saveBtn.disabled = (customerName === origName);
+                    return;
+                }
+            }
+
+            saveBtn.disabled = false;
+        }
+
+        document.getElementById('customer-name-input')?.addEventListener('input', checkCustomerFormState);
+        document.getElementById('customer-name-input')?.addEventListener('change', checkCustomerFormState);
+
+        function startEditCustomer(customerId) {
+            const c = availableCustomers.find(item => item.customerId === customerId);
+            if (!c) return;
+
+            document.getElementById('customer-edit-id').value = c.customerId;
+            document.getElementById('customer-name-input').value = c.customerName;
+
+            document.getElementById('customer-form-title').textContent = 'Edit Customer: ' + c.customerName;
+            document.getElementById('btn-save-customer').textContent = 'Send Request';
+            document.getElementById('btn-cancel-customer-edit').style.display = 'inline-flex';
+            checkCustomerFormState();
+            document.getElementById('customer-name-input').focus();
+        }
+
+        function resetCustomerForm() {
+            const form = document.getElementById('form-customer');
+            if (form) form.reset();
+            document.getElementById('customer-edit-id').value = '';
+            document.getElementById('customer-form-title').textContent = 'Add New Customer';
+            document.getElementById('btn-save-customer').textContent = 'Send Request';
+            document.getElementById('btn-cancel-customer-edit').style.display = 'none';
+            checkCustomerFormState();
+        }
+
+        async function handleCustomerFormSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('customer-edit-id').value;
+            const customerName = (document.getElementById('customer-name-input').value || '').trim();
+
+            if (!customerName) {
+                return AdminApp.showCenterAlert({ title: 'Validation Error', message: 'Customer Name is required.', type: 'error' });
+            }
+
+            if (editId) {
+                const orig = availableCustomers.find(item => String(item.customerId) === String(editId));
+                if (orig && (orig.customerName || '').trim() === customerName) {
+                    return AdminApp.showCenterAlert({
+                        title: 'No Changes Detected',
+                        message: 'Please modify the customer name before sending a request.',
+                        type: 'warning'
+                    });
+                }
+            }
+
+            const payload = { customerName };
+            const saveBtn = document.getElementById('btn-save-customer');
+            if (saveBtn) saveBtn.disabled = true;
+
+            try {
+                if (editId) {
+                    const res = await window.api.put('/api/customers/' + editId, payload);
+                    AdminApp.showCenterAlert({
+                        title: 'Request Submitted',
+                        message: res?.message || `Update request for customer "${customerName}" submitted for Manager approval.`,
+                        type: 'success'
+                    });
+                } else {
+                    const res = await window.api.post('/api/customers', payload);
+                    AdminApp.showCenterAlert({
+                        title: 'Request Submitted',
+                        message: res?.message || `Creation request for customer "${customerName}" submitted for Manager approval.`,
+                        type: 'success'
+                    });
+                }
+                resetCustomerForm();
+                await loadCustomers();
+            } catch (err) {
+                console.error('Failed to save customer:', err);
+                AdminApp.showCenterAlert({
+                    title: 'Save Failed',
+                    message: err.message || 'Could not save customer information.',
+                    type: 'error'
+                });
+            } finally {
+                checkCustomerFormState();
+            }
+        }
+
+        async function confirmDeleteCustomer(customerId, customerName) {
+            const confirmed = await AdminApp.showConfirmDialog({
+                title: 'Delete Customer?',
+                message: `Are you sure you want to request deactivation of customer "${customerName}"? This request will be sent to the Manager for approval.`,
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                type: 'danger'
+            });
+            if (!confirmed) return;
+
+            try {
+                const res = await window.api.delete('/api/customers/' + customerId);
+                AdminApp.showCenterAlert({
+                    title: 'Request Submitted',
+                    message: res?.message || `Deactivation request for customer "${customerName}" submitted for Manager approval.`,
+                    type: 'success'
+                });
+                await loadCustomers();
+            } catch (err) {
+                console.error('Failed to delete customer:', err);
+                AdminApp.showCenterAlert({
+                    title: 'Request Failed',
+                    message: err.message || 'Could not submit customer deactivation request.',
+                    type: 'error'
+                });
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/zones/products');
+                    if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+                        availableProducts = res.data;
+                        refreshSOProductSelects();
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load products:', err);
+            }
+        }
+
+        async function loadSalesOrders() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/sales-orders');
+                    if (res && res.success && Array.isArray(res.data)) {
+                        soData = res.data;
+                        applyFilters();
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load sales orders:', err);
+            }
+            renderSOTable(soData);
+        }
+
+        function renderSOTable(data) {
+            const pageInfo = document.getElementById('so-pagination-info');
+
+            if (!data || data.length === 0) {
+                if (soTbody) soTbody.innerHTML = emptySOHtml;
+                if (pageInfo) pageInfo.textContent = 'Showing 0 of 0 entries';
+                updateKPIs([]);
+                return;
+            }
+
+            soTbody.innerHTML = data.map(so => {
+                const statusClass = AdminApp.getStatusBadgeClass(so.status);
+                const displayId = so.id || so.soId;
+                const displayDate = AdminApp.formatDisplayDate(so.orderDatetime || so.date);
+                const customerName = so.customer || so.customerName || '-';
+                const totalQty = so.totalQty !== undefined ? so.totalQty : (so.totalQuantity || 0);
+                const totalPrice = so.totalPrice !== undefined ? so.totalPrice : (so.totalAmount || 0);
+
+                return `
+                    <tr>
+                        <td>${escapeHtml(displayDate)}</td>
+                        <td class="cell-id">#${escapeHtml(displayId)}</td>
+                        <td>${escapeHtml(customerName)}</td>
+                        <td>${escapeHtml(totalQty)}</td>
+                        <td>฿${formatMoney(totalPrice)}</td>
+                        <td>
+                            <span class="badge-status ${statusClass}">${escapeHtml(so.status)}</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons-group">
+                                <button type="button" class="btn-action-detail" onclick="viewSODetail('${escapeHtml(displayId)}')">Detail</button>
+                                ${String(so.status || '').toUpperCase() === 'REJECTED' ? `
+                                    <button type="button" class="btn-action-reason" onclick="viewSORejectionReason('${escapeHtml(displayId)}')" title="View reason for rejection">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Reason
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (pageInfo) pageInfo.textContent = `Showing 1 to ${data.length} of ${data.length} entries`;
+            updateKPIs(data);
+        }
+
+        function updateKPIs(data) {
+            const list = Array.isArray(data) ? data : [];
+            const totalOrdersEl = document.getElementById('kpi-total-so');
+            const pendingOrdersEl = document.getElementById('kpi-pending-so');
+            const approvedOrdersEl = document.getElementById('kpi-approved-so');
+
+            if (totalOrdersEl) totalOrdersEl.textContent = list.length;
+            if (pendingOrdersEl) pendingOrdersEl.textContent = list.filter(d => String(d.status).toUpperCase() === 'PENDING').length;
+            if (approvedOrdersEl) approvedOrdersEl.textContent = list.filter(d => String(d.status).toUpperCase() === 'APPROVED').length;
+        }
+
+        function applyFilters() {
+            const searchTerm = (document.getElementById('so-search-input')?.value || '').toLowerCase().trim();
+            const selectedStatus = document.getElementById('so-status-filter')?.value || 'ALL';
+            const dateInput = document.getElementById('requests-date-input');
+            const selectedDate = dateInput ? dateInput.value : '';
+
+            const filtered = soData.filter(so => {
+                const displayId = String(so.id || so.soId || '');
+                const customer = String(so.customer || so.customerName || '');
+                const date = String(so.date || '');
+
+                const matchesSearch = displayId.toLowerCase().includes(searchTerm) ||
+                    customer.toLowerCase().includes(searchTerm) ||
+                    date.toLowerCase().includes(searchTerm);
+
+                const matchesStatus = (selectedStatus === 'ALL') ||
+                    (String(so.status).toUpperCase() === selectedStatus.toUpperCase());
+
+                const matchesDate = AdminApp.matchesDateFilter(so.date || so.orderDatetime, selectedDate);
+
+                return matchesSearch && matchesStatus && matchesDate;
+            });
+
+            renderSOTable(filtered);
+        }
+
+        AdminApp.initCustomDatePicker({
+            box: 'requests-date-box',
+            onChange: applyFilters
+        });
+
+        document.getElementById('so-search-input')?.addEventListener('input', applyFilters);
+        document.getElementById('so-status-filter')?.addEventListener('change', applyFilters);
+
+        // --- Create SO Form Handlers ---
+        function handleSOProductChange(selectEl) {
+            const row = selectEl.closest('.po-wire-item-row');
+            if (!row) return;
+
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            const price = parseFloat(selectedOption ? selectedOption.getAttribute('data-price') : 0) || 0;
+
+            const unitPriceInput = row.querySelector('.so-item-unit-price');
+            const qtyInput = row.querySelector('.so-item-qty');
+            const totalPriceInput = row.querySelector('.so-item-total-price');
+
+            unitPriceInput.value = price > 0 ? formatMoney(price) : '';
+            unitPriceInput.dataset.price = price;
+
+            if (!qtyInput.value || parseInt(qtyInput.value, 10) <= 0) {
+                qtyInput.value = '1';
+            }
+
+            const qty = parseInt(qtyInput.value, 10) || 0;
+            const total = qty * price;
+            totalPriceInput.value = total > 0 ? formatMoney(total) : '';
+        }
+
+        function handleSOQtyChange(qtyInput) {
+            const row = qtyInput.closest('.po-wire-item-row');
+            if (!row) return;
+
+            const unitPriceInput = row.querySelector('.so-item-unit-price');
+            const totalPriceInput = row.querySelector('.so-item-total-price');
+            const price = parseFloat(unitPriceInput.dataset.price || 0);
+
+            const qty = parseInt(qtyInput.value, 10) || 0;
+            const total = qty * price;
+            totalPriceInput.value = total > 0 ? formatMoney(total) : '';
+        }
+
+        function getSOItemRowInnerHtml() {
+            return `
+                <select class="po-wire-select so-item-product" onchange="handleSOProductChange(this)">
+                    ${getSOProductOptionsHtml()}
+                </select>
+                <input type="number" min="1" class="po-wire-input so-item-qty" placeholder="" oninput="handleSOQtyChange(this)">
+                <input type="text" class="po-wire-input-readonly so-item-unit-price" readonly placeholder="">
+                <input type="text" class="po-wire-input-readonly so-item-total-price" readonly placeholder="">
+            `;
+        }
+
+        function addSOItemRow() {
+            const container = document.getElementById('so-items-container');
+            if (!container) return;
+
+            const newRow = document.createElement('div');
+            newRow.className = 'po-wire-item-row';
+            newRow.innerHTML = getSOItemRowInnerHtml();
+            container.appendChild(newRow);
+            AdminApp.syncProductSelects(newRow);
+            const sel = newRow.querySelector('.so-item-product');
+            (sel?._comboInput || sel)?.focus();
+        }
+
+        function deleteLastSOItemRow() {
+            const container = document.getElementById('so-items-container');
+            if (!container) return;
+            const rows = container.querySelectorAll('.po-wire-item-row');
+            if (rows.length > 1) {
+                rows[rows.length - 1].remove();
+            } else if (rows.length === 1) {
+                const row = rows[0];
+                const select = row.querySelector('.so-item-product');
+                if (select) {
+                    select.selectedIndex = 0;
+                    if (typeof select._syncCombobox === 'function') select._syncCombobox();
+                }
+                row.querySelectorAll('input').forEach(input => input.value = '');
+                const unit = row.querySelector('.so-item-unit-price');
+                if (unit) unit.dataset.price = '0';
+            }
+        }
+
+        function syncUserInfo() {
+            const user = AdminApp.getCurrentUser();
+            if (user) {
+                const createdByEl = document.getElementById('new-so-created-by');
+                const userIdEl = document.getElementById('new-so-user-id');
+                if (createdByEl) createdByEl.value = user.fullName || '';
+                if (userIdEl) userIdEl.value = user.userId || '';
+            }
+        }
+
+        function goBackToSOStep1() {
+            document.getElementById('so-modal-box')?.classList.remove('is-review-step');
+            const step1 = document.getElementById('so-create-step-1');
+            const step2 = document.getElementById('so-create-step-2');
+            if (step2) step2.style.display = 'none';
+            if (step1) step1.style.display = 'block';
+        }
+
+        function openCreateSOModal() {
+            syncUserInfo();
+            goBackToSOStep1();
+            const customerSelect = document.getElementById('new-so-customer');
+            if (customerSelect) customerSelect.selectedIndex = 0;
+            resetSOItemsForm();
+            AdminApp.openModal('modal-create-so');
+        }
+
+        function closeCreateSOModal() {
+            document.getElementById('so-modal-box')?.classList.remove('is-review-step');
+            AdminApp.closeModal('modal-create-so');
+        }
+
+        document.getElementById('btn-open-create-so-modal')?.addEventListener('click', openCreateSOModal);
+        document.getElementById('btn-open-manage-customers')?.addEventListener('click', openManageCustomersModal);
+
+        let pendingSOPayload = null;
+
+        function handleSOStep1Next(e) {
+            e.preventDefault();
+
+            const customerSelect = document.getElementById('new-so-customer');
+            const selectedCustomerName = customerSelect ? customerSelect.value : '';
+            const selectedCustomerOption = customerSelect?.options[customerSelect.selectedIndex];
+            const selectedCustomerId = selectedCustomerOption ? selectedCustomerOption.getAttribute('data-id') : null;
+
+            if (!selectedCustomerName) {
+                AdminApp.showCenterAlert({
+                    title: 'Customer Required',
+                    message: 'Please select a customer for the sales order.',
+                    type: 'error'
+                });
+                customerSelect?.focus();
+                return;
+            }
+
+            const rows = document.querySelectorAll('#so-items-container .po-wire-item-row');
+            const items = [];
+            const reviewItems = [];
+            let totalQty = 0;
+            let totalPrice = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const selectEl = row.querySelector('.so-item-product');
+                const qtyEl = row.querySelector('.so-item-qty');
+                const unitEl = row.querySelector('.so-item-unit-price');
+
+                const opt = selectEl?.options[selectEl.selectedIndex];
+                const prodVal = selectEl?.value;
+                if (!prodVal) {
+                    AdminApp.showCenterAlert({
+                        title: 'Product Required',
+                        message: `Please select a product for Item row #${i + 1}.`,
+                        type: 'error'
+                    });
+                    (selectEl?._comboInput || selectEl)?.focus();
+                    return;
+                }
+
+                const qty = parseInt(qtyEl?.value, 10);
+                if (!qty || qty <= 0) {
+                    AdminApp.showCenterAlert({
+                        title: 'Invalid Quantity',
+                        message: `Please enter a valid quantity (> 0) for Item row #${i + 1}.`,
+                        type: 'error'
+                    });
+                    qtyEl?.focus();
+                    return;
+                }
+
+                const prodId = opt?.getAttribute('data-id') || prodVal;
+                const prodName = opt?.getAttribute('data-name') || opt?.text?.split(' (')[0] || prodVal;
+                const price = parseFloat(unitEl?.dataset?.price || opt?.getAttribute('data-price') || 0);
+                const stock = parseInt(opt?.getAttribute('data-stock') || '999', 10);
+                const subtotal = qty * price;
+
+                // Validate stock locally if available
+                if (stock !== undefined && !isNaN(stock) && qty > stock) {
+                    AdminApp.showCenterAlert({
+                        title: 'Insufficient Stock',
+                        message: `"${prodName}" has only ${stock} units in stock. You requested ${qty}.`,
+                        type: 'error'
+                    });
+                    qtyEl?.focus();
+                    return;
+                }
+
+                const foundProd = availableProducts.find(p => String(p.id) === String(prodId) || p.name === prodName);
+                const zoneCode = (foundProd && foundProd.location) ? foundProd.location : (opt?.getAttribute('data-zone') || '-');
+                const resolvedProdId = (foundProd && foundProd.id) ? foundProd.id : prodId;
+                const prodImg = (foundProd && foundProd.imageUrl) ? foundProd.imageUrl : AdminApp.getProductImageUrl(prodName, zoneCode);
+
+                items.push({
+                    productId: /^\d+$/.test(resolvedProdId) ? parseInt(resolvedProdId, 10) : null,
+                    productName: prodName,
+                    quantity: qty,
+                    unitPrice: price
+                });
+
+                reviewItems.push({
+                    productId: resolvedProdId,
+                    productName: prodName,
+                    zone: zoneCode,
+                    imageUrl: prodImg,
+                    quantity: qty,
+                    unitPrice: price,
+                    subtotal: subtotal
+                });
+
+                totalQty += qty;
+                totalPrice += subtotal;
+            }
+
+            if (items.length === 0) {
+                AdminApp.showCenterAlert({
+                    title: 'No Items',
+                    message: 'Please add at least one item to the sales order.',
+                    type: 'error'
+                });
+                return;
+            }
+
+            const currentUser = AdminApp.getCurrentUser() || {};
+            const createdByName = currentUser.fullName || 'Admin';
+            const currentUserId = currentUser.userId || '-';
+            const currentUserRole = currentUser.role || 'Admin';
+
+            pendingSOPayload = {
+                customerId: selectedCustomerId ? parseInt(selectedCustomerId, 10) : null,
+                customerName: selectedCustomerName,
+                items: items
+            };
+
+            // Populate Step 2 review fields
+            document.getElementById('so-step2-date').textContent = AdminApp.formatReviewDateTime(new Date());
+            document.getElementById('so-step2-created-by').textContent = createdByName;
+            document.getElementById('so-step2-user-id').textContent = currentUserId;
+            document.getElementById('so-step2-role').textContent = currentUserRole;
+            document.getElementById('so-step2-customer-name').textContent = selectedCustomerName;
+            document.getElementById('so-step2-customer-id').textContent = selectedCustomerId || '-';
+
+            // Populate review table rows
+            document.getElementById('so-step2-table-body').innerHTML = AdminApp.renderOrderReviewRows(reviewItems);
+            document.getElementById('so-step2-total-qty').textContent = `${totalQty} Units`;
+            document.getElementById('so-step2-total-price').textContent = formatMoney(totalPrice);
+
+            // Transition view
+            document.getElementById('so-modal-box')?.classList.add('is-review-step');
+            document.getElementById('so-create-step-1').style.display = 'none';
+            document.getElementById('so-create-step-2').style.display = 'block';
+        }
+
+        async function submitFinalSO() {
+            if (!pendingSOPayload) return;
+
+            const submitBtn = document.getElementById('btn-submit-final-so');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const res = await window.api.post('/api/sales-orders', pendingSOPayload);
+                closeCreateSOModal();
+
+                // Reset form
+                document.getElementById('form-create-so')?.reset();
+                resetSOItemsForm();
+                goBackToSOStep1();
+                pendingSOPayload = null;
+
+                const soId = res?.data?.id || res?.data?.soId || '';
+                AdminApp.showCenterAlert({
+                    title: 'Sales Order Created!',
+                    message: `Sales Order #${soId} created and submitted for approval.`,
+                    type: 'success'
+                });
+
+                await loadSalesOrders();
+            } catch (err) {
+                AdminApp.showCenterAlert({
+                    title: 'Creation Failed',
+                    message: err.message || 'Failed to create sales order',
+                    type: 'error'
+                });
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        }
+
+        function resetSOItemsForm() {
+            const container = document.getElementById('so-items-container');
+            if (!container) return;
+            container.innerHTML = `<div class="po-wire-item-row">${getSOItemRowInnerHtml()}</div>`;
+            syncUserInfo();
+        }
+
+        async function viewSODetail(soId) {
+            let so = soData.find(item => String(item.id || item.soId) === String(soId));
+
+            if (!so || !so.items || so.items.length === 0) {
+                try {
+                    if (window.api && typeof window.api.get === 'function') {
+                        const res = await window.api.get(`/api/sales-orders/${soId}`);
+                        if (res && res.success && res.data) {
+                            so = res.data;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch SO details:', err);
+                }
+            }
+
+            if (!so) return;
+
+            document.getElementById('detail-modal-body').innerHTML = AdminApp.renderOrderDetailModal({
+                title: 'Sales Order Detail',
+                idLabel: 'SO ID',
+                displayId: so.id || so.soId,
+                displayDate: so.date || (so.orderDatetime ? AdminApp.formatDisplayDate(so.orderDatetime) : '-'),
+                status: so.status,
+                createdByName: so.createdBy || so.createdByName || 'Admin',
+                userId: so.userId || so.createdByUserId || '-',
+                userRole: so.role || 'Admin',
+                partnerNameLabel: 'Customer Name:',
+                partnerName: so.customer || so.customerName || '-',
+                partnerIdLabel: 'Customer ID:',
+                partnerId: so.customerId || '-',
+                unitColumnLabel: 'Unit Price',
+                items: so.items || [],
+                totalQty: so.totalQty !== undefined ? so.totalQty : (so.totalQuantity || 0),
+                totalPrice: so.totalPrice !== undefined ? so.totalPrice : (so.totalAmount || 0),
+                decisionReason: so.decisionReason || '',
+                decidedByName: so.decidedByName || '',
+                decidedDatetime: so.decidedDatetime || ''
+            });
+
+            AdminApp.openModal('modal-so-detail');
+        }
+
+        async function viewSORejectionReason(soId) {
+            let so = soData.find(item => String(item.soId || item.id) === String(soId));
+            if (!so || !so.decisionReason) {
+                try {
+                    const rawId = String(soId).replace(/^#/, '');
+                    const res = await window.api.get(`/api/sales-orders/${rawId}`);
+                    if (res?.success && res.data) {
+                        so = res.data;
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch SO details:', err);
+                }
+            }
+            if (!so) return;
+
+            AdminApp.showRejectionModal({
+                title: 'Reason for Rejection',
+                requestId: so.soId || so.id,
+                requestType: 'Sales Order',
+                date: so.orderDatetime || so.date,
+                rejectedBy: so.decidedByName || 'Manager',
+                rejectedDatetime: so.decidedDatetime,
+                reason: so.decisionReason || 'No specific reason provided by manager.',
+                onViewDetail: () => viewSODetail(soId)
+            });
+        }
+
+        // Initialize: Load all data from API
+        syncUserInfo();
+        loadCustomers();
+        loadProducts();
+        loadSalesOrders();
+    </script>
+</body>
+
+</html>
+
+

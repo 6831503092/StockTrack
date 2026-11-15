@@ -27,5 +27,8 @@ public class Zone {
 
     @Column(name = "zone_name", length = 30, nullable = false, unique = true)
     private String zoneName;
+
+    @Column(name = "capacity", nullable = false)
+    private Integer capacity = 500;
 }
 

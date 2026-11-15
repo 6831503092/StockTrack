@@ -1,0 +1,504 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrack - Products Managements</title>
+    <link rel="icon" type="image/png" href="../assets/favicon/favicon.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation (Modular Component) -->
+        <div id="sidebar-container" data-role="ADMIN" data-active-menu="zone-product"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-content dashboard-main-layout">
+            <!-- 1. Top Header Row -->
+            <header class="requests-header-row">
+                <div class="requests-header-left">
+                    <h1>Products Managements</h1>
+                    <p>search ,view and manage product information</p>
+                </div>
+
+                <div class="requests-header-right header-actions-inline">
+                    <a href="zone-product.html" class="btn-back-header">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Back
+                    </a>
+                </div>
+            </header>
+
+            <!-- 2. KPI Summary Cards Grid -->
+            <section class="po-stats-grid">
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Total Products</span>
+                        <span class="stat-value mint" id="kpi-pm-total">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Stored Units</span>
+                        <span class="stat-value blue" id="kpi-pm-units">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Low Stock</span>
+                        <span class="stat-value amber" id="kpi-pm-low-stock">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Main Data Card: Products Details Table -->
+            <section class="po-card">
+                <div class="card-header-flex">
+                    <h2>Products Details</h2>
+
+                    <div class="card-header-controls">
+                        <div class="po-search-box w-260">
+                            <input type="text" id="search-products" placeholder="Search product name or ID...">
+                            <span class="search-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <select id="select-pm-zone" class="po-status-select zone-select-lg">
+                            <option value="ALL">All Zones</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Table View -->
+                <div class="po-table-wrapper">
+                    <table class="po-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 110px;">Product ID</th>
+                                <th>Product Name</th>
+                                <th>Default Cost</th>
+                                <th>Selling Price</th>
+                                <th>Current Stock</th>
+                                <th>Min Alert</th>
+                                <th style="width: 100px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Table Footer / Pagination -->
+                <div class="po-pagination">
+                    <span id="product-pagination-info">Showing 0 of 0 entries</span>
+                    <div class="pagination-controls" id="pm-pagination-controls">
+                        <button type="button" class="btn-page" id="btn-prev-page" disabled>&lt;</button>
+                        <span id="pagination-pages" style="display: inline-flex; gap: 4px;">
+                            <button type="button" class="btn-page active">1</button>
+                        </span>
+                        <button type="button" class="btn-page" id="btn-next-page" disabled>&gt;</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: Edit Product Modal (Matches Reference Mockup) -->
+    <div class="modal-overlay" id="modal-edit-product">
+        <div class="modal-box modal-edit-product-box">
+            <h2 class="edit-product-title">Edit Product</h2>
+
+            <form id="form-edit-product" onsubmit="handleProductEditSubmit(event)">
+                <div class="edit-product-grid">
+                    <!-- Column 1 (Readonly Fields) -->
+                    <div class="edit-product-col">
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-product-id">Product ID</label>
+                            <input type="text" id="edit-product-id" class="edit-input-readonly" readonly>
+                        </div>
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-default-cost">Default Cost</label>
+                            <input type="text" id="edit-default-cost" class="edit-input-readonly" readonly>
+                        </div>
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-min-stock-alert">Min Low Stock Alert</label>
+                            <input type="text" id="edit-min-stock-alert" class="edit-input-readonly" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 (Editable Fields) -->
+                    <div class="edit-product-col">
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-product-name">Product Name</label>
+                            <input type="text" id="edit-product-name" class="edit-input-editable" required>
+                        </div>
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-selling-price">Selling Price</label>
+                            <input type="number" step="0.01" min="0" id="edit-selling-price" class="edit-input-editable" required>
+                        </div>
+                        <div class="edit-product-group">
+                            <label class="edit-product-label" for="edit-current-stock">Current Stock</label>
+                            <input type="number" min="0" id="edit-current-stock" class="edit-input-editable" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="edit-product-actions">
+                    <button type="button" class="btn-edit-cancel" onclick="closeEditProductModal()">Cancel</button>
+                    <button type="submit" class="btn-edit-submit" id="btn-submit-edit-product">Sent Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/common/sidebar.js"></script>
+    <script src="../js/common/api.js"></script>
+    <script src="../js/admin/admin.js"></script>
+    <script>
+        AdminApp.checkAdminAccess();
+
+        const { escapeHtml, formatMoney, openModal, closeModal } = AdminApp;
+
+        let allProducts = [];
+        let filteredProducts = [];
+        let currentPage = 1;
+        const pageSize = 10;
+
+        const tbody = document.getElementById('products-table-body');
+        const searchInput = document.getElementById('search-products');
+        const selectZone = document.getElementById('select-pm-zone');
+        const pageInfo = document.getElementById('product-pagination-info');
+        const prevBtn = document.getElementById('btn-prev-page');
+        const nextBtn = document.getElementById('btn-next-page');
+        const pagesContainer = document.getElementById('pagination-pages');
+
+        async function loadZones() {
+            try {
+                const res = await window.api?.get('/api/zones');
+                if (res?.success && Array.isArray(res.data)) {
+                    selectZone.innerHTML = `
+                        <option value="ALL">All Zones</option>
+                        ${res.data.map(z => `<option value="${escapeHtml(z.zoneCode)}">${escapeHtml(z.zoneName)}</option>`).join('')}
+                    `;
+                }
+            } catch (err) {
+                console.error('Failed to load zones:', err);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const res = await window.api?.get('/api/zones/products');
+                if (res?.success && Array.isArray(res.data)) {
+                    allProducts = res.data;
+                } else if (Array.isArray(res)) {
+                    allProducts = res;
+                }
+            } catch (err) {
+                console.error('Failed to load products from API:', err);
+            } finally {
+                applyFilter();
+            }
+        }
+
+        function updateKPIs(data) {
+            const list = Array.isArray(data) ? data : [];
+            const units = list.reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
+            const lowStock = list.filter(p => (Number(p.stock) || 0) <= (Number(p.minStockAlert) || 20)).length;
+
+            document.getElementById('kpi-pm-total').textContent = list.length;
+            document.getElementById('kpi-pm-units').textContent = units.toLocaleString('en-US');
+            document.getElementById('kpi-pm-low-stock').textContent = lowStock;
+        }
+
+        function applyFilter() {
+            const query = (searchInput?.value || '').toLowerCase().trim();
+            const selectedZone = (selectZone?.value || 'ALL').toUpperCase();
+
+            filteredProducts = allProducts.filter(p => {
+                const loc = String(p.location || '');
+                const zName = String(p.zoneName || '');
+                const matchZone = selectedZone === 'ALL' ||
+                    loc.toUpperCase() === selectedZone ||
+                    zName.toUpperCase() === selectedZone;
+
+                const matchQuery = !query ||
+                    String(p.id || '').includes(query) ||
+                    String(p.name || '').toLowerCase().includes(query) ||
+                    loc.toLowerCase().includes(query) ||
+                    zName.toLowerCase().includes(query);
+
+                return matchZone && matchQuery;
+            });
+
+            currentPage = 1;
+            renderTable();
+            updateKPIs(filteredProducts);
+        }
+
+        function renderTable() {
+            if (!filteredProducts?.length) {
+                tbody.innerHTML = '';
+                pageInfo.textContent = 'Showing 0 of 0 entries';
+                renderPagination(0);
+                return;
+            }
+
+            const total = filteredProducts.length;
+            const totalPages = Math.ceil(total / pageSize);
+            currentPage = Math.max(1, Math.min(currentPage, totalPages));
+
+            const startIdx = (currentPage - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, total);
+            const pageItems = filteredProducts.slice(startIdx, endIdx);
+
+            tbody.innerHTML = pageItems.map(p => {
+                const isLow = (Number(p.stock) || 0) <= (Number(p.minStockAlert) || 20);
+                const badgeClass = isLow ? 'badge-low-stock' : 'badge-in-stock';
+
+                return `
+                    <tr>
+                        <td class="cell-id">#${escapeHtml(String(p.id))}</td>
+                        <td>
+                            <div style="font-weight: 600; color: #0f172a;">${escapeHtml(p.name)}</div>
+                            <div class="cell-subtext">${escapeHtml(p.zoneName || p.location || '-')}</div>
+                        </td>
+                        <td>฿${formatMoney(p.defaultCost)}</td>
+                        <td>฿${formatMoney(p.sellingPrice)}</td>
+                        <td>
+                            <span class="badge-status ${badgeClass}">
+                                ${Number(p.stock || 0).toLocaleString()} Units
+                            </span>
+                        </td>
+                        <td>${Number(p.minStockAlert || 20).toLocaleString()} Units</td>
+                        <td>
+                            <button type="button" class="btn-action-edit" onclick="openEditProductModal('${escapeHtml(String(p.id))}')">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                <span>Edit</span>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            pageInfo.textContent = `Showing ${startIdx + 1} to ${endIdx} of ${total} entries`;
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages || totalPages === 0;
+
+            if (totalPages <= 1) {
+                pagesContainer.innerHTML = `<button type="button" class="btn-page active">1</button>`;
+                return;
+            }
+
+            pagesContainer.innerHTML = Array.from({ length: totalPages }, (_, idx) => {
+                const page = idx + 1;
+                return `<button type="button" class="btn-page ${page === currentPage ? 'active' : ''}" onclick="goToPage(${page})">${page}</button>`;
+            }).join('');
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderTable();
+        }
+
+        prevBtn?.addEventListener('click', () => {
+            if (currentPage > 1) goToPage(currentPage - 1);
+        });
+
+        nextBtn?.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredProducts.length / pageSize);
+            if (currentPage < totalPages) goToPage(currentPage + 1);
+        });
+
+        searchInput?.addEventListener('input', applyFilter);
+        selectZone?.addEventListener('change', applyFilter);
+
+        let currentEditingProduct = null;
+
+        function getEditProductChanges() {
+            if (!currentEditingProduct) {
+                return { hasChanges: false, newName: '', newPrice: 0, newStock: 0 };
+            }
+
+            const origName = (currentEditingProduct.name || '').trim();
+            const origPrice = Number(currentEditingProduct.sellingPrice ?? currentEditingProduct.price ?? 0);
+            const origStock = Number(currentEditingProduct.stock ?? 0);
+
+            const nameInput = document.getElementById('edit-product-name');
+            const priceInput = document.getElementById('edit-selling-price');
+            const stockInput = document.getElementById('edit-current-stock');
+
+            const rawName = nameInput ? nameInput.value : '';
+            const rawPrice = priceInput ? priceInput.value.trim() : '';
+            const rawStock = stockInput ? stockInput.value.trim() : '';
+
+            const newName = rawName.trim();
+            const newPrice = parseFloat(rawPrice);
+            const newStock = parseInt(rawStock, 10);
+
+            const isNameChanged = newName !== origName;
+            const isPriceChanged = rawPrice !== '' && !isNaN(newPrice)
+                ? Math.abs(newPrice - origPrice) > 0.0001
+                : rawPrice !== String(origPrice);
+            const isStockChanged = rawStock !== '' && !isNaN(newStock)
+                ? newStock !== origStock
+                : rawStock !== String(origStock);
+
+            const hasChanges = isNameChanged || isPriceChanged || isStockChanged;
+
+            return {
+                hasChanges,
+                newName,
+                newPrice,
+                newStock,
+                isNameChanged,
+                isPriceChanged,
+                isStockChanged,
+                origName,
+                origPrice,
+                origStock
+            };
+        }
+
+        function checkEditProductChanges() {
+            const submitBtn = document.getElementById('btn-submit-edit-product');
+            if (!submitBtn) return;
+
+            const { hasChanges } = getEditProductChanges();
+            submitBtn.disabled = !hasChanges;
+            if (!hasChanges) {
+                submitBtn.setAttribute('title', 'Please modify at least one field before sending a request.');
+            } else {
+                submitBtn.removeAttribute('title');
+            }
+        }
+
+        ['edit-product-name', 'edit-selling-price', 'edit-current-stock'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', checkEditProductChanges);
+                el.addEventListener('change', checkEditProductChanges);
+            }
+        });
+
+        function openEditProductModal(productId) {
+            const p = allProducts.find(item => String(item.id) === String(productId));
+            if (!p) return;
+
+            currentEditingProduct = p;
+
+            document.getElementById('edit-product-id').value = p.id || '';
+            document.getElementById('edit-default-cost').value = formatMoney(p.defaultCost || 0);
+            document.getElementById('edit-min-stock-alert').value = p.minStockAlert ?? 20;
+
+            document.getElementById('edit-product-name').value = p.name || '';
+            document.getElementById('edit-selling-price').value = p.sellingPrice ?? p.price ?? '';
+            document.getElementById('edit-current-stock').value = p.stock ?? 0;
+
+            checkEditProductChanges();
+            openModal('modal-edit-product');
+        }
+
+        function closeEditProductModal() {
+            closeModal('modal-edit-product');
+            currentEditingProduct = null;
+            const submitBtn = document.getElementById('btn-submit-edit-product');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.removeAttribute('title');
+            }
+        }
+
+        async function handleProductEditSubmit(e) {
+            e.preventDefault();
+            if (!currentEditingProduct) return;
+
+            const submitBtn = document.getElementById('btn-submit-edit-product');
+            const { hasChanges, newName, newPrice, newStock } = getEditProductChanges();
+
+            if (!newName) {
+                return AdminApp.showCenterAlert({ title: 'Name Required', message: 'Please enter a product name.', type: 'error' });
+            }
+            if (isNaN(newPrice) || newPrice < 0) {
+                return AdminApp.showCenterAlert({ title: 'Invalid Price', message: 'Please enter a valid selling price (>= 0).', type: 'error' });
+            }
+            if (isNaN(newStock) || newStock < 0) {
+                return AdminApp.showCenterAlert({ title: 'Invalid Stock', message: 'Please enter a valid current stock quantity (>= 0).', type: 'error' });
+            }
+
+            if (!hasChanges) {
+                return AdminApp.showCenterAlert({
+                    title: 'No Changes Detected',
+                    message: 'No changes were made to the product. Please modify at least one field before sending a request.',
+                    type: 'warning'
+                });
+            }
+
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                await window.api?.post('/api/requests/product-update', {
+                    productId: currentEditingProduct.id,
+                    productName: newName,
+                    sellingPrice: newPrice,
+                    currentStock: newStock
+                });
+
+                closeEditProductModal();
+
+                AdminApp.showCenterAlert({
+                    title: 'Request Sent!',
+                    message: `Product edit request for "${newName}" submitted for approval.`,
+                    type: 'success'
+                });
+            } catch (err) {
+                AdminApp.showCenterAlert({
+                    title: 'Submission Failed',
+                    message: err.message || 'Failed to submit product edit request.',
+                    type: 'error'
+                });
+            } finally {
+                if (currentEditingProduct) {
+                    checkEditProductChanges();
+                } else if (submitBtn) {
+                    submitBtn.disabled = false;
+                }
+            }
+        }
+
+        (async () => {
+            await loadZones();
+            await loadProducts();
+        })();
+    </script>
+</body>
+
+</html>
+
+

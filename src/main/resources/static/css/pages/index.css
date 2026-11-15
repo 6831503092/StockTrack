@@ -1,0 +1,681 @@
+/* ==========================================
+   StockTrack - Index / Login Page Styles
+   ========================================== */
+
+.page-wrapper {
+    display: grid;
+    grid-template-columns: 46% 54%;
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* ------------------------------------------
+   Left Panel (Illustration / Graphic Area)
+   ------------------------------------------ */
+.left-panel {
+    position: relative;
+    background-color: var(--mint-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 40px;
+}
+
+/* Subtle curved shape & decorative backdrop */
+.left-panel::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    right: -25%;
+    width: 90%;
+    height: 120%;
+    background: radial-gradient(circle at center, #ffffff 0%, rgba(255, 255, 255, 0.4) 60%, transparent 80%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.left-panel::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 180px;
+    background: linear-gradient(to top, rgba(199, 237, 217, 0.35), transparent);
+    pointer-events: none;
+}
+
+/* ------------------------------------------
+   Ambient Decorative Background Elements
+   ------------------------------------------ */
+.decor-grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(39, 198, 144, 0.28) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, black 25%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, black 25%, transparent 80%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.decor-blob {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.decor-blob-1 {
+    width: 440px;
+    height: 440px;
+    background: radial-gradient(circle, rgba(39, 198, 144, 0.22) 0%, rgba(39, 198, 144, 0.06) 55%, transparent 75%);
+    filter: blur(50px);
+    top: 12%;
+    left: 8%;
+    animation: pulseBlob 9s ease-in-out infinite alternate;
+}
+
+.decor-blob-2 {
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, rgba(45, 212, 191, 0.20) 0%, rgba(39, 198, 144, 0.05) 55%, transparent 75%);
+    filter: blur(55px);
+    bottom: 10%;
+    right: 8%;
+    animation: pulseBlob 11s ease-in-out infinite alternate-reverse;
+}
+
+.decor-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.decor-ring-outer {
+    width: 580px;
+    height: 580px;
+    border: 1.5px dashed rgba(39, 198, 144, 0.22);
+    animation: spinSlow 90s linear infinite;
+}
+
+.decor-ring-inner {
+    width: 440px;
+    height: 440px;
+    border: 1px solid rgba(39, 198, 144, 0.14);
+}
+
+.decor-sparkle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+    animation: floatSparkle 4.5s ease-in-out infinite alternate;
+}
+
+.sparkle-top {
+    top: 15%;
+    left: 18%;
+    animation-delay: 0s;
+}
+
+.sparkle-bottom {
+    bottom: 18%;
+    right: 18%;
+    animation-delay: 2s;
+}
+
+.decor-plus-cross {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.45;
+    animation: floatSparkle 5s ease-in-out infinite alternate;
+}
+
+.cross-left {
+    top: 36%;
+    left: 10%;
+    animation-delay: 1.2s;
+}
+
+.cross-right {
+    top: 26%;
+    right: 12%;
+    animation-delay: 2.8s;
+}
+
+/* ------------------------------------------
+   Illustration & Floating Graphic Cards
+   ------------------------------------------ */
+.illustration-placeholder {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ground shadow / 3D pedestal */
+.decor-ground-stage {
+    position: absolute;
+    bottom: 4%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 380px;
+    height: 60px;
+    background: radial-gradient(ellipse at center, rgba(39, 198, 144, 0.25) 0%, rgba(39, 198, 144, 0.08) 50%, transparent 75%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(10px);
+}
+
+.login-illustration {
+    width: 100%;
+    max-width: 460px;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 14px 28px rgba(18, 52, 38, 0.08));
+    user-select: none;
+    -webkit-user-drag: none;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.4s ease;
+}
+
+.illustration-placeholder:hover .login-illustration {
+    transform: translateY(-3px) scale(1.01);
+}
+
+/* ------------------------------------------
+   Floating Pure-Graphic Glassmorphic Badges
+   ------------------------------------------ */
+.floating-badge {
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.90);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    box-shadow: 0 10px 24px -4px rgba(16, 185, 129, 0.12),
+                0 4px 12px rgba(15, 23, 42, 0.04);
+    user-select: none;
+    pointer-events: none;
+    will-change: transform;
+}
+
+/* Positions */
+.badge-chart {
+    top: 5%;
+    left: -12px;
+    animation: floatBadge1 4.6s ease-in-out infinite;
+}
+
+.badge-box {
+    top: 12%;
+    right: -15px;
+    animation: floatBadge2 5.2s ease-in-out infinite;
+}
+
+.badge-scan {
+    bottom: 14%;
+    left: -8px;
+    animation: floatBadge2 4.8s ease-in-out infinite reverse;
+}
+
+.badge-check {
+    bottom: 8%;
+    right: -10px;
+    animation: floatBadge1 5.4s ease-in-out infinite reverse;
+}
+
+/* Badge Icon Wrappers */
+.badge-icon-wrap {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.badge-icon-wrap.icon-mint {
+    background: #edf8f3;
+}
+
+.badge-icon-wrap.icon-soft {
+    background: #f1f5f9;
+}
+
+.badge-icon-wrap.icon-green-solid {
+    background: linear-gradient(135deg, #27c690 0%, #1ea678 100%);
+    box-shadow: 0 3px 8px rgba(39, 198, 144, 0.35);
+}
+
+/* Badge 1: Equalizer Analytics Bars */
+.badge-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 22px;
+    padding-top: 2px;
+}
+
+.badge-chart-bars .bar {
+    width: 5px;
+    border-radius: 3px;
+    background: #c7edd9;
+    transition: height 0.3s ease;
+}
+
+.badge-chart-bars .bar-1 { height: 10px; }
+.badge-chart-bars .bar-2 { height: 16px; background: #27c690; }
+.badge-chart-bars .bar-3 { height: 22px; background: #27c690; }
+.badge-chart-bars .bar-4 { height: 13px; background: #6ee7b7; }
+
+/* Badge 2: Pulse & Line Tracker */
+.badge-status-cluster {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pulse-indicator {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #27c690;
+    position: relative;
+}
+
+.pulse-indicator::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: rgba(39, 198, 144, 0.4);
+    animation: pulseDot 2.2s ease-out infinite;
+}
+
+.mini-line-track {
+    width: 36px;
+    height: 6px;
+    border-radius: 3px;
+    background: #e2e8f0;
+    position: relative;
+    overflow: hidden;
+}
+
+.mini-line-track::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 62%;
+    background: #27c690;
+    border-radius: 3px;
+}
+
+/* Badge 3: Barcode Lines */
+.barcode-lines {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 18px;
+}
+
+.barcode-lines .b-line {
+    height: 100%;
+    background: #94a3b8;
+    border-radius: 1px;
+}
+
+.barcode-lines .b-1 { width: 3px; background: #27c690; }
+.barcode-lines .b-2 { width: 1.5px; }
+.barcode-lines .b-3 { width: 4px; background: #27c690; }
+.barcode-lines .b-4 { width: 2px; }
+.barcode-lines .b-5 { width: 3px; }
+
+/* Badge 4: Progress Pill */
+.badge-progress-pill {
+    width: 48px;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.badge-progress-pill .progress-fill {
+    width: 78%;
+    height: 100%;
+    background: linear-gradient(90deg, #27c690, #34d399);
+    border-radius: 4px;
+}
+
+/* ------------------------------------------
+   Keyframe Animations
+   ------------------------------------------ */
+@keyframes floatBadge1 {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@keyframes floatBadge2 {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(8px);
+    }
+}
+
+@keyframes floatSparkle {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.35;
+    }
+    50% {
+        transform: translateY(-6px) scale(1.15);
+        opacity: 0.75;
+    }
+}
+
+@keyframes spinSlow {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes pulseBlob {
+    0% {
+        transform: scale(1) translate(0, 0);
+    }
+    100% {
+        transform: scale(1.08) translate(14px, -14px);
+    }
+}
+
+@keyframes pulseDot {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(2.2);
+        opacity: 0;
+    }
+}
+
+
+/* ------------------------------------------
+   Right Panel (Login Form Area)
+   ------------------------------------------ */
+.right-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-white);
+    padding: 48px 32px;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 440px;
+}
+
+/* Header Text */
+.form-header {
+    margin-bottom: 36px;
+}
+
+.form-header h1 {
+    font-size: 2.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    line-height: 1.25;
+}
+
+.form-header p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+/* Form Styles */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 13px 18px;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    background-color: var(--bg-white);
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-group input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.85;
+}
+
+.form-group input:hover {
+    border-color: #cbd5e1;
+}
+
+.form-group input:focus {
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-input-focus);
+}
+
+/* Submit Button */
+.btn-submit {
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(39, 198, 144, 0.2);
+    transition: background-color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+.btn-submit:hover {
+    background-color: var(--primary-hover);
+    box-shadow: var(--shadow-button-hover);
+}
+
+.btn-submit:active {
+    background-color: var(--primary-active);
+    transform: translateY(1px) scale(0.995);
+}
+
+/* ------------------------------------------
+   Responsive Design
+   ------------------------------------------ */
+@media (max-width: 960px) {
+    .page-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .left-panel {
+        display: none;
+        /* Hide left decorative section on small screens */
+    }
+
+    .right-panel {
+        padding: 60px 24px;
+        min-height: 100vh;
+    }
+
+    .form-container {
+        max-width: 400px;
+    }
+
+    .form-header h1 {
+        font-size: 1.95rem;
+    }
+}
+
+/* ==========================================================================
+   Login Page: Inline Error Banner & Input Error State
+   ========================================================================== */
+.login-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background-color: #fef2f2;
+    border: 1.5px solid #fecaca;
+    border-radius: 10px;
+    color: #ef4444;
+    font-size: 0.885rem;
+    font-weight: 500;
+    line-height: 1.4;
+    animation: shakeError 0.35s ease-in-out;
+}
+
+.login-error-banner svg {
+    flex-shrink: 0;
+    stroke: #ef4444;
+}
+
+@keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+.form-group input.input-error {
+    border-color: #ef4444 !important;
+    background-color: #fffafb;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.form-group input.input-warning {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16) !important;
+}
+
+/* ==========================================================================
+   Custom Modern Validation Tooltip (Replaces default browser bubble)
+   ========================================================================== */
+.custom-validation-tooltip {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 8px;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    filter: drop-shadow(0 8px 18px rgba(15, 23, 42, 0.12));
+}
+
+.custom-validation-tooltip.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tooltip-arrow {
+    width: 10px;
+    height: 10px;
+    background: #ffffff;
+    border-top: 1.5px solid #cbd5e1;
+    border-left: 1.5px solid #cbd5e1;
+    transform: rotate(45deg);
+    margin-left: 20px;
+    margin-bottom: -5px;
+    position: relative;
+    z-index: 2;
+}
+
+.tooltip-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 9px;
+    padding: 8px 14px 8px 10px;
+    color: #1e293b;
+    font-family: var(--font-family, 'Plus Jakarta Sans', sans-serif);
+    font-size: 0.88rem;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    position: relative;
+    z-index: 1;
+    white-space: nowrap;
+}
+
+.tooltip-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: #ea580c;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tooltip-text {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #0f172a;
+    line-height: 1.3;
+}

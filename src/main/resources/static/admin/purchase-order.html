@@ -1,0 +1,1423 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrack - Purchase Order</title>
+    <link rel="icon" type="image/png" href="../assets/favicon/favicon.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation (Modular Component) -->
+        <div id="sidebar-container" data-role="ADMIN" data-active-menu="purchase-order"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-content dashboard-main-layout">
+            <!-- 1. Top Header Row -->
+            <header class="requests-header-row">
+                <div class="requests-header-left">
+                    <h1>Purchase Order</h1>
+                    <p>view and create purchase orders</p>
+                </div>
+
+                <div class="requests-header-right">
+                    <div class="po-create-btn-row">
+                        <button type="button" class="btn-create-po" id="btn-open-create-modal">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Create Purchase Order
+                        </button>
+
+                        <button type="button" class="btn-header-outline" id="btn-open-manage-suppliers" onclick="openManageSuppliersModal()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            Manage Suppliers
+                        </button>
+
+                        <div class="requests-date-box" id="requests-date-box" title="Click to filter by date">
+                            <input type="date" id="requests-date-input" aria-label="Filter by date">
+                        </div>
+                    </div>
+
+                    <div class="po-header-filters-row">
+                        <div class="po-search-box">
+                            <input type="text" id="po-search-input" placeholder="search...">
+                            <span class="search-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <select id="po-status-filter" class="po-status-select">
+                            <option value="ALL">All status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 2. KPI / Summary Cards -->
+            <section class="po-stats-grid">
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Total Purchase Orders</span>
+                        <span class="stat-value mint" id="kpi-total-orders">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Pending Approval</span>
+                        <span class="stat-value amber" id="kpi-pending-orders">0</span>
+                    </div>
+                </div>
+
+                <div class="po-stat-card">
+                    <div class="po-stat-info">
+                        <span class="stat-label">Approved Orders</span>
+                        <span class="stat-value blue" id="kpi-approved-orders">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Main Data Card: Table Container -->
+            <section class="po-card">
+                <div class="po-table-wrapper">
+                    <table class="po-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>PO ID</th>
+                                <th>Supplier</th>
+                                <th>Total Qty</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="po-table-body">
+                            
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table Footer / Pagination -->
+                <div class="po-pagination">
+                    <span id="po-pagination-info">Showing 0 of 0 entries</span>
+                    <div class="pagination-controls">
+                        <button type="button" class="btn-page" id="btn-prev-page" disabled>&lt;</button>
+                        <button type="button" class="btn-page active">1</button>
+                        <button type="button" class="btn-page" id="btn-next-page" disabled>&gt;</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL 1: Create Purchase Order Modal (Wireframe Reference Match) -->
+    <div class="modal-overlay" id="modal-create-po">
+        <div class="modal-box modal-po-wire" id="po-modal-box">
+            <!-- STEP 1: Form Input -->
+            <div id="po-create-step-1">
+                <div class="po-wire-header">
+                    <h2>Create Purchase Order</h2>
+                    <button type="button" class="btn-close-modal" aria-label="Close modal">&times;</button>
+                </div>
+
+                <form id="form-create-po" onsubmit="handlePOStep1Next(event)">
+                    <!-- Row 1: Created by & UserID -->
+                    <div class="po-wire-grid-2">
+                        <div>
+                            <label for="new-po-created-by" class="po-wire-label">Created by</label>
+                            <input type="text" id="new-po-created-by" class="po-wire-input-readonly" readonly placeholder="User Name">
+                        </div>
+                        <div>
+                            <label for="new-po-user-id" class="po-wire-label">UserID</label>
+                            <input type="text" id="new-po-user-id" class="po-wire-input-readonly" readonly placeholder="User ID">
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Supplier -->
+                    <div class="po-wire-group">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label for="new-po-supplier" class="po-wire-label" style="margin-bottom: 0;">Supplier</label>
+                            
+                        </div>
+                        <select id="new-po-supplier" class="po-wire-select" required onchange="handleSupplierChange(this.value)">
+                            <option value="" disabled selected>Select Supplier</option>
+                            <option value="JRScomp." data-zone="Z1">JRScomp.</option>
+                            <option value="Thai Wood Supply Co." data-zone="Z2">Thai Wood Supply Co.</option>
+                            <option value="Modern Steel Ltd." data-zone="Z3">Modern Steel Ltd.</option>
+                            <option value="Decor Fabric Asia" data-zone="Z4">Decor Fabric Asia</option>
+                        </select>
+                    </div>
+
+                    <!-- Row 3: Product Items Section -->
+                    <div class="po-wire-items-section">
+                        <div class="po-wire-items-header">
+                            <span>Product name</span>
+                            <span>Quantity</span>
+                            <span>Unit price</span>
+                            <span>Total price</span>
+                        </div>
+
+                        <div class="po-wire-items-list" id="po-items-container">
+                            <div class="po-wire-item-row">
+                                <select class="po-wire-select po-item-product" onchange="handleProductChange(this)">
+                                    <option value="" disabled selected>select product</option>
+                                </select>
+                                <input type="number" min="1" class="po-wire-input po-item-qty" placeholder="" oninput="handleQtyChange(this)">
+                                <input type="text" class="po-wire-input-readonly po-item-unit-price" readonly placeholder="">
+                                <input type="text" class="po-wire-input-readonly po-item-total-price" readonly placeholder="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: + Add Item / - Delete Item -->
+                    <div class="po-wire-item-actions">
+                        <button type="button" class="po-wire-btn-text" id="btn-add-item" onclick="addPOItemRow()">+ Add Item</button>
+                        <button type="button" class="po-wire-btn-text delete" id="btn-delete-item" onclick="deleteLastPOItemRow()">- Delete Item</button>
+                    </div>
+
+                    <!-- Row 5: Action Buttons (Changed Save to Next) -->
+                    <div class="po-wire-actions">
+                        <button type="button" class="po-wire-btn-cancel" data-close-modal>Cancel</button>
+                        <button type="submit" class="po-wire-btn-save" id="btn-po-step1-next">Next</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- STEP 2: Detail Confirmation View (Matches Mockup Reference) -->
+            <div id="po-create-step-2" style="display: none; position: relative;">
+                <button type="button" class="btn-close-modal" data-close-modal aria-label="Close modal">&times;</button>
+                <div class="order-review-container">
+                    <div class="order-review-header">
+                        <h2>Purchase Order Detail</h2>
+                        <div class="order-review-subtitle">
+                            <span>Date: <span id="po-step2-date">-</span></span>
+                            <span>•</span>
+                            <span>Status: <span class="status-tag">[ pending ]</span></span>
+                        </div>
+                    </div>
+
+                    <div class="order-info-card">
+                        <h4>Information</h4>
+                        <div class="order-info-grid">
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Created by:</span>
+                                    <span class="order-info-value" id="po-step2-created-by">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">User ID:</span>
+                                    <span class="order-info-value" id="po-step2-user-id">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Role:</span>
+                                    <span class="order-info-value" id="po-step2-role">Admin</span>
+                                </div>
+                            </div>
+                            <div class="order-info-col">
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Supplier Name:</span>
+                                    <span class="order-info-value" id="po-step2-supplier-name">-</span>
+                                </div>
+                                <div class="order-info-row">
+                                    <span class="order-info-label">Supplier ID:</span>
+                                    <span class="order-info-value" id="po-step2-supplier-id">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-review-table-wrapper">
+                        <table class="order-review-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 38px;">#</th>
+                                    <th class="col-thumb">Image</th>
+                                    <th>Product ID</th>
+                                    <th>Product name</th>
+                                    <th>Zone</th>
+                                    <th>Qty</th>
+                                    <th>Unit Cost</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="po-step2-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="order-review-summary-card">
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Quantity:</span>
+                            <span class="order-summary-val" id="po-step2-total-qty">0 Units</span>
+                        </div>
+                        <div class="order-summary-row">
+                            <span class="order-summary-label">Total Price:</span>
+                            <span class="order-summary-val" id="po-step2-total-price">0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="order-review-bottom-bar">
+                        <div class="order-review-actions">
+                            <button type="button" class="po-wire-btn-cancel" onclick="goBackToPOStep1()">Cancel</button>
+                            <button type="button" class="po-wire-btn-save" id="btn-submit-final-po" onclick="submitFinalPO()">Create</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Purchase Order Details Modal -->
+    <div class="modal-overlay" id="modal-po-detail">
+        <div class="modal-box modal-order-flow" id="po-detail-modal-box">
+            <button type="button" class="btn-close-modal" data-close-modal aria-label="Close modal">&times;</button>
+            <div id="detail-modal-body">
+                <!-- Dynamically filled by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Manage Suppliers Modal -->
+    <div class="modal-overlay" id="modal-manage-suppliers">
+        <div class="modal-box modal-po-wire modal-manage-suppliers-box">
+            <div class="po-wire-header">
+                <h2>Manage Suppliers</h2>
+                <button type="button" class="btn-close-modal" onclick="closeManageSuppliersModal()" aria-label="Close modal">&times;</button>
+            </div>
+
+            <!-- Add / Edit Supplier Form -->
+            <form id="form-supplier" class="po-wire-form-card" onsubmit="handleSupplierFormSubmit(event)">
+                <div class="po-wire-form-card-header">
+                    <span class="po-wire-form-title" id="supplier-form-title">Add New Supplier</span>
+                </div>
+                <input type="hidden" id="supplier-edit-id" value="">
+
+                <!-- Row 1: Company Name & Zone -->
+                <div class="po-wire-supplier-row-top">
+                    <div>
+                        <label for="supplier-name-input" class="po-wire-label">Company Name *</label>
+                        <input type="text" id="supplier-name-input" class="po-wire-input" placeholder="e.g. Thai Wood Supply" required maxlength="50">
+                    </div>
+                    <div>
+                        <label for="supplier-zone-select" class="po-wire-label">Zone</label>
+                        <select id="supplier-zone-select" class="po-wire-select">
+                            <option value="">None</option>
+                            <option value="Z1">Zone 1 (Z1)</option>
+                            <option value="Z2">Zone 2 (Z2)</option>
+                            <option value="Z3">Zone 3 (Z3)</option>
+                            <option value="Z4">Zone 4 (Z4)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Row 2: Products & Form Actions -->
+                <div class="po-wire-supplier-row-bottom">
+                    <div class="po-wire-supplier-cat-col">
+                        <label for="supplier-cat-select" class="po-wire-label">Products</label>
+                        <div id="supplier-cat-select-wrap">
+                            <select id="supplier-cat-select" class="po-wire-select" onchange="handleSupplierCategoryChange(this.value)">
+                                <option value="">Select Products</option>
+                                <option value="__custom__" style="color: #059669; font-weight: 700;">+ Create New Products (Custom)...</option>
+                            </select>
+                        </div>
+                        <div id="supplier-cat-custom-wrap" style="display: none;">
+                            <div class="po-wire-custom-cat-row">
+                                <input type="text" id="supplier-cat-custom-input" class="po-wire-input" placeholder="Enter products name..." maxlength="50" onkeydown="handleCustomCatKeydown(event)">
+                                <button type="button" class="po-wire-btn-save" style="height: 42px; padding: 0 18px; font-size: 0.9rem; white-space: nowrap;" onclick="applyCustomSupplierCategory()" title="Add to products list">Add</button>
+                                <button type="button" class="po-wire-btn-icon-cancel" onclick="toggleCustomSupplierCategory(false)" title="Back to products list">&times;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="po-wire-supplier-form-actions">
+                        <button type="button" class="po-wire-btn-cancel" id="btn-cancel-supplier-edit" style="display: none;" onclick="resetSupplierForm()">Cancel</button>
+                        <button type="submit" class="po-wire-btn-save" id="btn-save-supplier">Send Request</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Suppliers Table -->
+            <div class="po-wire-section-header">
+                <span class="po-wire-section-title">
+                    Current Active Suppliers
+                    <span class="po-wire-count-badge" id="suppliers-count">0</span>
+                </span>
+            </div>
+            <div class="po-wire-suppliers-table-wrap">
+                <table class="order-review-table">
+                    <thead>
+                        <tr>
+                            <th>Company Name</th>
+                            <th>Products</th>
+                            <th>Zone</th>
+                            <th style="width: 170px; white-space: nowrap;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manage-suppliers-tbody">
+                        <!-- Injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="po-wire-actions" style="margin-top: 24px;">
+                <button type="button" class="po-wire-btn-cancel" onclick="closeManageSuppliersModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/common/sidebar.js"></script>
+    <script src="../js/common/api.js"></script>
+    <script src="../js/admin/admin.js"></script>
+    <script>
+        AdminApp.checkAdminAccess();
+
+        let poData = [];
+        let availableProducts = [];
+        let availableSuppliers = [];
+        let pendingSubmittedCategories = [];
+
+        const poTbody = document.getElementById('po-table-body');
+        const emptyPOHtml = '';
+        const formatMoney = AdminApp.formatMoney;
+        const escapeHtml = AdminApp.escapeHtml;
+
+        function getCurrentSupplierZone() {
+            const supplierSelect = document.getElementById('new-po-supplier');
+            if (!supplierSelect || !supplierSelect.value) return null;
+            const selectedOpt = supplierSelect.options[supplierSelect.selectedIndex];
+            return selectedOpt ? selectedOpt.getAttribute('data-zone') : null;
+        }
+
+        function getProductOptionsHtml(filterZoneCode) {
+            const zoneCode = filterZoneCode || getCurrentSupplierZone();
+
+            if (!zoneCode) {
+                return `<option value="" disabled selected>supplier first</option>`;
+            }
+
+            const productsInZone = (availableProducts || []).filter(p => p.location === zoneCode);
+
+            if (productsInZone.length === 0) {
+                return `<option value="" disabled selected>No products available in ${escapeHtml(zoneCode)}</option>`;
+            }
+
+            return `
+                <option value="" disabled selected>Select Product</option>
+                ${productsInZone.map(p => {
+                    const cost = p.defaultCost || 0;
+                    return `<option value="${p.id}" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-cost="${cost}">${escapeHtml(p.name)}</option>`;
+                }).join('')}
+            `;
+        }
+
+        function handleSupplierChange(supplierName) {
+            const selectedSupplier = availableSuppliers.find(s => s.companyName === supplierName);
+            const targetZoneCode = selectedSupplier ? selectedSupplier.zoneCode : getCurrentSupplierZone();
+            refreshProductSelects(targetZoneCode);
+        }
+
+        function refreshProductSelects(filterZoneCode) {
+            const zoneCode = filterZoneCode || getCurrentSupplierZone();
+            const selects = document.querySelectorAll('.po-item-product');
+            const optionsHtml = getProductOptionsHtml(zoneCode);
+
+            selects.forEach(sel => {
+                sel.innerHTML = optionsHtml;
+                if (typeof sel._syncCombobox === 'function') {
+                    sel._syncCombobox();
+                }
+                const row = sel.closest('.po-wire-item-row');
+                if (row) {
+                    const qtyInput = row.querySelector('.po-item-qty');
+                    const unitPriceInput = row.querySelector('.po-item-unit-price');
+                    const totalPriceInput = row.querySelector('.po-item-total-price');
+                    if (qtyInput) qtyInput.value = '';
+                    if (unitPriceInput) {
+                        unitPriceInput.value = '';
+                        unitPriceInput.dataset.cost = '0';
+                    }
+                    if (totalPriceInput) totalPriceInput.value = '';
+                }
+            });
+            AdminApp.syncProductSelects();
+        }
+
+        async function loadSuppliers() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/suppliers');
+                    if (res && res.success && Array.isArray(res.data)) {
+                        availableSuppliers = res.data;
+                        const selectSupplier = document.getElementById('new-po-supplier');
+                        const currentVal = selectSupplier ? selectSupplier.value : '';
+                        if (selectSupplier) {
+                            selectSupplier.innerHTML = `
+                                <option value="" disabled selected>Select Supplier</option>
+                                ${availableSuppliers.map(s => `
+                                    <option value="${escapeHtml(s.companyName)}" data-id="${s.supplierId}" data-zone="${escapeHtml(s.zoneCode || '')}">
+                                        ${escapeHtml(s.companyName)}
+                                    </option>
+                                `).join('')}
+                            `;
+                            if (currentVal && availableSuppliers.some(s => s.companyName === currentVal)) {
+                                selectSupplier.value = currentVal;
+                            }
+                        }
+                        renderManageSuppliersTable();
+                        populateSupplierCategoryOptions();
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load suppliers:', err);
+            }
+        }
+
+        async function loadZoneOptionsForSuppliers() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/zones');
+                    if (res?.success && Array.isArray(res.data) && res.data.length > 0) {
+                        const selectEl = document.getElementById('supplier-zone-select');
+                        if (selectEl) {
+                            const curVal = selectEl.value;
+                            selectEl.innerHTML = `
+                                <option value="">None</option>
+                                ${res.data.map(z => `<option value="${escapeHtml(z.zoneCode)}">${escapeHtml(z.zoneName || z.zoneCode)} (${escapeHtml(z.zoneCode)})</option>`).join('')}
+                            `;
+                            if (curVal) selectEl.value = curVal;
+                        }
+                    }
+                }
+            } catch (_) {}
+        }
+
+        function openManageSuppliersModal() {
+            resetSupplierForm();
+            loadZoneOptionsForSuppliers();
+            populateSupplierCategoryOptions();
+            renderManageSuppliersTable();
+            AdminApp.openModal('modal-manage-suppliers');
+        }
+
+        function closeManageSuppliersModal() {
+            AdminApp.closeModal('modal-manage-suppliers');
+        }
+
+        function getExistingSupplierCategories(excludeSupplierId = null) {
+            const standardCats = ['Tables', 'Chairs', 'Beds', 'Cabinets'];
+            const excludeIdStr = excludeSupplierId ? String(excludeSupplierId) : null;
+            const editingSupplier = excludeIdStr
+                ? (availableSuppliers || []).find(s => String(s.supplierId) === excludeIdStr)
+                : null;
+            const editingOwnCat = editingSupplier && editingSupplier.category
+                ? editingSupplier.category.trim().toLowerCase()
+                : null;
+
+            const existingSet = new Set();
+
+            standardCats.forEach(cat => {
+                if (cat.toLowerCase() !== editingOwnCat) {
+                    existingSet.add(cat.toLowerCase());
+                }
+            });
+
+            (availableSuppliers || []).forEach(s => {
+                if (excludeIdStr && String(s.supplierId) === excludeIdStr) return;
+                const cat = (s.category || '').trim();
+                if (cat) {
+                    existingSet.add(cat.toLowerCase());
+                }
+            });
+
+            (pendingSubmittedCategories || []).forEach(cat => {
+                const clean = (cat || '').trim().toLowerCase();
+                if (clean && clean !== editingOwnCat) {
+                    existingSet.add(clean);
+                }
+            });
+
+            return existingSet;
+        }
+
+        function isDuplicateSupplierCategory(categoryName, excludeSupplierId = null) {
+            const normalized = (categoryName || '').trim().toLowerCase();
+            if (!normalized) return false;
+            return getExistingSupplierCategories(excludeSupplierId).has(normalized);
+        }
+
+        function populateSupplierCategoryOptions(selectedValue) {
+            const select = document.getElementById('supplier-cat-select');
+            if (!select) return;
+
+            const resolvedVal = selectedValue !== undefined
+                ? (selectedValue || '').trim()
+                : ((select.value && select.value !== '__custom__') ? select.value.trim() : '');
+
+            let html = `<option value="">Select Products</option>`;
+            if (resolvedVal && resolvedVal !== '__custom__') {
+                html += `<option value="${escapeHtml(resolvedVal)}">${escapeHtml(resolvedVal)}</option>`;
+            }
+            html += `<option value="__custom__" style="color: #059669; font-weight: 700;">+ Create New Products (Custom)...</option>`;
+
+            select.innerHTML = html;
+            select.value = (resolvedVal && resolvedVal !== '__custom__') ? resolvedVal : '';
+            select.classList.toggle('is-placeholder', !select.value);
+        }
+
+        function toggleCustomSupplierCategory(show) {
+            const customWrap = document.getElementById('supplier-cat-custom-wrap');
+            const selectWrap = document.getElementById('supplier-cat-select-wrap');
+            const customInput = document.getElementById('supplier-cat-custom-input');
+            const toggleBtn = document.getElementById('btn-toggle-custom-cat');
+            const select = document.getElementById('supplier-cat-select');
+
+            if (show) {
+                if (selectWrap) selectWrap.style.display = 'none';
+                if (customWrap) customWrap.style.display = 'block';
+                if (toggleBtn) toggleBtn.style.display = 'none';
+                if (customInput) {
+                    customInput.value = '';
+                    customInput.focus();
+                }
+            } else {
+                if (selectWrap) selectWrap.style.display = 'block';
+                if (customWrap) customWrap.style.display = 'none';
+                if (toggleBtn) toggleBtn.style.display = 'inline';
+                if (customInput) customInput.value = '';
+                if (select && select.value === '__custom__') {
+                    select.value = '';
+                }
+            }
+        }
+
+        function handleSupplierCategoryChange(value) {
+            if (value === '__custom__') {
+                toggleCustomSupplierCategory(true);
+                checkSupplierFormState();
+                return;
+            }
+            toggleCustomSupplierCategory(false);
+
+            if (value) {
+                const zoneSelect = document.getElementById('supplier-zone-select');
+                if (zoneSelect && !zoneSelect.value) {
+                    const catMap = { 'Tables': 'Z1', 'Chairs': 'Z2', 'Beds': 'Z3', 'Cabinets': 'Z4' };
+                    if (catMap[value]) {
+                        zoneSelect.value = catMap[value];
+                    } else {
+                        const prod = (availableProducts || []).find(p => p.name === value);
+                        if (prod && prod.location) {
+                            zoneSelect.value = prod.location;
+                        }
+                    }
+                }
+            }
+            checkSupplierFormState();
+        }
+
+        function handleCustomCatKeydown(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                applyCustomSupplierCategory();
+            }
+        }
+
+        function saveCustomSupplierCategoryToStorage(cat) {
+            if (!cat) return;
+            try {
+                const list = JSON.parse(localStorage.getItem('sras_supplier_categories') || '[]');
+                if (!list.includes(cat)) {
+                    list.push(cat);
+                    localStorage.setItem('sras_supplier_categories', JSON.stringify(list));
+                }
+            } catch (_) {}
+        }
+
+        function applyCustomSupplierCategory() {
+            const input = document.getElementById('supplier-cat-custom-input');
+            const val = (input ? input.value : '').trim();
+            if (!val) {
+                AdminApp.showCenterAlert({
+                    title: 'Validation Error',
+                    message: 'Please enter a products name to create.',
+                    type: 'error'
+                });
+                input?.focus();
+                return;
+            }
+            if (isDuplicateSupplierCategory(val)) {
+                AdminApp.showCenterAlert({
+                    title: 'Duplicate Products',
+                    message: `Products "${val}" already exists and cannot be created.`,
+                    type: 'error'
+                });
+                input?.focus();
+                return;
+            }
+            populateSupplierCategoryOptions(val);
+            toggleCustomSupplierCategory(false);
+            const select = document.getElementById('supplier-cat-select');
+            if (select) {
+                select.value = val;
+                handleSupplierCategoryChange(val);
+            }
+        }
+
+        function getSelectedSupplierCategory() {
+            const customWrap = document.getElementById('supplier-cat-custom-wrap');
+            const isCustomActive = customWrap && customWrap.style.display !== 'none';
+            const customInput = document.getElementById('supplier-cat-custom-input');
+            const customVal = (customInput ? customInput.value : '').trim();
+            const select = document.getElementById('supplier-cat-select');
+            const selectVal = (select ? select.value : '').trim();
+
+            if (isCustomActive && customVal) {
+                return customVal;
+            }
+            if (selectVal && selectVal !== '__custom__') {
+                return selectVal;
+            }
+            if (customVal) {
+                return customVal;
+            }
+            return '';
+        }
+
+        function renderManageSuppliersTable() {
+            const tbody = document.getElementById('manage-suppliers-tbody');
+            const countEl = document.getElementById('suppliers-count');
+            if (countEl) countEl.textContent = availableSuppliers.length;
+            if (!tbody) return;
+
+            if (!availableSuppliers.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 28px; font-size: 0.9rem;">
+                            No active suppliers found. Add one above!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = availableSuppliers.map(s => `
+                <tr>
+                    <td class="cell-prod-name">${escapeHtml(s.companyName)}</td>
+                    <td style="color: #475569; font-weight: 500;">${escapeHtml(s.category || '—')}</td>
+                    <td>
+                        ${s.zoneCode ? `<span class="badge-role" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 3px 10px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;">${escapeHtml(s.zoneCode)}</span>` : '<span style="color: #94a3b8;">—</span>'}
+                    </td>
+                    <td style="white-space: nowrap;">
+                        <div class="action-buttons-group" style="flex-wrap: nowrap;">
+                            <button type="button" class="btn-action-detail" onclick="startEditSupplier(${s.supplierId})">
+                                Edit
+                            </button>
+                            <button type="button" class="btn-action-reason" onclick="confirmDeleteSupplier(${s.supplierId}, '${escapeHtml(s.companyName)}')">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function checkSupplierFormState() {
+            const saveBtn = document.getElementById('btn-save-supplier');
+            if (!saveBtn) return;
+
+            const editId = document.getElementById('supplier-edit-id')?.value;
+            const companyName = (document.getElementById('supplier-name-input')?.value || '').trim();
+            const category = getSelectedSupplierCategory();
+            const zoneCode = (document.getElementById('supplier-zone-select')?.value || '').trim();
+
+            if (!companyName) {
+                saveBtn.disabled = true;
+                return;
+            }
+
+            if (editId) {
+                const orig = availableSuppliers.find(item => String(item.supplierId) === String(editId));
+                if (orig) {
+                    const origName = (orig.companyName || '').trim();
+                    const origCat = (orig.category || '').trim();
+                    const origZone = (orig.zoneCode || '').trim();
+                    const hasChanges = companyName !== origName || category !== origCat || zoneCode !== origZone;
+                    saveBtn.disabled = !hasChanges;
+                    return;
+                }
+            }
+
+            saveBtn.disabled = false;
+        }
+
+        ['supplier-name-input', 'supplier-zone-select', 'supplier-cat-select', 'supplier-cat-custom-input'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', checkSupplierFormState);
+                el.addEventListener('change', checkSupplierFormState);
+            }
+        });
+
+        function startEditSupplier(supplierId) {
+            const s = availableSuppliers.find(item => item.supplierId === supplierId);
+            if (!s) return;
+
+            document.getElementById('supplier-edit-id').value = s.supplierId;
+            document.getElementById('supplier-name-input').value = s.companyName;
+            
+            toggleCustomSupplierCategory(false);
+            populateSupplierCategoryOptions(s.category || '');
+            const catSelect = document.getElementById('supplier-cat-select');
+            if (catSelect) catSelect.value = s.category || '';
+
+            document.getElementById('supplier-zone-select').value = s.zoneCode || '';
+
+            document.getElementById('supplier-form-title').textContent = 'Edit Supplier: ' + s.companyName;
+            document.getElementById('btn-save-supplier').textContent = 'Send Request';
+            document.getElementById('btn-cancel-supplier-edit').style.display = 'inline-flex';
+            checkSupplierFormState();
+            document.getElementById('supplier-name-input').focus();
+        }
+
+        function resetSupplierForm() {
+            const form = document.getElementById('form-supplier');
+            if (form) form.reset();
+            document.getElementById('supplier-edit-id').value = '';
+            toggleCustomSupplierCategory(false);
+            populateSupplierCategoryOptions('');
+            const catSelect = document.getElementById('supplier-cat-select');
+            if (catSelect) catSelect.value = '';
+            document.getElementById('supplier-form-title').textContent = 'Add New Supplier';
+            document.getElementById('btn-save-supplier').textContent = 'Send Request';
+            document.getElementById('btn-cancel-supplier-edit').style.display = 'none';
+            checkSupplierFormState();
+        }
+
+        async function handleSupplierFormSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('supplier-edit-id').value;
+            const companyName = (document.getElementById('supplier-name-input').value || '').trim();
+            const category = getSelectedSupplierCategory();
+            const zoneCode = (document.getElementById('supplier-zone-select').value || '').trim();
+
+            if (!companyName) {
+                return AdminApp.showCenterAlert({ title: 'Validation Error', message: 'Supplier Company Name is required.', type: 'error' });
+            }
+
+            if (editId) {
+                const orig = availableSuppliers.find(item => String(item.supplierId) === String(editId));
+                if (orig) {
+                    const origName = (orig.companyName || '').trim();
+                    const origCat = (orig.category || '').trim();
+                    const origZone = (orig.zoneCode || '').trim();
+                    if (companyName === origName && category === origCat && zoneCode === origZone) {
+                        return AdminApp.showCenterAlert({
+                            title: 'No Changes Detected',
+                            message: 'Please modify at least one field before sending a request.',
+                            type: 'warning'
+                        });
+                    }
+                }
+            }
+
+            if (category && isDuplicateSupplierCategory(category, editId)) {
+                return AdminApp.showCenterAlert({
+                    title: 'Duplicate Products',
+                    message: `Products "${category}" already exists and cannot be created.`,
+                    type: 'error'
+                });
+            }
+
+            const payload = { companyName, category, zoneCode };
+            const saveBtn = document.getElementById('btn-save-supplier');
+            if (saveBtn) saveBtn.disabled = true;
+
+            try {
+                if (editId) {
+                    const res = await window.api.put('/api/suppliers/' + editId, payload);
+                    AdminApp.showCenterAlert({
+                        title: 'Request Submitted',
+                        message: res?.message || `Update request for supplier "${companyName}" submitted for Manager approval.`,
+                        type: 'success'
+                    });
+                } else {
+                    const res = await window.api.post('/api/suppliers', payload);
+                    AdminApp.showCenterAlert({
+                        title: 'Request Submitted',
+                        message: res?.message || `Creation request for supplier "${companyName}" submitted for Manager approval.`,
+                        type: 'success'
+                    });
+                }
+                if (category) {
+                    pendingSubmittedCategories.push(category);
+                }
+                resetSupplierForm();
+                await loadSuppliers();
+            } catch (err) {
+                console.error('Failed to save supplier:', err);
+                AdminApp.showCenterAlert({
+                    title: 'Save Failed',
+                    message: err.message || 'Could not save supplier information.',
+                    type: 'error'
+                });
+            } finally {
+                checkSupplierFormState();
+            }
+        }
+
+        async function confirmDeleteSupplier(supplierId, companyName) {
+            const confirmed = await AdminApp.showConfirmDialog({
+                title: 'Delete Supplier?',
+                message: `Are you sure you want to request deactivation of supplier "${companyName}"? This request will be sent to the Manager for approval.`,
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                type: 'danger'
+            });
+            if (!confirmed) return;
+
+            try {
+                const res = await window.api.delete('/api/suppliers/' + supplierId);
+                AdminApp.showCenterAlert({
+                    title: 'Request Submitted',
+                    message: res?.message || `Deactivation request for supplier "${companyName}" submitted for Manager approval.`,
+                    type: 'success'
+                });
+                await loadSuppliers();
+            } catch (err) {
+                console.error('Failed to delete supplier:', err);
+                AdminApp.showCenterAlert({
+                    title: 'Request Failed',
+                    message: err.message || 'Could not submit supplier deactivation request.',
+                    type: 'error'
+                });
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/zones/products');
+                    if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+                        availableProducts = res.data;
+                        refreshProductSelects();
+                        populateSupplierCategoryOptions();
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load products:', err);
+            }
+        }
+
+        async function loadPurchaseOrders() {
+            try {
+                if (window.api && typeof window.api.get === 'function') {
+                    const res = await window.api.get('/api/purchase-orders');
+                    if (res && res.success && Array.isArray(res.data)) {
+                        poData = res.data;
+                        applyFilters();
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load purchase orders:', err);
+            }
+            renderPOTable(poData);
+        }
+
+        function renderPOTable(data) {
+            const pageInfo = document.getElementById('po-pagination-info');
+
+            if (!data || data.length === 0) {
+                if (poTbody) poTbody.innerHTML = emptyPOHtml;
+                if (pageInfo) pageInfo.textContent = 'Showing 0 of 0 entries';
+                updateKPIs([]);
+                return;
+            }
+
+            poTbody.innerHTML = data.map(po => {
+                const statusClass = AdminApp.getStatusBadgeClass(po.status);
+                const displayId = po.id || po.poId;
+                const displayDate = AdminApp.formatDisplayDate(po.orderDatetime || po.date);
+                const supplierName = po.supplier || po.supplierName || '-';
+                const totalQty = po.totalQty !== undefined ? po.totalQty : (po.totalQuantity || 0);
+                const totalPrice = po.totalPrice !== undefined ? po.totalPrice : (po.totalAmount || 0);
+
+                return `
+                    <tr>
+                        <td>${escapeHtml(displayDate)}</td>
+                        <td class="cell-id">#${escapeHtml(displayId)}</td>
+                        <td>${escapeHtml(supplierName)}</td>
+                        <td>${escapeHtml(totalQty)}</td>
+                        <td>฿${formatMoney(totalPrice)}</td>
+                        <td>
+                            <span class="badge-status ${statusClass}">${escapeHtml(po.status)}</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons-group">
+                                <button type="button" class="btn-action-detail" onclick="viewPODetail('${escapeHtml(displayId)}')">Detail</button>
+                                ${String(po.status || '').toUpperCase() === 'REJECTED' ? `
+                                    <button type="button" class="btn-action-reason" onclick="viewPORejectionReason('${escapeHtml(displayId)}')" title="View reason for rejection">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Reason
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (pageInfo) pageInfo.textContent = `Showing 1 to ${data.length} of ${data.length} entries`;
+            updateKPIs(data);
+        }
+
+        function updateKPIs(data) {
+            const list = Array.isArray(data) ? data : [];
+            const totalOrdersEl = document.getElementById('kpi-total-orders');
+            const pendingOrdersEl = document.getElementById('kpi-pending-orders');
+            const approvedOrdersEl = document.getElementById('kpi-approved-orders');
+
+            if (totalOrdersEl) totalOrdersEl.textContent = list.length;
+            if (pendingOrdersEl) pendingOrdersEl.textContent = list.filter(d => String(d.status).toUpperCase() === 'PENDING').length;
+            if (approvedOrdersEl) approvedOrdersEl.textContent = list.filter(d => String(d.status).toUpperCase() === 'APPROVED').length;
+        }
+
+        function applyFilters() {
+            const searchTerm = (document.getElementById('po-search-input')?.value || '').toLowerCase().trim();
+            const selectedStatus = document.getElementById('po-status-filter')?.value || 'ALL';
+            const dateInput = document.getElementById('requests-date-input');
+            const selectedDate = dateInput ? dateInput.value : '';
+
+            const filtered = poData.filter(po => {
+                const displayId = String(po.id || po.poId || '');
+                const supplier = String(po.supplier || po.supplierName || '');
+                const date = String(po.date || '');
+
+                const matchesSearch = displayId.toLowerCase().includes(searchTerm) ||
+                    supplier.toLowerCase().includes(searchTerm) ||
+                    date.toLowerCase().includes(searchTerm);
+
+                const matchesStatus = (selectedStatus === 'ALL') ||
+                    (String(po.status).toUpperCase() === selectedStatus.toUpperCase());
+
+                const matchesDate = AdminApp.matchesDateFilter(po.date || po.orderDatetime, selectedDate);
+
+                return matchesSearch && matchesStatus && matchesDate;
+            });
+
+            renderPOTable(filtered);
+        }
+
+        AdminApp.initCustomDatePicker({
+            box: 'requests-date-box',
+            onChange: applyFilters
+        });
+
+        document.getElementById('po-search-input')?.addEventListener('input', applyFilters);
+        document.getElementById('po-status-filter')?.addEventListener('change', applyFilters);
+
+        // --- Create PO Form Handlers ---
+        function handleProductChange(selectEl) {
+            const row = selectEl.closest('.po-wire-item-row');
+            if (!row) return;
+
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            const cost = parseFloat(selectedOption ? selectedOption.getAttribute('data-cost') : 0) || 0;
+
+            const unitPriceInput = row.querySelector('.po-item-unit-price');
+            const qtyInput = row.querySelector('.po-item-qty');
+            const totalPriceInput = row.querySelector('.po-item-total-price');
+
+            unitPriceInput.value = cost > 0 ? formatMoney(cost) : '';
+            unitPriceInput.dataset.cost = cost;
+
+            if (!qtyInput.value || parseInt(qtyInput.value, 10) <= 0) {
+                qtyInput.value = '1';
+            }
+
+            const qty = parseInt(qtyInput.value, 10) || 0;
+            const total = qty * cost;
+            totalPriceInput.value = total > 0 ? formatMoney(total) : '';
+        }
+
+        function handleQtyChange(qtyInput) {
+            const row = qtyInput.closest('.po-wire-item-row');
+            if (!row) return;
+
+            const unitPriceInput = row.querySelector('.po-item-unit-price');
+            const totalPriceInput = row.querySelector('.po-item-total-price');
+            const cost = parseFloat(unitPriceInput.dataset.cost || 0);
+
+            const qty = parseInt(qtyInput.value, 10) || 0;
+            const total = qty * cost;
+            totalPriceInput.value = total > 0 ? formatMoney(total) : '';
+        }
+
+        function getPOItemRowInnerHtml(zoneCode) {
+            return `
+                <select class="po-wire-select po-item-product" onchange="handleProductChange(this)">
+                    ${getProductOptionsHtml(zoneCode)}
+                </select>
+                <input type="number" min="1" class="po-wire-input po-item-qty" placeholder="" oninput="handleQtyChange(this)">
+                <input type="text" class="po-wire-input-readonly po-item-unit-price" readonly placeholder="">
+                <input type="text" class="po-wire-input-readonly po-item-total-price" readonly placeholder="">
+            `;
+        }
+
+        function addPOItemRow() {
+            const container = document.getElementById('po-items-container');
+            if (!container) return;
+
+            const zoneCode = getCurrentSupplierZone();
+            if (!zoneCode) {
+                AdminApp.showCenterAlert({
+                    title: 'Select Supplier First',
+                    message: 'Please select a supplier before adding items.',
+                    type: 'warning'
+                });
+                document.getElementById('new-po-supplier')?.focus();
+                return;
+            }
+
+            const newRow = document.createElement('div');
+            newRow.className = 'po-wire-item-row';
+            newRow.innerHTML = getPOItemRowInnerHtml(zoneCode);
+            container.appendChild(newRow);
+            AdminApp.syncProductSelects(newRow);
+            const sel = newRow.querySelector('.po-item-product');
+            (sel?._comboInput || sel)?.focus();
+        }
+
+        function deleteLastPOItemRow() {
+            const container = document.getElementById('po-items-container');
+            if (!container) return;
+            const rows = container.querySelectorAll('.po-wire-item-row');
+            if (rows.length > 1) {
+                rows[rows.length - 1].remove();
+            } else if (rows.length === 1) {
+                const row = rows[0];
+                const select = row.querySelector('.po-item-product');
+                if (select) {
+                    select.selectedIndex = 0;
+                    if (typeof select._syncCombobox === 'function') select._syncCombobox();
+                }
+                row.querySelectorAll('input').forEach(input => input.value = '');
+                const unit = row.querySelector('.po-item-unit-price');
+                if (unit) unit.dataset.cost = '0';
+            }
+        }
+
+        function syncUserInfo() {
+            const user = AdminApp.getCurrentUser();
+            if (user) {
+                const createdByEl = document.getElementById('new-po-created-by');
+                const userIdEl = document.getElementById('new-po-user-id');
+                if (createdByEl) createdByEl.value = user.fullName || '';
+                if (userIdEl) userIdEl.value = user.userId || '';
+            }
+        }
+
+        function goBackToPOStep1() {
+            document.getElementById('po-modal-box')?.classList.remove('is-review-step');
+            const step1 = document.getElementById('po-create-step-1');
+            const step2 = document.getElementById('po-create-step-2');
+            if (step2) step2.style.display = 'none';
+            if (step1) step1.style.display = 'block';
+        }
+
+        function openCreatePOModal() {
+            syncUserInfo();
+            goBackToPOStep1();
+            const supplierSelect = document.getElementById('new-po-supplier');
+            if (supplierSelect) supplierSelect.selectedIndex = 0;
+            resetPOItemsForm();
+            AdminApp.openModal('modal-create-po');
+        }
+
+        function closeCreatePOModal() {
+            document.getElementById('po-modal-box')?.classList.remove('is-review-step');
+            AdminApp.closeModal('modal-create-po');
+        }
+
+        document.getElementById('btn-open-create-modal')?.addEventListener('click', openCreatePOModal);
+        document.getElementById('btn-open-manage-suppliers')?.addEventListener('click', openManageSuppliersModal);
+
+        let pendingPOPayload = null;
+
+        function handlePOStep1Next(e) {
+            e.preventDefault();
+
+            const supplierSelect = document.getElementById('new-po-supplier');
+            const selectedSupplierName = supplierSelect ? supplierSelect.value : '';
+            const selectedSupplierOption = supplierSelect?.options[supplierSelect.selectedIndex];
+            const selectedSupplierId = selectedSupplierOption ? selectedSupplierOption.getAttribute('data-id') : null;
+            const selectedSupplierZone = selectedSupplierOption ? selectedSupplierOption.getAttribute('data-zone') : getCurrentSupplierZone();
+
+            if (!selectedSupplierName) {
+                AdminApp.showCenterAlert({
+                    title: 'Supplier Required',
+                    message: 'Please select a supplier for the purchase order.',
+                    type: 'error'
+                });
+                supplierSelect?.focus();
+                return;
+            }
+
+            const rows = document.querySelectorAll('#po-items-container .po-wire-item-row');
+            const items = [];
+            const reviewItems = [];
+            let totalQty = 0;
+            let totalPrice = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const selectEl = row.querySelector('.po-item-product');
+                const qtyEl = row.querySelector('.po-item-qty');
+                const unitEl = row.querySelector('.po-item-unit-price');
+
+                const opt = selectEl?.options[selectEl.selectedIndex];
+                const prodVal = selectEl?.value;
+                if (!prodVal) {
+                    AdminApp.showCenterAlert({
+                        title: 'Product Required',
+                        message: `Please select a product for Item row #${i + 1}.`,
+                        type: 'error'
+                    });
+                    (selectEl?._comboInput || selectEl)?.focus();
+                    return;
+                }
+
+                const qty = parseInt(qtyEl?.value, 10);
+                if (!qty || qty <= 0) {
+                    AdminApp.showCenterAlert({
+                        title: 'Invalid Quantity',
+                        message: `Please enter a valid quantity (> 0) for Item row #${i + 1}.`,
+                        type: 'error'
+                    });
+                    qtyEl?.focus();
+                    return;
+                }
+
+                const prodId = opt?.getAttribute('data-id') || prodVal;
+                const prodName = opt?.getAttribute('data-name') || opt?.text?.split(' (')[0] || prodVal;
+                const cost = parseFloat(unitEl?.dataset?.cost || opt?.getAttribute('data-cost') || 0);
+                const subtotal = qty * cost;
+
+                const foundProd = availableProducts.find(p => String(p.id) === String(prodId) || p.name === prodName);
+                const zoneCode = (foundProd && foundProd.location) ? foundProd.location : (selectedSupplierZone || '-');
+                const resolvedProdId = (foundProd && foundProd.id) ? foundProd.id : prodId;
+                const prodImg = (foundProd && foundProd.imageUrl) ? foundProd.imageUrl : AdminApp.getProductImageUrl(prodName, zoneCode);
+
+                items.push({
+                    productId: /^\d+$/.test(resolvedProdId) ? parseInt(resolvedProdId, 10) : null,
+                    productName: prodName,
+                    quantity: qty,
+                    unitCost: cost
+                });
+
+                reviewItems.push({
+                    productId: resolvedProdId,
+                    productName: prodName,
+                    zone: zoneCode,
+                    imageUrl: prodImg,
+                    quantity: qty,
+                    unitCost: cost,
+                    subtotal: subtotal
+                });
+
+                totalQty += qty;
+                totalPrice += subtotal;
+            }
+
+            if (items.length === 0) {
+                AdminApp.showCenterAlert({
+                    title: 'No Items',
+                    message: 'Please add at least one item to the purchase order.',
+                    type: 'error'
+                });
+                return;
+            }
+
+            const currentUser = AdminApp.getCurrentUser() || {};
+            const createdByName = currentUser.fullName || 'Admin';
+            const currentUserId = currentUser.userId || '-';
+            const currentUserRole = currentUser.role || 'Admin';
+
+            pendingPOPayload = {
+                supplierId: selectedSupplierId ? parseInt(selectedSupplierId, 10) : null,
+                supplierName: selectedSupplierName,
+                items: items
+            };
+
+            // Populate Step 2 review fields
+            document.getElementById('po-step2-date').textContent = AdminApp.formatReviewDateTime(new Date());
+            document.getElementById('po-step2-created-by').textContent = createdByName;
+            document.getElementById('po-step2-user-id').textContent = currentUserId;
+            document.getElementById('po-step2-role').textContent = currentUserRole;
+            document.getElementById('po-step2-supplier-name').textContent = selectedSupplierName;
+            document.getElementById('po-step2-supplier-id').textContent = selectedSupplierId || '-';
+
+            // Populate review table rows
+            document.getElementById('po-step2-table-body').innerHTML = AdminApp.renderOrderReviewRows(reviewItems);
+            document.getElementById('po-step2-total-qty').textContent = `${totalQty} Units`;
+            document.getElementById('po-step2-total-price').textContent = formatMoney(totalPrice);
+
+            // Transition view
+            document.getElementById('po-modal-box')?.classList.add('is-review-step');
+            document.getElementById('po-create-step-1').style.display = 'none';
+            document.getElementById('po-create-step-2').style.display = 'block';
+        }
+
+        async function submitFinalPO() {
+            if (!pendingPOPayload) return;
+
+            const submitBtn = document.getElementById('btn-submit-final-po');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const res = await window.api.post('/api/purchase-orders', pendingPOPayload);
+                closeCreatePOModal();
+
+                // Reset form
+                document.getElementById('form-create-po')?.reset();
+                resetPOItemsForm();
+                goBackToPOStep1();
+                pendingPOPayload = null;
+
+                const poId = res?.data?.id || res?.data?.poId || '';
+                AdminApp.showCenterAlert({
+                    title: 'Purchase Order Created!',
+                    message: `Purchase Order #${poId} created and submitted for approval.`,
+                    type: 'success'
+                });
+
+                await loadPurchaseOrders();
+            } catch (err) {
+                AdminApp.showCenterAlert({
+                    title: 'Creation Failed',
+                    message: err.message || 'Failed to create purchase order',
+                    type: 'error'
+                });
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        }
+
+        function resetPOItemsForm() {
+            const container = document.getElementById('po-items-container');
+            if (!container) return;
+            container.innerHTML = `<div class="po-wire-item-row">${getPOItemRowInnerHtml(getCurrentSupplierZone())}</div>`;
+            syncUserInfo();
+        }
+
+        async function viewPODetail(poId) {
+            let po = poData.find(item => String(item.id || item.poId) === String(poId));
+
+            if (!po || !po.items || po.items.length === 0) {
+                try {
+                    if (window.api && typeof window.api.get === 'function') {
+                        const res = await window.api.get(`/api/purchase-orders/${poId}`);
+                        if (res && res.success && res.data) {
+                            po = res.data;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch PO details:', err);
+                }
+            }
+
+            if (!po) return;
+
+            document.getElementById('detail-modal-body').innerHTML = AdminApp.renderOrderDetailModal({
+                title: 'Purchase Order Detail',
+                idLabel: 'PO ID',
+                displayId: po.id || po.poId,
+                displayDate: po.date || (po.orderDatetime ? AdminApp.formatDisplayDate(po.orderDatetime) : '-'),
+                status: po.status,
+                createdByName: po.createdBy || po.createdByName || 'Admin',
+                userId: po.userId || po.createdByUserId || '-',
+                userRole: po.role || 'Admin',
+                partnerNameLabel: 'Supplier Name:',
+                partnerName: po.supplier || po.supplierName || '-',
+                partnerIdLabel: 'Supplier ID:',
+                partnerId: po.supplierId || '-',
+                unitColumnLabel: 'Unit Cost',
+                items: po.items || [],
+                totalQty: po.totalQty !== undefined ? po.totalQty : (po.totalQuantity || 0),
+                totalPrice: po.totalPrice !== undefined ? po.totalPrice : (po.totalAmount || 0),
+                decisionReason: po.decisionReason || '',
+                decidedByName: po.decidedByName || '',
+                decidedDatetime: po.decidedDatetime || ''
+            });
+
+            AdminApp.openModal('modal-po-detail');
+        }
+
+        async function viewPORejectionReason(poId) {
+            let po = poData.find(item => String(item.poId || item.id) === String(poId));
+            if (!po || !po.decisionReason) {
+                try {
+                    const rawId = String(poId).replace(/^#/, '');
+                    const res = await window.api.get(`/api/purchase-orders/${rawId}`);
+                    if (res?.success && res.data) {
+                        po = res.data;
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch PO details:', err);
+                }
+            }
+            if (!po) return;
+
+            AdminApp.showRejectionModal({
+                title: 'Reason for Rejection',
+                requestId: po.poId || po.id,
+                requestType: 'Purchase Order',
+                date: po.orderDatetime || po.date,
+                rejectedBy: po.decidedByName || 'Manager',
+                rejectedDatetime: po.decidedDatetime,
+                reason: po.decisionReason || 'No specific reason provided by manager.',
+                onViewDetail: () => viewPODetail(poId)
+            });
+        }
+
+        // Initialize: Load all data from API
+        syncUserInfo();
+        loadSuppliers();
+        loadProducts();
+        loadPurchaseOrders();
+    </script>
+</body>
+
+</html>
+
+

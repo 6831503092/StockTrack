@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrack - Zone & Product Details</title>
+    <link rel="icon" type="image/png" href="../assets/favicon/favicon.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation (Modular Component) -->
+        <div id="sidebar-container" data-role="ADMIN" data-active-menu="zone-product"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-content dashboard-main-layout">
+            <!-- 1. Top Header Row -->
+            <header class="requests-header-row">
+                <div class="requests-header-left">
+                    <h1>Zone & Product Details</h1>
+                    <p>manage warehouse zone and products information</p>
+                </div>
+            </header>
+
+            <!-- 2. Featured Showcase Cards -->
+            <div class="zp-cards-container" id="zp-cards-container">
+                <!-- Card 1: Warehouse Zone -->
+                <div class="zp-card-wrapper zp-card-warehouse">
+                    <div class="zp-feature-card" id="card-warehouse-zone" onclick="window.location.href='warehouse-zones.html'" title="Click to view Warehouse Zones">
+                        <div class="zp-card-content">
+                            <h2 class="zp-card-title">Warehouse Zone</h2>
+                            <p class="zp-card-desc">view and manage warehouse zones</p>
+
+                            <div class="zp-stats-list">
+                                <div class="zp-stat-row">
+                                    <span class="zp-bullet">•</span>
+                                    <span class="zp-stat-title">Active zone:</span>
+                                    <span class="zp-stat-num" id="zp-stat-active-zones">-</span>
+                                </div>
+                                <div class="zp-stat-row">
+                                    <span class="zp-bullet">•</span>
+                                    <span class="zp-stat-title">Stored Units:</span>
+                                    <span class="zp-stat-num" id="zp-stat-stored-units">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="zp-card-visual">
+                            <img src="../assets/images/Warehouse-Zones.jpg"
+                                alt="Warehouse Zone Interior" data-fallback-icon="warehouse">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Product Management -->
+                <div class="zp-card-wrapper zp-card-product">
+                    <div class="zp-feature-card" id="card-product-management" onclick="window.location.href='product-management.html'" title="Click to view Product Management">
+                        <div class="zp-card-content">
+                            <h2 class="zp-card-title">Product Management</h2>
+                            <p class="zp-card-desc">manage products detail and inventory</p>
+
+                            <div class="zp-stats-list">
+                                <div class="zp-stat-row">
+                                    <span class="zp-bullet">•</span>
+                                    <span class="zp-stat-title">Total Products:</span>
+                                    <span class="zp-stat-num" id="zp-stat-total-products">-</span>
+                                </div>
+                                <div class="zp-stat-row">
+                                    <span class="zp-bullet warning">•</span>
+                                    <span class="zp-stat-title">Low Stock:</span>
+                                    <span class="zp-stat-num warning" id="zp-stat-low-stock">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="zp-card-visual">
+                            <img src="../assets/images/Products-Managements.jpg"
+                                alt="Product Management Logistics" data-fallback-icon="product">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/common/sidebar.js"></script>
+    <script src="../js/common/api.js"></script>
+    <script src="../js/admin/admin.js"></script>
+    <script>
+        AdminApp.checkAdminAccess();
+
+        async function loadSummaryStats() {
+            try {
+                const res = await window.api?.get('/api/zones/summary');
+                const data = res?.data;
+                if (res?.success && data) {
+                    document.getElementById('zp-stat-active-zones').textContent = data.activeZonesCount || 0;
+                    document.getElementById('zp-stat-stored-units').textContent = (data.storedUnits || 0).toLocaleString();
+                    document.getElementById('zp-stat-total-products').textContent = data.totalProducts || 0;
+                    document.getElementById('zp-stat-low-stock').textContent = data.lowStockCount || 0;
+                }
+            } catch (err) {
+                console.error('Failed to load summary stats:', err);
+            }
+        }
+
+        loadSummaryStats();
+    </script>
+</body>
+
+</html>
+
+

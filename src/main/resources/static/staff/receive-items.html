@@ -2,148 +2,41 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StockTrack - Receive Items</title><link rel="icon" href="../picture/favicon/favicon.png">
+<title>StockTrack - Receive Items</title><link rel="icon" href="../assets/favicon/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/staff.css">
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/pages/staff.css">
 </head>
 <body class="staff-dashboard receive-workflow">
 <a class="staff-skip-link" href="#staff-main">Skip to content</a>
 <div class="app-layout"><div id="sidebar-container" data-role="STAFF" data-active-menu="receive"></div>
 <main class="main-content" id="staff-main" tabindex="-1">
-<header class="staff-header"><div><h1>Receive Items</h1><p id="receive-subtitle">Select an approved request to begin</p></div><span class="connection-status" id="receive-connection" role="status"><span></span>Online</span></header>
+<header class="staff-header"><div class="workflow-hero-copy"><p class="workflow-hero-kicker">INBOUND / RECEIVING</p><h1>Receive Items</h1><p id="receive-subtitle">Select an approved request to begin</p></div><div class="workflow-hero-art receive-art" aria-hidden="true"><svg viewBox="0 0 180 140" fill="none"><path d="m27 48 63-33 63 33v62l-63 33-63-33V48Z" fill="#fff" fill-opacity=".09" stroke="#fff" stroke-opacity=".55" stroke-width="2"/><path d="m27 48 63 35 63-35M90 83v60" stroke="#fff" stroke-opacity=".55" stroke-width="2"/><path d="M90 69V37m0 0L77 50m13-13 13 13" stroke="#dbffe9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M69 94h42" stroke="#fff" stroke-opacity=".65" stroke-width="3" stroke-linecap="round"/><circle cx="142" cy="27" r="5" fill="#c6ffdc"/></svg></div><span class="connection-status" id="receive-connection" role="status"><span></span>Online</span></header>
 <p class="receive-eyebrow">RECEIVE WORKFLOW / <span id="receive-stage-label">REQUESTS</span></p>
 <h2 id="receive-stage-title" tabindex="-1">Requests</h2>
-<ol class="receive-steps" aria-label="Workflow progress"><li aria-current="step">1. Requests</li><li>2. Details</li><li>3. Verify</li><li>4. Confirm</li><li>5. Result</li></ol>
+<ol class="receive-steps" aria-label="Workflow progress"><li aria-current="step">1. Requests</li><li>2. Verify</li><li>3. Confirm</li><li>4. Result</li></ol>
 <p id="receive-alert" role="alert" hidden></p>
 <section aria-live="polite" id="receive-stage-content" aria-labelledby="receive-stage-title"></section>
-<aside class="receive-tip"><h3>Tip</h3><p id="receive-tip-text">Only approved requests can be processed.</p></aside>
-<footer class="receive-footer"><div><p id="receive-save-note">Draft progress is saved locally until the staff member confirms.</p><small>Sample requests · Browser only; warehouse inventory is not updated.</small></div><div><button type="button" id="receive-back" hidden>← Back</button><button type="button" id="receive-next">Continue →</button></div></footer>
-<a class="workflow-dashboard-link" href="dashboard.html">← Back to dashboard</a>
+<div class="workflow-actions" id="workflow-actions">
+<button type="button" id="receive-reject" class="btn-reject" hidden style="margin-right: auto;">✕ Reject Order</button>
+<button type="button" id="receive-back" hidden>← Back</button>
+<button type="button" id="receive-next">Continue →</button>
+</div>
+<dialog id="receive-reject-modal" class="staff-reject-dialog">
+  <form method="dialog" id="receive-reject-form">
+    <h3>Reject Purchase Order</h3>
+    <p>Please specify the reason for rejecting this order. (Required)</p>
+    <p id="receive-reject-error" class="modal-error" hidden></p>
+    <textarea id="receive-reject-reason" required placeholder="Specify reason for rejection (e.g., Goods damaged, wrong products, quantity shortage/excess)..." rows="4"></textarea>
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-cancel" id="receive-reject-cancel">Cancel</button>
+      <button type="submit" class="btn-modal-confirm-reject" id="receive-reject-confirm">Confirm Reject</button>
+    </div>
+  </form>
+</dialog>
 </main></div>
-<script src="../js/api.js"></script><script src="../js/sidebar.js"></script><script>
-(function () {
-    'use strict';
-    const user = window.api.getCurrentUser();
-    if (!user || user.role !== 'STAFF') { window.location.replace('../index.html'); return; }
-    const requests = [
-        { id:'RE-2026-014', reference:'PO-2026-014', requester:'Alex Morgan', date:'02 Nov 2026', items:[['Modern table',40],['Wooden table',30],['Dining table',20]] },
-        { id:'RE-2026-013', reference:'PO-2026-013', requester:'Jamie Lee', date:'01 Nov 2026', items:[['Modern table',50],['Wooden table',25]] },
-        { id:'RE-2026-012', reference:'PO-2026-012', requester:'Taylor Kim', date:'31 Oct 2026', items:[['Modern table',20],['Wooden table',20],['Dining table',15],['Side table',10]] }
-    ];
-    const draftKey = 'stocktrack_receive_draft_' + (user.userId || user.username);
-    const receiptKey = 'stocktrack_receipts_' + user.userId;
-    let step = 0, selected = requests[0].id, quantities = [], notes = '', confirmed = false, completed = [];
-    const content = document.getElementById('receive-stage-content');
-    const alert = document.getElementById('receive-alert');
-    const next = document.getElementById('receive-next');
-    const back = document.getElementById('receive-back');
-    const titles = ['Requests','Details','Verify','Confirm','Result'];
-    function el(tag,text,parent) { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (parent) parent.appendChild(node); return node; }
-    function error(text) { alert.textContent = text; alert.hidden = false; }
-    function request() { return requests.find(item => item.id === selected); }
-    try {
-        const receipts = JSON.parse(localStorage.getItem(receiptKey) || '[]');
-        if (!Array.isArray(receipts)) throw new Error('Invalid history');
-        completed = receipts.map(item => item.requestId).filter(Boolean);
-        const draft = JSON.parse(localStorage.getItem(draftKey) || 'null');
-        if (draft && requests.some(item => item.id === draft.selected) && !completed.includes(draft.selected)) {
-            selected = draft.selected;
-            if (Array.isArray(draft.quantities) && draft.quantities.length === request().items.length && draft.quantities.every((q,i) => Number.isInteger(q) && q > 0 && q <= request().items[i][1])) quantities = draft.quantities;
-            notes = typeof draft.notes === 'string' ? draft.notes.slice(0,1000) : '';
-            if (Number.isInteger(draft.step) && draft.step >= 0 && draft.step <= 3 && quantities.length === request().items.length) step = draft.step;
-        } else selected = requests.find(item => !completed.includes(item.id))?.id || '';
-    } catch (err) { error('Local data could not be loaded. Saving may be unavailable.'); }
-    function saveDraft() {
-        try { localStorage.setItem(draftKey,JSON.stringify({selected,quantities,notes,step})); }
-        catch (err) { document.getElementById('receive-save-note').textContent = 'Draft could not be saved. Keep this page open to retain your progress.'; }
-    }
-    function choose(id) { selected = id; quantities = request().items.map(item => item[1]); notes = ''; confirmed = false; alert.hidden = true; saveDraft(); }
-    function table(headers) {
-        const wrapper = el('div',undefined,content); wrapper.className = 'receive-table-scroll';
-        const table = el('table',undefined,wrapper), row = el('tr',undefined,el('thead',undefined,table));
-        headers.forEach(text => { const th = el('th',text,row); th.scope = 'col'; });
-        return el('tbody',undefined,table);
-    }
-    function render() {
-        content.replaceChildren();
-        document.getElementById('receive-stage-title').textContent = titles[step];
-        document.getElementById('receive-stage-label').textContent = titles[step].toUpperCase();
-        document.getElementById('receive-subtitle').textContent = ['Select an approved request to begin','Review the approved request details','Check quantities against the goods delivered','Review and confirm your local receipt','Your receiving record is complete'][step];
-        document.querySelectorAll('.receive-steps li').forEach((node,i) => { node.removeAttribute('aria-current'); if (i === step) node.setAttribute('aria-current','step'); node.classList.toggle('complete',i < step); });
-        back.hidden = step === 0 || step === 4;
-        next.textContent = step === 3 ? 'Confirm receipt →' : step === 4 ? 'Receive another →' : 'Continue →';
-        document.getElementById('receive-tip-text').textContent = ['Only approved requests can be processed.','Check the request reference before continuing.','Received quantities must be between 1 and the approved quantity.','Confirm only after checking the physical goods.','This receipt is saved locally. Warehouse inventory has not been updated.'][step];
-        if (step === 0) {
-            el('h3','Available approved requests',content);
-            const body = table(['Request ID','Reference','Requested By','Date','Items','Status','Action','Select']);
-            requests.filter(item => !completed.includes(item.id)).forEach(item => {
-                const row = el('tr',undefined,body);
-                [item.id,item.reference,item.requester,item.date,item.items.length,'Approved'].forEach(value => el('td',value,row));
-                const open = el('button','Open →',el('td',undefined,row)); open.type = 'button'; open.className = 'receive-open'; open.setAttribute('aria-label','Open ' + item.id);
-                open.addEventListener('click',() => { choose(item.id); step = 1; render(); focusTitle(); });
-                const radio = el('input',undefined,el('td',undefined,row)); radio.type = 'radio'; radio.name = 'request'; radio.value = item.id; radio.checked = item.id === selected; radio.setAttribute('aria-label','Select ' + item.id);
-                radio.addEventListener('change',() => choose(item.id));
-            });
-            if (!body.children.length) { const cell = el('td','No approved requests remain in this local workspace.',el('tr',undefined,body)); cell.colSpan = 8; }
-            return;
-        }
-        const item = request();
-        if (step === 4) {
-            const panel = el('div',undefined,content); panel.className = 'receive-details';
-            el('h3','Receipt saved successfully',panel); el('p','Request ' + item.id + ' · ' + item.reference,panel); el('p',quantities.reduce((sum,q) => sum + q,0) + ' units recorded in this browser.',panel); el('p','Warehouse inventory has not been updated.',panel); return;
-        }
-        const panel = el('div',undefined,content); panel.className = 'receive-details';
-        el('h3',item.id + ' · ' + item.reference,panel); el('p','Requested by ' + item.requester + ' · ' + item.date,panel); el('p','Destination: Warehouse 1 · Status: Approved',panel);
-        const body = table(['Product','Approved quantity',step === 1 ? 'Unit' : 'Received quantity']);
-        item.items.forEach((product,i) => {
-            const row = el('tr',undefined,body); el('td',product[0],row); el('td',product[1],row);
-            const cell = el('td',step === 1 ? 'Units' : step === 3 ? quantities[i] : undefined,row);
-            if (step === 2) {
-                const input = el('input',undefined,cell); input.type = 'number'; input.min = '1'; input.max = String(product[1]); input.step = '1'; input.required = true; input.value = quantities[i]; input.className = 'receive-quantity'; input.setAttribute('aria-label','Received quantity for ' + product[0]);
-                input.addEventListener('input',() => { quantities[i] = Number(input.value); saveDraft(); });
-            }
-        });
-        if (step === 2) {
-            const label = el('label','Delivery notes (optional)',content); label.className = 'receive-notes-label';
-            const textarea = el('textarea',undefined,label); textarea.rows = 3; textarea.maxLength = 1000; textarea.value = notes; textarea.placeholder = 'Condition of goods or delivery details'; textarea.addEventListener('input',() => { notes = textarea.value; saveDraft(); });
-        }
-        if (step === 3) {
-            if (notes) el('p','Notes: ' + notes,panel);
-            const label = el('label',undefined,content); label.className = 'receive-confirm-check';
-            const check = el('input',undefined,label); check.type = 'checkbox'; check.checked = confirmed; check.addEventListener('change',() => { confirmed = check.checked; });
-            el('span','I have checked the goods and quantities. Save this receipt in this browser.',label);
-        }
-    }
-    function focusTitle() { document.getElementById('receive-stage-title').focus(); }
-    next.addEventListener('click',() => {
-        alert.hidden = true;
-        if (step === 4) { step = 0; selected = requests.find(item => !completed.includes(item.id))?.id || ''; quantities = []; notes = ''; confirmed = false; render(); focusTitle(); return; }
-        if (!request() || completed.includes(selected)) { error('Select an available approved request to continue.'); return; }
-        if (!quantities.length) quantities = request().items.map(item => item[1]);
-        if (step === 2) {
-            const inputs = [...content.querySelectorAll('input[type=number]')];
-            for (const input of inputs) { if (!input.reportValidity()) return; }
-            if (!quantities.every((q,i) => Number.isInteger(q) && q >= 1 && q <= request().items[i][1])) { error('Check all received quantities.'); return; }
-        }
-        if (step === 3) {
-            if (!confirmed) { error('Please confirm that you have checked the goods and quantities.'); return; }
-            try {
-                const receipts = JSON.parse(localStorage.getItem(receiptKey) || '[]');
-                if (!Array.isArray(receipts)) throw new Error('Invalid history');
-                if (receipts.some(receipt => receipt.requestId === selected)) { error('This request has already been received in this browser.'); return; }
-                const item = request();
-                receipts.push({requestId:item.id,reference:item.reference,confirmedAt:new Date().toISOString(),supplier:item.requester,receivedDate:new Date().toLocaleDateString('en-CA'),zone:'Warehouse 1',notes,items:item.items.map((product,i) => ({product:product[0],quantity:quantities[i],cost:null}))});
-                localStorage.setItem(receiptKey,JSON.stringify(receipts)); completed.push(selected);
-            } catch (err) { error('Unable to save the receipt. Your progress has been kept; please try again.'); return; }
-            try { localStorage.removeItem(draftKey); } catch (err) { /* A completed request is excluded when a stale draft loads. */ }
-        } else saveDraft();
-        step++; if (step < 4) saveDraft(); render(); focusTitle();
-    });
-    back.addEventListener('click',() => { if (step > 0 && step < 4) { step--; confirmed = false; alert.hidden = true; saveDraft(); render(); focusTitle(); } });
-    function connection() { const status = document.getElementById('receive-connection'); status.classList.toggle('offline',!navigator.onLine); status.replaceChildren(el('span'),document.createTextNode(navigator.onLine ? 'Online' : 'Offline')); }
-    window.addEventListener('online',connection); window.addEventListener('offline',connection); connection(); render();
-})();
-</script>
+<script src="../js/common/api.js"></script><script src="../js/common/sidebar.js"></script><script src="../js/common/auth.js"></script><script src="../js/staff/staff-wizard.js"></script><script src="../js/staff/receive-items.js"></script>
 </body></html>
+
+
 

@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockTrack - Stock Out</title><link rel="icon" href="../assets/favicon/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/pages/staff.css">
+</head>
+<body class="staff-dashboard issue-workflow stock-out-workflow">
+<a class="staff-skip-link" href="#staff-main">Skip to content</a>
+<div class="app-layout"><div id="sidebar-container" data-role="STAFF" data-active-menu="stock-out"></div>
+<main class="main-content" id="staff-main" tabindex="-1">
+<header class="staff-header"><div class="workflow-hero-copy"><p class="workflow-hero-kicker">OUTBOUND / ORDER PICKING</p><h1>Stock Out</h1><p id="issue-subtitle">Select an approved request to begin</p></div><div class="workflow-hero-art issue-art" aria-hidden="true"><svg viewBox="0 0 180 140" fill="none"><path d="m27 48 63-33 63 33v62l-63 33-63-33V48Z" fill="#fff" fill-opacity=".09" stroke="#fff" stroke-opacity=".55" stroke-width="2"/><path d="m27 48 63 35 63-35M90 83v60" stroke="#fff" stroke-opacity=".55" stroke-width="2"/><path d="M90 38v35m0 0L77 60m13 13 13-13" stroke="#e0e9ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M68 95h44" stroke="#fff" stroke-opacity=".65" stroke-width="3" stroke-linecap="round"/><circle cx="142" cy="27" r="5" fill="#dbe5ff"/></svg></div><span class="connection-status" id="issue-connection" role="status"><span></span>Online</span></header>
+<p class="issue-eyebrow">STOCK OUT WORKFLOW / <span id="issue-stage-label">REQUESTS</span></p>
+<h2 id="issue-stage-title" tabindex="-1">Requests</h2>
+<ol class="issue-steps" aria-label="Workflow progress"><li aria-current="step">1. Requests</li><li>2. Verify</li><li>3. Confirm</li><li>4. Result</li></ol>
+<p id="issue-alert" role="alert" hidden></p>
+<section aria-live="polite" id="issue-stage-content" aria-labelledby="issue-stage-title"></section>
+<div class="workflow-actions" id="workflow-actions">
+<button type="button" id="issue-reject" class="btn-reject" hidden style="margin-right: auto;">✕ Reject Order</button>
+<button type="button" id="issue-back" hidden>← Back</button>
+<button type="button" id="issue-next">Continue →</button>
+</div>
+<dialog id="issue-reject-modal" class="staff-reject-dialog">
+  <form method="dialog" id="issue-reject-form">
+    <h3>Reject Stock Out</h3>
+    <p>Please specify the reason for rejecting this stock out order. (Required)</p>
+    <p id="issue-reject-error" class="modal-error" hidden></p>
+    <textarea id="issue-reject-reason" required placeholder="Specify reason for rejection (e.g., Damaged item in stock, insufficient inventory, picking issue)..." rows="4"></textarea>
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-cancel" id="issue-reject-cancel">Cancel</button>
+      <button type="submit" class="btn-modal-confirm-reject" id="issue-reject-confirm">Confirm Reject</button>
+    </div>
+  </form>
+</dialog>
+</main></div>
+<script src="../js/common/api.js"></script><script src="../js/common/sidebar.js"></script><script src="../js/common/auth.js"></script><script src="../js/staff/staff-wizard.js"></script><script src="../js/staff/stock-out.js"></script>
+</body></html>
+
+
+

@@ -1,68 +1,15 @@
-﻿/* ==========================================
-   StockTrack - Modular Imports
+/* ==========================================
+   StockTrack - Base System Design Tokens & Components
    ========================================== */
-@import 'index.css';
-@import 'sidebar.css';
-@import 'admin.css';
-@import 'manager.css';
-@import 'owner.css';
+@import 'base/tokens.css';
+@import 'base/components.css';
 
 /* ==========================================
-   StockTrack - Global Styles & Design Tokens
+   StockTrack - Modular Layout & Pages
    ========================================== */
-
-:root {
-    /* Brand Colors */
-    --primary-color: #27c690;
-    --primary-hover: #20b582;
-    --primary-active: #1aa072;
-    --primary-light: #e8f8f2;
-    --primary-glow: rgba(39, 198, 144, 0.2);
-
-    /* Left Panel Mint Shades */
-    --mint-bg: #edf8f3;
-    --mint-surface: #e2f4ec;
-    --mint-accent: #c7edd9;
-
-    /* Neutral Colors */
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-muted: #94a3b8;
-    --border-color: #e2e8f0;
-    --border-focus: #27c690;
-    --bg-white: #ffffff;
-    --bg-page: #f8fafc;
-
-    /* Typography */
-    --font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-    /* Transitions & Shadows */
-    --transition-fast: 0.15s ease;
-    --transition-normal: 0.25s ease;
-    --shadow-input-focus: 0 0 0 4px rgba(39, 198, 144, 0.15);
-    --shadow-button-hover: 0 8px 24px rgba(39, 198, 144, 0.28);
-}
-
-/* Base Reset */
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html,
-body {
-    height: 100%;
-    font-family: var(--font-family);
-    color: var(--text-primary);
-    background-color: var(--bg-white);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-input,
-button {
-    font-family: inherit;
-}
+@import 'layout/sidebar.css';
+@import 'pages/index.css';
+@import 'pages/admin.css';
+@import 'pages/manager.css';
+@import 'pages/owner.css';
+@import 'pages/staff.css';

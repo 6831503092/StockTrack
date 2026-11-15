@@ -2,93 +2,36 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StockTrack - Staff Dashboard</title><link rel="icon" href="../picture/favicon/favicon.png">
+<title>StockTrack - Staff Dashboard</title><link rel="icon" href="../assets/favicon/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/staff.css">
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/pages/staff.css">
 </head>
 <body class="staff-dashboard">
 <a class="staff-skip-link" href="#staff-main">Skip to content</a>
 <div class="app-layout"><div id="sidebar-container" data-role="STAFF" data-active-menu="dashboard"></div>
 <main class="main-content" id="staff-main" tabindex="-1">
-<header class="staff-header"><div><h1>Welcome, Staff!</h1><p>Manage your inventory operations efficiently.</p></div><span class="connection-status" id="connection-status"><span></span>Online</span></header>
-<section class="summary-grid" aria-label="Inventory overview">
-<article class="summary-card"><h2>Total Products</h2><div><strong>300</strong><span>Items in Inventory</span></div></article>
-<article class="summary-card"><h2>Low Stock Items</h2><div><strong>0</strong><span>Need Attention</span></div></article>
-<article class="summary-card"><h2>Pending Requests</h2><div><strong>2</strong><span>Awaiting Approval</span></div></article>
-<article class="summary-card"><h2>Total Warehouses</h2><div><strong>2</strong><span>Active Locations</span></div></article>
+<header class="staff-header dashboard-hero">
+<div class="dashboard-hero-copy"><p class="dashboard-eyebrow">STOCKTRACK / STAFF WORKSPACE</p><h1>Welcome, Staff!</h1><p>Keep your warehouse work moving. Pick a workflow to get started.</p><nav class="dashboard-hero-tags" aria-label="Quick workflow links"><a href="receive-items.html">Receive goods</a><a href="stock-out.html">Stock out</a><a href="transfer-items.html">Transfer stock</a></nav></div>
+<div class="dashboard-hero-art" aria-hidden="true"><svg viewBox="0 0 280 190" fill="none"><path d="M37 76 140 22l103 54v82H37V76Z" fill="#fff" fill-opacity=".08" stroke="#fff" stroke-opacity=".46" stroke-width="2"/><path d="m37 76 103 55 103-55M140 131v27" stroke="#fff" stroke-opacity=".42" stroke-width="2"/><path d="m72 99 35-19 35 19v41l-35 19-35-19V99Z" fill="#fff" fill-opacity=".24" stroke="#fff" stroke-opacity=".78" stroke-width="2"/><path d="m72 99 35 20 35-20m-35 20v40" stroke="#fff" stroke-opacity=".75" stroke-width="2"/><path d="m151 91 28-15 29 15v33l-29 16-28-16V91Z" fill="#b9f4d5" fill-opacity=".72" stroke="#fff" stroke-opacity=".9" stroke-width="2"/><path d="m151 91 28 17 29-17m-29 17v32" stroke="#fff" stroke-opacity=".85" stroke-width="2"/><circle cx="221" cy="40" r="5" fill="#b9f4d5"/><circle cx="55" cy="48" r="3" fill="#fff" fill-opacity=".75"/><path d="m222 50 2 5m-174 91-4 4" stroke="#fff" stroke-opacity=".65" stroke-width="2" stroke-linecap="round"/></svg></div>
+<span class="connection-status" id="connection-status"><span></span>Online</span></header>
+<section class="summary-grid" aria-label="Staff activity totals">
+<article class="summary-card"><h2>Receipts saved</h2><div><strong id="staff-receipt-count">0</strong><span>Completed receipts</span></div></article>
+<article class="summary-card"><h2>Stock out saved</h2><div><strong id="staff-issue-count">0</strong><span>Completed stock outs</span></div></article>
+<article class="summary-card"><h2>Transfers saved</h2><div><strong id="staff-transfer-count">0</strong><span>Completed transfers</span></div></article>
+<article class="summary-card"><h2>Total records</h2><div><strong id="staff-total-count">0</strong><span>Total operations</span></div></article>
 </section>
 <section class="workflow-grid" aria-label="Inventory workflows">
-<a class="workflow-card receive" href="receive-items.html"><span class="workflow-title">Receive Items</span><span class="workflow-description">Receive goods into warehouse</span><span class="workflow-link">Open workflow</span></a>
-<a class="workflow-card issue" href="issue-items.html"><span class="workflow-title">Issue Items</span><span class="workflow-description">Pick and issue products</span><span class="workflow-link">Open workflow</span></a>
-<a class="workflow-card transfer" href="transfer-items.html"><span class="workflow-title">Transfer Product</span><span class="workflow-description">Move products between warehouses</span><span class="workflow-link">Open workflow</span></a>
+<a class="workflow-card receive" href="receive-items.html"><span class="workflow-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg></span><span class="workflow-title">Receive Items</span><span class="workflow-description">Receive goods into warehouse</span><span class="workflow-link">Open workflow</span></a>
+<a class="workflow-card issue" href="stock-out.html"><span class="workflow-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 18v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1"/></svg></span><span class="workflow-title">Stock Out</span><span class="workflow-description">Pick and stock out products</span><span class="workflow-link">Open workflow</span></a>
+<a class="workflow-card transfer" href="transfer-items.html"><span class="workflow-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h14m0 0-4-4m4 4-4 4M20 16H6m0 0 4-4m-4 4 4 4"/></svg></span><span class="workflow-title">Transfer Product</span><span class="workflow-description">Move products between warehouses</span><span class="workflow-link">Open workflow</span></a>
 </section>
-<section class="recent-activities" aria-labelledby="activity-title"><h2 id="activity-title">Recent Activities</h2>
-<div class="activity-table-wrapper"><table><thead><tr><th scope="col">Date &amp; Time</th><th scope="col">Operation</th><th scope="col">Product</th><th scope="col">Quantity</th><th scope="col">Status</th></tr></thead>
-<tbody id="staff-activity-rows">
-<tr><td><time datetime="2026-11-02T09:15">02 Nov 2026 09:15</time></td><td>Receive</td><td>Modern table</td><td>100</td><td>Completed</td></tr>
-<tr><td><time datetime="2026-11-02T08:45">02 Nov 2026 08:45</time></td><td>Issue</td><td>Wooden table</td><td>50</td><td>Completed</td></tr>
-<tr><td><time datetime="2026-11-01T16:30">01 Nov 2026 16:30</time></td><td>Transfer</td><td>Dining table</td><td>30</td><td>In Progress</td></tr>
-</tbody></table></div><p class="sample-data-note">Sample inventory data · Local workflow records appear here after confirmation.</p></section>
+<section class="recent-activities" aria-labelledby="activity-title"><div class="activity-heading"><div><h2 id="activity-title">Recent Staff Activity</h2><p>Review the latest inventory operations performed by staff.</p></div><div class="activity-filters"><label for="activity-search">Search activity</label><input id="activity-search" type="search" placeholder="Search product or operation" autocomplete="off"><label for="activity-operation">Operation</label><select id="activity-operation"><option value="">All operations</option><option value="Receive">Receive</option><option value="Stock Out">Stock Out</option><option value="Transfer">Transfer</option></select></div></div>
+<div class="activity-table-wrapper requests-table-wrapper"><table class="requests-table po-table"><thead><tr><th scope="col">Date &amp; Time</th><th scope="col">Operation</th><th scope="col">Product</th><th scope="col">Quantity</th><th scope="col">Status</th></tr></thead>
+<tbody id="staff-activity-rows"><tr><td colspan="5">Loading activity...</td></tr></tbody></table></div></section>
 </main></div>
-<script src="../js/api.js"></script><script src="../js/sidebar.js"></script><script>
-(function () {
-    'use strict';
-    const user = window.api.getCurrentUser();
-    if (!user || user.role !== 'STAFF') {
-        window.location.replace('../index.html');
-        return;
-    }
-    const status = document.getElementById('connection-status');
-    status.setAttribute('role', 'status');
-    function updateConnection() {
-        const dot = document.createElement('span');
-        dot.setAttribute('aria-hidden', 'true');
-        status.classList.toggle('offline', !navigator.onLine);
-        status.replaceChildren(dot, document.createTextNode(navigator.onLine ? 'Online' : 'Offline'));
-    }
-    window.addEventListener('online', updateConnection);
-    window.addEventListener('offline', updateConnection);
-    updateConnection();
-    const activityRows = document.getElementById('staff-activity-rows');
-    const identity = user.userId || user.username;
-    const sources = [
-        ['Receive', 'stocktrack_receipts_' + user.userId],
-        ['Issue', 'stocktrack_issues_' + identity],
-        ['Transfer', 'stocktrack_transfers_' + identity]
-    ];
-    const activities = [];
-    sources.forEach(([operation, key]) => {
-        try {
-            const records = JSON.parse(localStorage.getItem(key) || '[]');
-            if (!Array.isArray(records)) return;
-            records.forEach(record => {
-                if (!record || !Array.isArray(record.items)) return;
-                record.items.forEach(item => {
-                    if (!item || typeof item.product !== 'string' || !Number.isFinite(item.quantity)) return;
-                    activities.push({ operation, product: item.product, quantity: item.quantity,
-                        date: record.confirmedAt || record.receivedDate || record.issuedDate || record.transferDate || '' });
-                });
-            });
-        } catch (error) { /* Keep sample activity available when local storage cannot be read. */ }
-    });
-    activities.sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
-    const fragment = document.createDocumentFragment();
-    activities.slice(0, 10).forEach(activity => {
-        const row = document.createElement('tr');
-        const parsedDate = new Date(activity.date);
-        const date = Number.isNaN(parsedDate.getTime()) ? activity.date : parsedDate.toLocaleString('en-GB', {
-            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
-        [date, activity.operation, activity.product, activity.quantity, 'Saved locally'].forEach(value => {
-            const cell = document.createElement('td');
-            cell.textContent = value;
-            row.appendChild(cell);
-        });
-        fragment.appendChild(row);
-    });
-    activityRows.prepend(fragment);
-})();
-</script>
+<script src="../js/common/api.js"></script><script src="../js/common/sidebar.js"></script><script src="../js/staff/staff-dashboard.js"></script>
 </body></html>
+
+
 
