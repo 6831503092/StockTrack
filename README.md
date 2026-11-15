@@ -61,8 +61,8 @@
 
 ## Live Deployment on GCP (Cloud Run)
 
-- **Live Application URL:** [https://stocktrack-service-url.run.app](https://stocktrack-service-url.run.app) *(Replace with your actual Cloud Run URL)*
-- **CI/CD Pipeline:** Automated build and deployment to Google Cloud Run configured via **Cloud Build** ([cloudbuild.yaml](file:///c:/Users/bankt/Project-SRAS/cloudbuild.yaml)) and **Artifact Registry**.
+- **Live Application URL:** [https://stocktrack-287375379898.us-central1.run.app](https://stocktrack-287375379898.us-central1.run.app) 
+
 
 ---
 
