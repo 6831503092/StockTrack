@@ -48,7 +48,7 @@
                 const notice = el('div', undefined, content);
                 notice.className = 'receive-exact-notice';
                 notice.style.cssText = 'margin: 16px 0; padding: 12px 16px; border-radius: 8px; background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px;';
-                notice.innerHTML = '<span style="font-size: 16px;">ℹ️</span> <span><strong>ข้อกำหนดการรับสินค้า:</strong> สินค้าต้องมีจำนวนครบถ้วนตามใบสั่งซื้อพอดี (ห้ามขาดหรือเกิน) ถึงจะสามารถบันทึกรับเข้าคลังได้ หากสินค้าไม่ครบหรือเกิน กรุณากดปุ่ม <strong>✕ Reject Order</strong> พร้อมระบุเหตุผล</span>';
+                notice.innerHTML = '<span style="font-size: 16px;">ℹ️</span> <span><strong>Receiving Requirement:</strong> Delivered quantities must exactly match the purchase order (no shortages or overages allowed) to receive items into warehouse stock. If quantities do not match, please click <strong>✕ Reject Order</strong> and specify a reason.</span>';
             },
             headers: ['Product', 'Destination Zone', 'Expected Quantity', 'Received Quantity'],
             renderItemRow: (row, product, i, quantities, el) => {
@@ -92,7 +92,7 @@
                     const mismatchedProduct = item.items[mismatchIndex];
                     return {
                         isValid: false,
-                        errorMessage: `ถ้ารับของเข้า จำนวนต้องครบพอดี ห้ามขาดหรือเกินถึงจะกดรับของเข้าคลังได้: สินค้า "${mismatchedProduct[0]}" มีจำนวนที่ระบุ (${quantities[mismatchIndex]}) ไม่ตรงกับยอดสั่งซื้อ (${mismatchedProduct[1]}) หากสินค้าไม่ครบหรือเกิน กรุณากดปุ่ม ✕ Reject Order พร้อมระบุเหตุผล`
+                        errorMessage: `Received quantity must exactly match the purchase order: Product "${mismatchedProduct[0]}" has a specified quantity (${quantities[mismatchIndex]}) that does not match the ordered quantity (${mismatchedProduct[1]}). If items are incomplete or over, please click ✕ Reject Order and specify a reason.`
                     };
                 }
                 return { isValid: true };
@@ -113,7 +113,7 @@
                     const mismatchedProduct = item.items[mismatchIndex];
                     return {
                         isValid: false,
-                        errorMessage: `ถ้ารับของเข้า จำนวนต้องครบพอดี ห้ามขาดหรือเกินถึงจะกดรับของเข้าคลังได้: สินค้า "${mismatchedProduct[0]}" (${quantities[mismatchIndex]}/${mismatchedProduct[1]}) กรุณากด Reject พร้อมระบุเหตุผล`
+                        errorMessage: `Received quantity must exactly match the purchase order: Product "${mismatchedProduct[0]}" (${quantities[mismatchIndex]}/${mismatchedProduct[1]}). Please click Reject and specify a reason.`
                     };
                 }
                 return { isValid: true };

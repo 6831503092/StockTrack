@@ -369,7 +369,7 @@
                     const reason = rejectReason ? rejectReason.value.trim() : '';
                     if (!reason) {
                         if (rejectError) {
-                            rejectError.textContent = 'กรุณาระบุเหตุผลในการปฏิเสธ (Reject reason is required)';
+                            rejectError.textContent = 'Please specify a rejection reason (Reject reason is required).';
                             rejectError.hidden = false;
                         }
                         rejectReason?.focus();
