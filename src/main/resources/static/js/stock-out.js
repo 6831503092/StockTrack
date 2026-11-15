@@ -20,7 +20,7 @@
     const rejectCancel = document.getElementById('issue-reject-cancel');
     const rejectConfirm = document.getElementById('issue-reject-confirm');
     const actions = document.getElementById('workflow-actions') || document.querySelector('.workflow-actions');
-    const titles = ['Requests','Details','Verify','Confirm','Result'];
+    const titles = ['Requests', 'Verify', 'Confirm', 'Result'];
 
     function el(tag, text, parent) {
         const node = document.createElement(tag);
@@ -96,7 +96,6 @@
         if (subtitle) {
             subtitle.textContent = [
                 'Select an approved sales order to begin stock out',
-                'Review the approved sales order details',
                 'Check quantities against the products picked',
                 'Review and confirm picking items out of inventory',
                 'Stock out is complete'
@@ -109,9 +108,15 @@
             node.classList.toggle('complete', i < step);
         });
 
-        if (back) back.hidden = step === 0 || step === 4;
-        if (next) next.textContent = step === 3 ? 'Confirm stock out →' : step === 4 ? 'Stock out another →' : 'Continue →';
-        if (rejectBtn) rejectBtn.hidden = (step === 0 || step === 4);
+        if (back) back.hidden = step === 0 || step === 3;
+        if (rejectBtn) rejectBtn.hidden = (step === 0 || step === 3);
+        if (next) {
+            next.hidden = (step === 0 && !requests.length);
+            if (step === 0) next.textContent = 'Continue to Verify →';
+            else if (step === 1) next.textContent = 'Continue to Confirm →';
+            else if (step === 2) next.textContent = 'Confirm Stock Out →';
+            else if (step === 3) next.textContent = 'Stock Out Another →';
+        }
 
         if (step === 0) {
             el('h3', 'Available Approved Sales Orders (From Manager)', content);
@@ -153,12 +158,19 @@
             return;
         }
 
-        if (step === 4) {
+        if (step === 3) {
             const panel = el('div', undefined, content);
             panel.className = 'issue-details';
             el('h3', 'Stock out confirmed and inventory deducted successfully!', panel);
             el('p', 'Sales Order ' + item.id + ' (' + item.reference + ') has been marked as STOCK OUT.', panel);
             el('p', quantities.reduce((sum, q) => sum + q, 0) + ' units have been deducted from warehouse stock.', panel);
+
+            const nav = el('div', undefined, panel);
+            nav.style.cssText = 'margin-top: 20px; display: flex; gap: 12px;';
+            const dashLink = el('a', '← Back to Staff Dashboard', nav);
+            dashLink.href = 'dashboard.html';
+            dashLink.className = 'btn-secondary';
+            dashLink.style.cssText = 'display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; border: 1px solid #cbd5e1; color: #475569; background: #fff;';
             return;
         }
 
@@ -168,14 +180,14 @@
         el('p', 'Customer: ' + item.customer + ' | Created by: ' + item.requester + ' (' + item.date + ')', panel);
         el('p', 'Status: Approved by Manager', panel);
 
-        const body = table(['Product', 'Zone', 'Approved Quantity', step === 1 ? 'Unit' : 'Stock out quantity']);
-        item.items.forEach((product, i) => {
-            const row = el('tr', undefined, body);
-            el('td', product[0], row);
-            el('td', product[3] || 'Default Zone', row);
-            el('td', String(product[1]), row);
-            const cell = el('td', step === 1 ? 'Units' : step === 3 ? String(quantities[i]) : undefined, row);
-            if (step === 2) {
+        if (step === 1) {
+            const body = table(['Product', 'Zone', 'Approved Quantity', 'Stock out quantity']);
+            item.items.forEach((product, i) => {
+                const row = el('tr', undefined, body);
+                el('td', product[0], row);
+                el('td', product[3] || 'Default Zone', row);
+                el('td', String(product[1]), row);
+                const cell = el('td', undefined, row);
                 const input = el('input', undefined, cell);
                 input.type = 'number';
                 input.min = '1';
@@ -186,10 +198,8 @@
                 input.className = 'issue-quantity';
                 input.setAttribute('aria-label', 'Stock out quantity for ' + product[0]);
                 input.addEventListener('input', () => { quantities[i] = Number(input.value); });
-            }
-        });
+            });
 
-        if (step === 2) {
             const label = el('label', 'Stock out notes (optional)', content);
             label.className = 'issue-notes-label';
             const textarea = el('textarea', undefined, label);
@@ -200,7 +210,16 @@
             textarea.addEventListener('input', () => { notes = textarea.value; });
         }
 
-        if (step === 3) {
+        if (step === 2) {
+            const body = table(['Product', 'Zone', 'Approved Quantity', 'Stock out quantity']);
+            item.items.forEach((product, i) => {
+                const row = el('tr', undefined, body);
+                el('td', product[0], row);
+                el('td', product[3] || 'Default Zone', row);
+                el('td', String(product[1]), row);
+                el('td', String(quantities[i]), row);
+            });
+
             if (notes) el('p', 'Notes: ' + notes, panel);
             const label = el('label', undefined, actions);
             label.className = 'issue-confirm-check';
@@ -219,7 +238,7 @@
     if (next) {
         next.addEventListener('click', async () => {
             if (alert) alert.hidden = true;
-            if (step === 4) {
+            if (step === 3) {
                 step = 0;
                 selected = '';
                 quantities = [];
@@ -240,7 +259,14 @@
                 quantities = item.items.map(p => p[1]);
             }
 
-            if (step === 2) {
+            if (step === 0) {
+                step = 1;
+                render();
+                focusTitle();
+                return;
+            }
+
+            if (step === 1) {
                 const inputs = [...content.querySelectorAll('input[type=number]')];
                 for (const input of inputs) {
                     if (!input.reportValidity()) return;
@@ -249,9 +275,13 @@
                     error('Stock out quantity must be between 1 and the approved quantity.');
                     return;
                 }
+                step = 2;
+                render();
+                focusTitle();
+                return;
             }
 
-            if (step === 3) {
+            if (step === 2) {
                 if (!confirmed) {
                     error('Please confirm that you have checked the goods and quantities.');
                     return;
@@ -269,27 +299,23 @@
                         notes: notes
                     };
                     await window.api.post('/api/staff/stock-out/' + item.rawId + '/confirm', payload);
-                    step = 4;
+                    step = 3;
                     render();
                     focusTitle();
                 } catch (err) {
                     error('Failed to confirm stock out: ' + (err.message || err));
                 } finally {
                     next.disabled = false;
-                    next.textContent = step === 4 ? 'Stock out another →' : 'Confirm stock out →';
+                    next.textContent = step === 3 ? 'Stock out another →' : 'Confirm stock out →';
                 }
                 return;
             }
-
-            step++;
-            render();
-            focusTitle();
         });
     }
 
     if (back) {
         back.addEventListener('click', () => {
-            if (step > 0 && step < 4) {
+            if (step > 0 && step < 3) {
                 step--;
                 confirmed = false;
                 if (alert) alert.hidden = true;
@@ -348,6 +374,18 @@
             }
         });
     }
+
+    function connection() {
+        const status = document.getElementById('issue-connection');
+        if (!status) return;
+        const dot = document.createElement('span');
+        dot.setAttribute('aria-hidden', 'true');
+        status.classList.toggle('offline', !navigator.onLine);
+        status.replaceChildren(dot, document.createTextNode(navigator.onLine ? 'Online' : 'Offline'));
+    }
+    window.addEventListener('online', connection);
+    window.addEventListener('offline', connection);
+    connection();
 
     loadRequests();
 })();

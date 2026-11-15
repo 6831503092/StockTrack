@@ -45,23 +45,42 @@ public class ProductMoveExecutor implements ApprovalExecutor {
             int targetZoneId = node.path("targetZoneId").asInt(0);
 
             Zone sourceZone = zoneRepository.findById(sourceZoneId).orElse(null);
+            if (sourceZone == null && node.has("sourceZoneCode") && !node.path("sourceZoneCode").asText().isBlank()) {
+                sourceZone = zoneRepository.findByZoneCode(node.path("sourceZoneCode").asText().trim()).orElse(null);
+            }
+
             Zone targetZone = zoneRepository.findById(targetZoneId).orElse(null);
+            if (targetZone == null && node.has("targetZoneCode") && !node.path("targetZoneCode").asText().isBlank()) {
+                targetZone = zoneRepository.findByZoneCode(node.path("targetZoneCode").asText().trim()).orElse(null);
+            }
 
             if (sourceZone == null || targetZone == null) {
                 log.warn("Cannot create StockMovement: Zone not found (source={}, target={})", sourceZoneId, targetZoneId);
                 return;
             }
 
-            List<Product> products = productRepository.findByZoneZoneIdAndIsActiveTrue(sourceZoneId);
-            Product primaryProduct = products.isEmpty() ? null : products.get(0);
+            List<Product> products = productRepository.findByZoneZoneIdAndIsActiveTrue(sourceZone.getZoneId());
+            Product primaryProduct = (products != null && !products.isEmpty()) ? products.get(0) : null;
+            if (primaryProduct == null && node.has("productId")) {
+                primaryProduct = productRepository.findById(node.path("productId").asInt(0)).orElse(null);
+            }
+            if (primaryProduct == null && node.has("sourceProducts") && node.path("sourceProducts").isArray() && !node.path("sourceProducts").isEmpty()) {
+                int pId = node.path("sourceProducts").get(0).path("productId").asInt(0);
+                if (pId > 0) {
+                    primaryProduct = productRepository.findById(pId).orElse(null);
+                }
+            }
             if (primaryProduct == null) {
-                log.warn("No products to move from zone {}", sourceZoneId);
+                primaryProduct = productRepository.findByIsActiveTrue().stream().findFirst().orElse(null);
+            }
+            if (primaryProduct == null) {
+                log.warn("No products found to create StockMovement for request #{}", request.getRequestId());
                 return;
             }
 
-            int totalQty = products.stream()
-                    .mapToInt(p -> p.getCurrentStock() != null ? p.getCurrentStock() : 0)
-                    .sum();
+            int totalQty = (products != null && !products.isEmpty())
+                    ? products.stream().mapToInt(p -> p.getCurrentStock() != null ? p.getCurrentStock() : 0).sum()
+                    : 1;
 
             StockMovement movement = StockMovement.builder()
                     .request(request)

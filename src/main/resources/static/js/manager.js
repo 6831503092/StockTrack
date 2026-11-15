@@ -526,11 +526,8 @@
                 labelSpan.title = product.name;
                 column.appendChild(labelSpan);
 
-                // Smart Tooltip Placement:
-                // - High bars (> 55 units) position inside/below top to prevent top clipping
-                // - Short bars position above bar
-                // - Left/right edge alignment so tooltips never clip off sides
-                const posClass = (product.stock > 55 || heightPx > 130) ? 'pos-inside' : 'pos-above';
+                // Tooltip Placement: Always inside chart area (pos-inside) to never overlap .card-header-flex
+                const posClass = 'pos-inside';
                 let alignClass = 'align-center';
                 if (idx < 2) {
                     alignClass = 'align-left';

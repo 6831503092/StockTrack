@@ -210,16 +210,16 @@
                     <div class="edit-product-col">
                         <div class="edit-product-group">
                             <label class="edit-product-label" for="manager-edit-id">Product ID</label>
-                            <input type="text" id="manager-edit-id" class="edit-input-readonly" readonly>
+                            <input type="text" id="manager-edit-id" class="edit-input-readonly" readonly tabindex="-1">
                         </div>
 
                         <div class="edit-product-group">
-                            <label class="edit-product-label" for="manager-edit-cost">Default Cost (฿)</label>
-                            <input type="number" step="0.01" min="0" id="manager-edit-cost" name="cost" class="edit-input-editable" required>
+                            <label class="edit-product-label" for="manager-edit-name">Product Name</label>
+                            <input type="text" id="manager-edit-name" name="productName" class="edit-input-editable" required maxlength="50">
                         </div>
 
                         <div class="edit-product-group">
-                            <label class="edit-product-label" for="manager-edit-minimum">Min Stock Alert</label>
+                            <label class="edit-product-label" for="manager-edit-minimum">Min Low Stock Alert</label>
                             <input type="number" min="0" id="manager-edit-minimum" name="minimum" class="edit-input-editable" required>
                         </div>
                     </div>
@@ -227,12 +227,12 @@
                     <!-- Column 2 -->
                     <div class="edit-product-col">
                         <div class="edit-product-group">
-                            <label class="edit-product-label" for="manager-edit-name">Product Name</label>
-                            <input type="text" id="manager-edit-name" name="productName" class="edit-input-editable" required maxlength="50">
+                            <label class="edit-product-label" for="manager-edit-cost">Default Cost</label>
+                            <input type="number" step="0.01" min="0" id="manager-edit-cost" name="cost" class="edit-input-readonly" readonly tabindex="-1">
                         </div>
 
                         <div class="edit-product-group">
-                            <label class="edit-product-label" for="manager-edit-price">Selling Price (฿)</label>
+                            <label class="edit-product-label" for="manager-edit-price">Selling Price</label>
                             <input type="number" step="0.01" min="0" id="manager-edit-price" name="price" class="edit-input-editable" required>
                         </div>
 

@@ -75,89 +75,122 @@
     border-radius: 50%;
 }
 
-/* KPI Cards */
+/* KPI Cards - Harmonized with Admin & Manager Theme */
+.owner-po-stats-grid,
 .owner-stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 18px;
-    margin-bottom: 32px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
 }
 
+.owner-dashboard .po-stat-card,
 .owner-stat-card {
-    background: var(--owner-card);
-    border: 1px solid var(--owner-border);
+    background: #ffffff;
+    border: 1px solid #eef2f6;
     border-radius: 14px;
-    padding: 22px;
-    box-shadow: 0 2px 8px rgba(15,23,42,0.025);
-    transition: transform .2s, box-shadow .2s;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+    position: relative;
+    overflow: hidden;
 }
 
+.owner-dashboard .po-stat-card:hover,
 .owner-stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 22px rgba(15,23,42,.06);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    border-color: #e2e8f0;
 }
 
-.stat-top {
+.owner-dashboard .po-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.stat-label {
-    color: var(--owner-muted);
-    font-size: .82rem;
-    font-weight: 600;
-}
-
-.stat-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 11px;
-    display: flex;
     justify-content: center;
-    align-items: center;
-    font-size: 1.35rem;
+    flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+    color: #ffffff;
+}
+
+.owner-dashboard .po-stat-card:hover .po-stat-icon {
+    transform: scale(1.08);
+}
+
+.owner-dashboard .po-stat-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: #ffffff !important;
+    color: #ffffff !important;
+    stroke-width: 2.2px;
+}
+
+.owner-dashboard .po-stat-icon.mint {
+    background: linear-gradient(135deg, #27c690 0%, #10b981 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);
+}
+
+.owner-dashboard .po-stat-icon.blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+}
+
+.owner-dashboard .po-stat-icon.amber {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.28);
+}
+
+.owner-dashboard .po-stat-icon.purple {
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.28);
+}
+
+.owner-dashboard .po-stat-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.owner-dashboard .po-stat-info .stat-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.owner-dashboard .po-stat-info .stat-value {
+    font-size: 1.45rem;
     font-weight: 700;
+    color: #0f172a;
+    line-height: 1.25;
 }
 
-.revenue-icon, .profit-icon {
-    background: #E8FAF4;
-    color: #20C997;
-}
+.owner-dashboard .po-stat-info .stat-value.mint { color: #27c690; }
+.owner-dashboard .po-stat-info .stat-value.blue { color: #0284c7; }
+.owner-dashboard .po-stat-info .stat-value.amber { color: #d97706; }
+.owner-dashboard .po-stat-info .stat-value.purple { color: #7e22ce; }
 
-.inventory-icon {
-    background: #FFF6E8;
-    color: #E9A23B;
-}
-
-.sale-icon {
-    background: #EEF4FF;
-    color: #5486E8;
-}
-
-.export-icon {
-    background: #F3EEFF;
-    color: #9270DB;
-}
-
-.stat-value {
-    font-size: 1.85rem;
-    font-weight: 800;
-    color: var(--owner-text);
-    margin-bottom: 7px;
-}
-
-.stat-description {
-    color: #94A3B8;
-    font-size: .72rem;
-}
-
-/* Profit Card */
-.profit-card {
-    border-color: var(--owner-accent-border, #C5F0E2);
-    background: linear-gradient(135deg, #FFFFFF 65%, #F0FCF7);
+.owner-dashboard .po-stat-info .stat-description {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin-top: 3px;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Section */
@@ -389,7 +422,15 @@
 }
 
 /* Responsive */
-@media (max-width: 1100px) {
+@media (max-width: 1280px) {
+    .owner-po-stats-grid,
+    .owner-stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .owner-po-stats-grid,
     .owner-stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -419,6 +460,7 @@
         padding: 20px 14px;
     }
 
+    .owner-po-stats-grid,
     .owner-stats-grid {
         grid-template-columns: 1fr;
     }

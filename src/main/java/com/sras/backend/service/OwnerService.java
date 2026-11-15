@@ -33,7 +33,7 @@ public class OwnerService {
 
     private static final DateTimeFormatter DISPLAY_DT_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
     private static final DateTimeFormatter ISO_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final Pattern REF_PATTERN = Pattern.compile("(?:PO|SO|Request|movement|product ID)\\s*#?([0-9]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern REF_PATTERN = Pattern.compile("(?:PO|SO|Request|movement|product ID|customer|supplier|zone)\\s*#?([0-9]+|[A-Za-z0-9]+)", Pattern.CASE_INSENSITIVE);
 
     @Transactional(readOnly = true)
     public OwnerDashboardDto getDashboard() {
@@ -195,6 +195,26 @@ public class OwnerService {
             type = "other";
             refPrefix = "PRD";
             status = "Completed";
+        } else if (action.startsWith("CUSTOMER_")) {
+            activityName = "Customer " + (action.endsWith("CREATE") ? "Created" : action.endsWith("UPDATE") ? "Updated" : "Deactivated");
+            type = "sale";
+            refPrefix = "CUST";
+            status = "Completed";
+        } else if (action.startsWith("SUPPLIER_")) {
+            activityName = "Supplier " + (action.endsWith("CREATE") ? "Created" : action.endsWith("UPDATE") ? "Updated" : "Deactivated");
+            type = "import";
+            refPrefix = "SUP";
+            status = "Completed";
+        } else if (action.startsWith("ZONE_")) {
+            activityName = "Zone " + (action.endsWith("CREATE") ? "Created" : "Updated");
+            type = "other";
+            refPrefix = "ZN";
+            status = "Completed";
+        } else if ("REQUEST_CREATE".equalsIgnoreCase(action)) {
+            activityName = "Request Submitted";
+            type = detail.contains("SO") ? "sale" : (detail.contains("PO") ? "import" : "other");
+            refPrefix = "REQ";
+            status = "Pending";
         }
 
         // Extract reference number from detail if available

@@ -34,53 +34,86 @@
             </div>
         </header>
 
-        <!-- KPI CARDS -->
-        <section class="owner-stats-grid">
+        <!-- KPI CARDS (Unified with Admin .po-stats-grid & .po-stat-card) -->
+        <section class="po-stats-grid owner-po-stats-grid" aria-label="Business overview metrics">
 
-            <article class="owner-stat-card">
-                <div class="stat-top">
+            <!-- 1. Total Revenue (Mint) -->
+            <div class="po-stat-card">
+                <div class="po-stat-icon mint">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <div class="po-stat-info">
                     <span class="stat-label">Total Revenue</span>
-                    <span class="stat-icon revenue-icon">฿</span>
+                    <span class="stat-value mint" id="owner-total-revenue">—</span>
+                    <span class="stat-description">Total business revenue</span>
                 </div>
-                <h2 class="stat-value" id="owner-total-revenue">—</h2>
-                <span class="stat-description">Total business revenue</span>
-            </article>
+            </div>
 
-            <article class="owner-stat-card">
-                <div class="stat-top">
+            <!-- 2. Inventory Value (Blue) -->
+            <div class="po-stat-card">
+                <div class="po-stat-icon blue">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <div class="po-stat-info">
                     <span class="stat-label">Inventory Value</span>
-                    <span class="stat-icon inventory-icon">▦</span>
+                    <span class="stat-value blue" id="owner-inventory-value">—</span>
+                    <span class="stat-description">Current inventory value</span>
                 </div>
-                <h2 class="stat-value" id="owner-inventory-value">—</h2>
-                <span class="stat-description">Current inventory value</span>
-            </article>
+            </div>
 
-            <article class="owner-stat-card">
-                <div class="stat-top">
+            <!-- 3. Total Sale (Amber) -->
+            <div class="po-stat-card">
+                <div class="po-stat-icon amber">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                        <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                </div>
+                <div class="po-stat-info">
                     <span class="stat-label">Total Sale</span>
-                    <span class="stat-icon sale-icon">↗</span>
+                    <span class="stat-value amber" id="owner-total-sale">—</span>
+                    <span class="stat-description">Number of sales transactions</span>
                 </div>
-                <h2 class="stat-value" id="owner-total-sale">—</h2>
-                <span class="stat-description">Number of sales transactions</span>
-            </article>
+            </div>
 
-            <article class="owner-stat-card">
-                <div class="stat-top">
+            <!-- 4. Total Export (Purple) -->
+            <div class="po-stat-card">
+                <div class="po-stat-icon purple">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13"></rect>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg>
+                </div>
+                <div class="po-stat-info">
                     <span class="stat-label">Total Export</span>
-                    <span class="stat-icon export-icon">⇧</span>
+                    <span class="stat-value purple" id="owner-total-export">—</span>
+                    <span class="stat-description">Total exported product units</span>
                 </div>
-                <h2 class="stat-value" id="owner-total-export">—</h2>
-                <span class="stat-description">Total exported product units</span>
-            </article>
+            </div>
 
-            <article class="owner-stat-card profit-card">
-                <div class="stat-top">
-                    <span class="stat-label">Total Profit</span>
-                    <span class="stat-icon profit-icon">◈</span>
+            <!-- 5. Total Profit (Emerald/Mint) -->
+            <div class="po-stat-card">
+                <div class="po-stat-icon mint">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        <circle cx="12" cy="12" r="10"></circle>
+                    </svg>
                 </div>
-                <h2 class="stat-value" id="owner-total-profit">—</h2>
-                <span class="stat-description">Total business profit</span>
-            </article>
+                <div class="po-stat-info">
+                    <span class="stat-label">Total Profit</span>
+                    <span class="stat-value mint" id="owner-total-profit">—</span>
+                    <span class="stat-description">Total business profit</span>
+                </div>
+            </div>
 
         </section>
 

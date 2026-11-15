@@ -103,6 +103,13 @@
   flex: 0 0 auto !important;
   min-height: auto !important;
   margin-bottom: 24px;
+  position: relative;
+}
+
+.manager-chart-card .card-header-flex {
+  position: relative;
+  z-index: 60;
+  background: var(--bg-white, #ffffff);
 }
 
 .manager-products-card {
@@ -285,7 +292,7 @@
   font-weight: 700;
 }
 
-/* Floating Tooltip on Bar Hover (Fully visible, never clipped) */
+/* Floating Tooltip on Bar Hover (Fully visible, never overlaps card-header-flex) */
 .manager-bar-tooltip {
   position: absolute;
   background: #0f172a;
@@ -302,13 +309,11 @@
   min-width: 175px;
   white-space: nowrap;
   text-align: left;
+  top: 30px;
+  bottom: auto;
 }
 
-.manager-bar-tooltip.pos-above {
-  bottom: calc(100% + 10px);
-  top: auto;
-}
-
+.manager-bar-tooltip.pos-above,
 .manager-bar-tooltip.pos-inside {
   top: 30px;
   bottom: auto;
@@ -344,17 +349,8 @@
 }
 
 /* Tooltip Arrow */
-.manager-bar-tooltip.pos-above::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 6px;
-  border-style: solid;
-  border-color: #0f172a transparent transparent transparent;
-}
-
+.manager-bar-tooltip::after,
+.manager-bar-tooltip.pos-above::after,
 .manager-bar-tooltip.pos-inside::after {
   content: '';
   position: absolute;

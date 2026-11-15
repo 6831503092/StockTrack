@@ -52,7 +52,6 @@ public class DataInitializer implements CommandLineRunner {
         seedProductsIfEmpty();
         seedSuppliersIfEmpty();
         seedCustomersIfEmpty();
-        seedAuditLogsIfEmpty();
     }
 
     private void seedCustomersIfEmpty() {

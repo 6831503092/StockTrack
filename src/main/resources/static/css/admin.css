@@ -2850,6 +2850,7 @@
   background: #e5e7eb;
   border: 1.5px solid #e5e7eb;
   color: #64748b;
+  cursor: not-allowed;
 }
 
 .edit-input-editable {

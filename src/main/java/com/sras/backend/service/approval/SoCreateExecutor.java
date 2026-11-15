@@ -23,13 +23,18 @@ public class SoCreateExecutor implements ApprovalExecutor {
 
     @Override
     public void execute(ApprovalRequest request) {
-        if (request.getTargetId() == null) {
-            log.warn("TargetId is null for SO_CREATE request #{}", request.getRequestId());
-            return;
+        SalesOrder so = null;
+        if (request.getTargetId() != null) {
+            so = salesOrderRepository.findById(request.getTargetId()).orElse(null);
+        }
+        if (so == null && request.getRequestId() != null) {
+            so = salesOrderRepository.findByRequestRequestId(request.getRequestId()).orElse(null);
         }
 
-        SalesOrder so = salesOrderRepository.findById(request.getTargetId())
-                .orElseThrow(() -> new IllegalArgumentException("Sales Order not found with ID: " + request.getTargetId()));
+        if (so == null) {
+            log.warn("Sales Order not found for SO_CREATE request #{}", request.getRequestId());
+            return;
+        }
 
         so.setStatus(SalesOrderStatus.APPROVED);
         salesOrderRepository.save(so);

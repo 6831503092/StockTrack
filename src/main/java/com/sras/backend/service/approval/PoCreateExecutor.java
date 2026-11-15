@@ -23,13 +23,18 @@ public class PoCreateExecutor implements ApprovalExecutor {
 
     @Override
     public void execute(ApprovalRequest request) {
-        if (request.getTargetId() == null) {
-            log.warn("TargetId is null for PO_CREATE request #{}", request.getRequestId());
-            return;
+        PurchaseOrder po = null;
+        if (request.getTargetId() != null) {
+            po = purchaseOrderRepository.findById(request.getTargetId()).orElse(null);
+        }
+        if (po == null && request.getRequestId() != null) {
+            po = purchaseOrderRepository.findByRequestRequestId(request.getRequestId()).orElse(null);
         }
 
-        PurchaseOrder po = purchaseOrderRepository.findById(request.getTargetId())
-                .orElseThrow(() -> new IllegalArgumentException("Purchase Order not found with ID: " + request.getTargetId()));
+        if (po == null) {
+            log.warn("Purchase Order not found for PO_CREATE request #{}", request.getRequestId());
+            return;
+        }
 
         po.setStatus(PurchaseOrderStatus.APPROVED);
         purchaseOrderRepository.save(po);

@@ -20,7 +20,7 @@
     const rejectCancel = document.getElementById('transfer-reject-cancel');
     const rejectConfirm = document.getElementById('transfer-reject-confirm');
     const actions = document.getElementById('workflow-actions') || document.querySelector('.workflow-actions');
-    const titles = ['Requests','Details','Verify','Confirm','Result'];
+    const titles = ['Requests', 'Verify', 'Confirm', 'Result'];
 
     function el(tag, text, parent) {
         const node = document.createElement(tag);
@@ -98,7 +98,6 @@
         if (subtitle) {
             subtitle.textContent = [
                 'Select an approved transfer request to begin verification',
-                'Review the transfer request details',
                 'Verify physical item relocation between zones',
                 'Review and confirm zone transfer',
                 'Transfer verification is complete'
@@ -111,9 +110,15 @@
             node.classList.toggle('complete', i < step);
         });
 
-        if (back) back.hidden = step === 0 || step === 4;
-        if (next) next.textContent = step === 3 ? 'Confirm transfer →' : step === 4 ? 'Transfer another →' : 'Continue →';
-        if (rejectBtn) rejectBtn.hidden = (step === 0 || step === 4);
+        if (back) back.hidden = step === 0 || step === 3;
+        if (rejectBtn) rejectBtn.hidden = (step === 0 || step === 3);
+        if (next) {
+            next.hidden = (step === 0 && !requests.length);
+            if (step === 0) next.textContent = 'Continue to Verify →';
+            else if (step === 1) next.textContent = 'Continue to Confirm →';
+            else if (step === 2) next.textContent = 'Confirm Transfer →';
+            else if (step === 3) next.textContent = 'Transfer Another →';
+        }
 
         if (step === 0) {
             el('h3', 'Available Approved Stock Movements (From Manager)', content);
@@ -155,12 +160,19 @@
             return;
         }
 
-        if (step === 4) {
+        if (step === 3) {
             const panel = el('div', undefined, content);
             panel.className = 'transfer-details';
             el('h3', 'Stock movement verified and completed successfully!', panel);
             el('p', 'Transfer ' + item.id + ' (' + item.reference + ') has been completed.', panel);
             el('p', item.productName + ' location has been updated from ' + item.fromZone + ' to ' + item.toZone + '.', panel);
+
+            const nav = el('div', undefined, panel);
+            nav.style.cssText = 'margin-top: 20px; display: flex; gap: 12px;';
+            const dashLink = el('a', '← Back to Staff Dashboard', nav);
+            dashLink.href = 'dashboard.html';
+            dashLink.className = 'btn-secondary';
+            dashLink.style.cssText = 'display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; border: 1px solid #cbd5e1; color: #475569; background: #fff;';
             return;
         }
 
@@ -170,14 +182,14 @@
         el('p', 'Relocation: ' + item.fromZone + ' → ' + item.toZone + ' | Requested by: ' + item.requester + ' (' + item.date + ')', panel);
         el('p', 'Status: Approved by Manager (Awaiting Physical Verification)', panel);
 
-        const body = table(['Product', 'From Zone → To Zone', 'Expected Quantity', step === 1 ? 'Unit' : 'Verified Quantity']);
-        item.items.forEach((product, i) => {
-            const row = el('tr', undefined, body);
-            el('td', product[0], row);
-            el('td', product[3], row);
-            el('td', String(product[1]), row);
-            const cell = el('td', step === 1 ? 'Units' : step === 3 ? String(quantities[i]) : undefined, row);
-            if (step === 2) {
+        if (step === 1) {
+            const body = table(['Product', 'From Zone → To Zone', 'Expected Quantity', 'Verified Quantity']);
+            item.items.forEach((product, i) => {
+                const row = el('tr', undefined, body);
+                el('td', product[0], row);
+                el('td', product[3], row);
+                el('td', String(product[1]), row);
+                const cell = el('td', undefined, row);
                 const input = el('input', undefined, cell);
                 input.type = 'number';
                 input.min = '1';
@@ -188,10 +200,8 @@
                 input.className = 'transfer-quantity';
                 input.setAttribute('aria-label', 'Verified quantity for ' + product[0]);
                 input.addEventListener('input', () => { quantities[i] = Number(input.value); });
-            }
-        });
+            });
 
-        if (step === 2) {
             const label = el('label', 'Transfer verification notes (optional)', content);
             label.className = 'transfer-notes-label';
             const textarea = el('textarea', undefined, label);
@@ -202,7 +212,16 @@
             textarea.addEventListener('input', () => { notes = textarea.value; });
         }
 
-        if (step === 3) {
+        if (step === 2) {
+            const body = table(['Product', 'From Zone → To Zone', 'Expected Quantity', 'Verified Quantity']);
+            item.items.forEach((product, i) => {
+                const row = el('tr', undefined, body);
+                el('td', product[0], row);
+                el('td', product[3], row);
+                el('td', String(product[1]), row);
+                el('td', String(quantities[i]), row);
+            });
+
             if (notes) el('p', 'Notes: ' + notes, panel);
             const label = el('label', undefined, actions);
             label.className = 'transfer-confirm-check';
@@ -221,7 +240,7 @@
     if (next) {
         next.addEventListener('click', async () => {
             if (alert) alert.hidden = true;
-            if (step === 4) {
+            if (step === 3) {
                 step = 0;
                 selected = '';
                 quantities = [];
@@ -242,7 +261,14 @@
                 quantities = item.items.map(p => p[1]);
             }
 
-            if (step === 2) {
+            if (step === 0) {
+                step = 1;
+                render();
+                focusTitle();
+                return;
+            }
+
+            if (step === 1) {
                 const inputs = [...content.querySelectorAll('input[type=number]')];
                 for (const input of inputs) {
                     if (!input.reportValidity()) return;
@@ -251,9 +277,13 @@
                     error('Verified quantity must be between 1 and the transfer quantity.');
                     return;
                 }
+                step = 2;
+                render();
+                focusTitle();
+                return;
             }
 
-            if (step === 3) {
+            if (step === 2) {
                 if (!confirmed) {
                     error('Please confirm that you have physically relocated the items.');
                     return;
@@ -269,27 +299,23 @@
                         notes: notes
                     };
                     await window.api.post('/api/staff/transfers/' + item.rawId + '/verify', payload);
-                    step = 4;
+                    step = 3;
                     render();
                     focusTitle();
                 } catch (err) {
                     error('Failed to verify transfer: ' + (err.message || err));
                 } finally {
                     next.disabled = false;
-                    next.textContent = step === 4 ? 'Transfer another →' : 'Confirm transfer →';
+                    next.textContent = step === 3 ? 'Transfer another →' : 'Confirm transfer →';
                 }
                 return;
             }
-
-            step++;
-            render();
-            focusTitle();
         });
     }
 
     if (back) {
         back.addEventListener('click', () => {
-            if (step > 0 && step < 4) {
+            if (step > 0 && step < 3) {
                 step--;
                 confirmed = false;
                 if (alert) alert.hidden = true;
@@ -350,6 +376,18 @@
             }
         });
     }
+
+    function connection() {
+        const status = document.getElementById('transfer-connection');
+        if (!status) return;
+        const dot = document.createElement('span');
+        dot.setAttribute('aria-hidden', 'true');
+        status.classList.toggle('offline', !navigator.onLine);
+        status.replaceChildren(dot, document.createTextNode(navigator.onLine ? 'Online' : 'Offline'));
+    }
+    window.addEventListener('online', connection);
+    window.addEventListener('offline', connection);
+    connection();
 
     loadRequests();
 })();

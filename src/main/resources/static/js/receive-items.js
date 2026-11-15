@@ -20,7 +20,7 @@
     const rejectCancel = document.getElementById('receive-reject-cancel');
     const rejectConfirm = document.getElementById('receive-reject-confirm');
     const actions = document.getElementById('workflow-actions') || document.querySelector('.workflow-actions');
-    const titles = ['Requests','Details','Verify','Confirm','Result'];
+    const titles = ['Requests', 'Verify', 'Confirm', 'Result'];
 
     function el(tag, text, parent) {
         const node = document.createElement(tag);
@@ -95,7 +95,6 @@
         if (subtitle) {
             subtitle.textContent = [
                 'Select an approved purchase order to begin receiving',
-                'Review the approved order details',
                 'Check quantities against the physical goods delivered',
                 'Review and confirm receiving goods into inventory',
                 'Receiving is complete'
@@ -108,9 +107,15 @@
             node.classList.toggle('complete', i < step);
         });
 
-        if (back) back.hidden = step === 0 || step === 4;
-        if (next) next.textContent = step === 3 ? 'Confirm receipt →' : step === 4 ? 'Receive another →' : 'Continue →';
-        if (rejectBtn) rejectBtn.hidden = (step === 0 || step === 4);
+        if (back) back.hidden = step === 0 || step === 3;
+        if (rejectBtn) rejectBtn.hidden = (step === 0 || step === 3);
+        if (next) {
+            next.hidden = (step === 0 && !requests.length);
+            if (step === 0) next.textContent = 'Continue to Verify →';
+            else if (step === 1) next.textContent = 'Continue to Confirm →';
+            else if (step === 2) next.textContent = 'Confirm Receipt →';
+            else if (step === 3) next.textContent = 'Receive Another →';
+        }
 
         if (step === 0) {
             el('h3', 'Available Approved Purchase Orders (From Manager)', content);
@@ -152,12 +157,19 @@
             return;
         }
 
-        if (step === 4) {
+        if (step === 3) {
             const panel = el('div', undefined, content);
             panel.className = 'receive-details';
             el('h3', 'Receipt saved and inventory updated successfully!', panel);
             el('p', 'Purchase Order ' + item.id + ' (' + item.reference + ') has been marked as RECEIVED.', panel);
             el('p', quantities.reduce((sum, q) => sum + q, 0) + ' units have been added to warehouse stock.', panel);
+
+            const nav = el('div', undefined, panel);
+            nav.style.cssText = 'margin-top: 20px; display: flex; gap: 12px;';
+            const dashLink = el('a', '← Back to Staff Dashboard', nav);
+            dashLink.href = 'dashboard.html';
+            dashLink.className = 'btn-secondary';
+            dashLink.style.cssText = 'display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; border: 1px solid #cbd5e1; color: #475569; background: #fff;';
             return;
         }
 
@@ -167,20 +179,19 @@
         el('p', 'Supplier: ' + item.supplier + ' | Created by: ' + item.requester + ' (' + item.date + ')', panel);
         el('p', 'Status: Approved by Manager', panel);
 
-        const body = table(['Product', 'Destination Zone', 'Expected Quantity', step === 1 ? 'Unit' : 'Received Quantity']);
-        if (step === 2) {
+        if (step === 1) {
             const notice = el('div', undefined, content);
             notice.className = 'receive-exact-notice';
             notice.style.cssText = 'margin: 16px 0; padding: 12px 16px; border-radius: 8px; background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px;';
             notice.innerHTML = '<span style="font-size: 16px;">ℹ️</span> <span><strong>ข้อกำหนดการรับสินค้า:</strong> สินค้าต้องมีจำนวนครบถ้วนตามใบสั่งซื้อพอดี (ห้ามขาดหรือเกิน) ถึงจะสามารถบันทึกรับเข้าคลังได้ หากสินค้าไม่ครบหรือเกิน กรุณากดปุ่ม <strong>✕ Reject Order</strong> พร้อมระบุเหตุผล</span>';
-        }
-        item.items.forEach((product, i) => {
-            const row = el('tr', undefined, body);
-            el('td', product[0], row);
-            el('td', product[3] || 'Default Zone', row);
-            el('td', String(product[1]), row);
-            const cell = el('td', step === 1 ? 'Units' : step === 3 ? String(quantities[i]) : undefined, row);
-            if (step === 2) {
+
+            const body = table(['Product', 'Destination Zone', 'Expected Quantity', 'Received Quantity']);
+            item.items.forEach((product, i) => {
+                const row = el('tr', undefined, body);
+                el('td', product[0], row);
+                el('td', product[3] || 'Default Zone', row);
+                el('td', String(product[1]), row);
+                const cell = el('td', undefined, row);
                 const input = el('input', undefined, cell);
                 input.type = 'number';
                 input.min = '0';
@@ -205,10 +216,8 @@
                         input.style.backgroundColor = '';
                     }
                 });
-            }
-        });
+            });
 
-        if (step === 2) {
             const label = el('label', 'Delivery notes (optional)', content);
             label.className = 'receive-notes-label';
             const textarea = el('textarea', undefined, label);
@@ -219,7 +228,16 @@
             textarea.addEventListener('input', () => { notes = textarea.value; });
         }
 
-        if (step === 3) {
+        if (step === 2) {
+            const body = table(['Product', 'Destination Zone', 'Expected Quantity', 'Received Quantity']);
+            item.items.forEach((product, i) => {
+                const row = el('tr', undefined, body);
+                el('td', product[0], row);
+                el('td', product[3] || 'Default Zone', row);
+                el('td', String(product[1]), row);
+                el('td', String(quantities[i]), row);
+            });
+
             if (notes) el('p', 'Notes: ' + notes, panel);
             const label = el('label', undefined, actions);
             label.className = 'receive-confirm-check';
@@ -238,7 +256,7 @@
     if (next) {
         next.addEventListener('click', async () => {
             if (alert) alert.hidden = true;
-            if (step === 4) {
+            if (step === 3) {
                 step = 0;
                 selected = '';
                 quantities = [];
@@ -259,7 +277,14 @@
                 quantities = item.items.map(p => p[1]);
             }
 
-            if (step === 2) {
+            if (step === 0) {
+                step = 1;
+                render();
+                focusTitle();
+                return;
+            }
+
+            if (step === 1) {
                 const inputs = [...content.querySelectorAll('input[type=number]')];
                 for (const input of inputs) {
                     if (!input.reportValidity()) return;
@@ -274,9 +299,13 @@
                     error(`ถ้ารับของเข้า จำนวนต้องครบพอดี ห้ามขาดหรือเกินถึงจะกดรับของเข้าคลังได้: สินค้า "${mismatchedProduct[0]}" มีจำนวนที่ระบุ (${quantities[mismatchIndex]}) ไม่ตรงกับยอดสั่งซื้อ (${mismatchedProduct[1]}) หากสินค้าไม่ครบหรือเกิน กรุณากดปุ่ม ✕ Reject Order พร้อมระบุเหตุผล`);
                     return;
                 }
+                step = 2;
+                render();
+                focusTitle();
+                return;
             }
 
-            if (step === 3) {
+            if (step === 2) {
                 if (!confirmed) {
                     error('Please confirm that you have checked the goods and quantities.');
                     return;
@@ -301,27 +330,23 @@
                         notes: notes
                     };
                     await window.api.post('/api/staff/receives/' + item.rawId + '/accept', payload);
-                    step = 4;
+                    step = 3;
                     render();
                     focusTitle();
                 } catch (err) {
                     error('Failed to submit receiving: ' + (err.message || err));
                 } finally {
                     next.disabled = false;
-                    next.textContent = step === 4 ? 'Receive another →' : 'Confirm receipt →';
+                    next.textContent = step === 3 ? 'Receive Another →' : 'Confirm Receipt →';
                 }
                 return;
             }
-
-            step++;
-            render();
-            focusTitle();
         });
     }
 
     if (back) {
         back.addEventListener('click', () => {
-            if (step > 0 && step < 4) {
+            if (step > 0 && step < 3) {
                 step--;
                 confirmed = false;
                 if (alert) alert.hidden = true;
@@ -382,6 +407,18 @@
             }
         });
     }
+
+    function connection() {
+        const status = document.getElementById('receive-connection');
+        if (!status) return;
+        const dot = document.createElement('span');
+        dot.setAttribute('aria-hidden', 'true');
+        status.classList.toggle('offline', !navigator.onLine);
+        status.replaceChildren(dot, document.createTextNode(navigator.onLine ? 'Online' : 'Offline'));
+    }
+    window.addEventListener('online', connection);
+    window.addEventListener('offline', connection);
+    connection();
 
     loadRequests();
 })();
