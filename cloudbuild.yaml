@@ -28,4 +28,4 @@ images:
   - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/webdev-dockers/stocktrack'
 
 substitutions:
-  _PROJECT_ID: 'YOUR_PROJECT_ID'
+  _PROJECT_ID: 'stocktrack-514813'
