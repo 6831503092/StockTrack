@@ -1,176 +1,128 @@
-# 📦 StockTrack (Project-SRAS)
+#  StockTrack (Project-SRAS)
 
-ระบบจัดการคลังสินค้า, ใบสั่งซื้อ, ใบสั่งขาย และการอนุมัติแบบบูรณาการ (Enterprise Inventory, Order & Approval Management System)  
-พัฒนาด้วย **Spring Boot 3.5.0 (Java 17)** ร่วมกับ **Vanilla HTML5 / Modern CSS / Vanilla JavaScript**
-
----
-
-## 🏗️ ไฮไลท์สถาปัตยกรรมระบบ (Architecture Highlights)
-ระบบได้รับการรีแฟกเตอร์ตามหลัก Clean Architecture และ SOLID Principles อย่างสมบูรณ์:
-1. **Declarative Role-Based Security:** กำหนดสิทธิ์ด้วย `@RequireRoles({Role...})` และฉีดผู้ใช้ปัจจุบันด้วย `@CurrentUser User user`
-2. **Unified Approval Engine:** ใช้ **Dispatcher Pattern** และ **Template Method Pattern** (`BaseApprovalExecutor`) รองรับคำขอ 12 รูปแบบ พร้อม Typed Payloads และ Transaction Boundary
-3. **Standardized Exception Architecture:** คืนค่ารูปแบบเดียวกันด้วย `ApiResponse<T>` ดักจับโดย `GlobalExceptionHandler` รองรับ HTTP 400, 403, 404, 409, 422
-4. **Decomposed Domain Services:** แยกบริการเฉพาะทาง เช่น `ReceivingService`, `StockOutService`, `TransferService`, `StockMovementService`, `SupplierService`, `CustomerService`, `ProductQueryService`
-5. **Deterministic Audit Logging:** ตาราง `AUDIT_LOGS` บันทึก `target_type` และ `target_id` โดยตรง ควบคุมผ่าน `AuditAction` Enum ปราศจาก Regular Expression ที่เปราะบาง
-6. **Frontend Shared Modules:** แยกโมดูลส่วนกลาง `static/js/common/` (`auth.js`, `format.js`, `ui.js`, `table.js`), `static/js/api.js`, และ Design Tokens `static/css/base/` (`tokens.css`, `components.css`)
+**StockTrack** is an enterprise inventory, order, and approval management system built with **Spring Boot 3.5.0 (Java 17)** and a modern **Vanilla HTML5 / CSS / JavaScript** frontend. The system manages warehouse zone logistics, procurement (Purchase Orders), sales fulfillment (Sales Orders), a unified 14-type dispatcher approval engine for managers, warehouse execution (goods receiving, stock-out dispatch, and zone transfers) for staff, and an executive dashboard with deterministic audit activity logging for business owners.
 
 ---
 
-## 📑 สารบัญคู่มือการทำงาน (Developer Journey)
-1. [1. การติดตั้งและโคลนโปรเจกต์ลงเครื่อง (Clone & Setup)](#1-การติดตั้งและโคลนโปรเจกต์ลงเครื่อง-clone--setup)
-2. [2. การแตก Branch ตาม Role (Git Branching)](#2-การแตก-branch-ตาม-role-git-branching)
-3. [3. วิธีเปิดรันเซิร์ฟเวอร์และบัญชีทดสอบ (Run Server & Accounts)](#3-วิธีเปิดรันเซิร์ฟเวอร์และบัญชีทดสอบ-run-server--accounts)
-4. [4. โครงสร้างไฟล์และขอบเขตงานตาม Role (File Responsibility)](#4-โครงสร้างไฟล์และขอบเขตงานตาม-role-file-responsibility)
-5. [5. กฎการดีไซน์และโทนสีมาตรฐาน (Design Tokens & Theme)](#5-กฎการดีไซน์และโทนสีมาตรฐาน-design-tokens--theme)
-6. [6. ระบบ Sidebar และการนำทาง (Sidebar Navigation)](#6-ระบบ-sidebar-และการนำทาง-sidebar-navigation)
-7. [7. การทดสอบระบบ (Automated Tests & Quality Checks)](#7-การทดสอบระบบ-automated-tests--quality-checks)
-8. [8. วิธีส่งงานขึ้น GitHub (Pull Request & Collaboration)](#8-วิธีส่งงานขึ้น-github-pull-request--collaboration)
+## Group Members
 
----
-
-## 1. การติดตั้งและโคลนโปรเจกต์ลงเครื่อง (Clone & Setup)
-
-1. **คัดลอก Repository URL:**
-   ```bash
-   git clone https://github.com/6831503092/StockTrack.git
-   cd StockTrack
-   ```
-2. **เปิดด้วย VS Code หรือ IntelliJ IDEA:**
-   ```bash
-   code .
-   ```
-3. **ตั้งค่าตัวตน Git (ทำครั้งแรกครั้งเดียว):**
-   ```bash
-   git config --global user.name "Your Name"
-   git config --global user.email "your.email@example.com"
-   ```
-
----
-
-## 2. การแตก Branch ตาม Role (Git Branching)
-
-เราใช้ **GitHub Flow** โดยห้ามคอมมิตลงบนกิ่ง `main` โดยตรง ให้ทุกคนแตก Branch ประจำ Role ของตัวเอง:
-- **Admin:** `feature/frontend-admin`
-- **Manager:** `feature/frontend-manager`
-- **Owner:** `feature/frontend-owner`
-- **Staff:** `feature/frontend-staff`
-
-```bash
-git checkout main
-git pull origin main
-git checkout -b feature/frontend-staff   # ตัวอย่างสำหรับทีม Staff
+```
+6831503069  Rawat Maneerat
+6831503080  Hanka Khosito
+6831503092  Jeerasak Chalam
+6831503104  Rattapoom El-sibai
+6831503107  Suradet Homkaenchan
 ```
 
+### Member Feature Responsibilities
+
+| Student ID | Full Name | Module / Role | Features & Responsibilities |
+| :---: | :--- | :---: | :--- |
+| **6831503092** | Jeerasak Chalam | **Admin & Architecture** | System Architecture (Clean Architecture & SOLID), declarative security (`@RequireRoles`, `@CurrentUser`), PO & SO creation workflows, product master data, warehouse zone management, user & role management. |
+| **6831503069** | Rawat Maneerat | **Manager** | Centralized approval inbox, multi-type request review and decision engine (Approve/Reject with required reason), manager KPI summary cards. |
+| **6831503080** | Hanka Khosito | **Staff (Operations)** | Physical goods receiving workflow (PO quantity verification), stock-out dispatch (SO quantity verification), zone transfer execution, and stock balance adjustments. |
+| **6831503104** | Rattapoom El-sibai | **Staff (Frontend / UI)** | Staff dashboard, multi-step inventory wizard workflows (verification & confirmation modals), UI components, and responsive layout styling. |
+| **6831503107** | Suradet Homkaenchan | **Owner** | Executive analytics dashboard (total revenue, inventory valuation, profit calculation, best-sellers, top imports), and deterministic audit activity log tracking. |
+
+### End-to-End Workflow Examples
+
+#### 1. Procurement & Receiving (PO Flow)
+* **Admin:** Creates Purchase Order (PO) with supplier, items, and target zone $\rightarrow$ Status: `PENDING`.
+* **Manager:** Reviews PO budget/items in approval inbox and clicks **Approve** $\rightarrow$ Status: `APPROVED`.
+* **Staff:** Verifies physically delivered goods in `receive-items.html` and confirms $\rightarrow$ Adds `+Stock`, Status: `COMPLETED`.
+* **Owner:** Real-time inventory valuation updates; audit trail logs the complete step-by-step history.
+
+#### 2. Sales & Stock-Out Dispatch (SO Flow)
+* **Admin:** Creates Sales Order (SO) with customer, items, and source zone $\rightarrow$ Status: `PENDING`.
+* **Manager:** Checks stock availability and clicks **Approve** $\rightarrow$ Status: `APPROVED`.
+* **Staff:** Picks items from physical shelf, checks confirmation box, and confirms stock-out $\rightarrow$ Deducts `-Stock`, Status: `COMPLETED`.
+* **Owner:** Total revenue and profit update instantly; top best-sellers refresh; action logged to audit trail.
+
+#### 3. Warehouse Zone & Stock Transfer Flow
+* **Admin:** Requests a new zone or product relocation between zones $\rightarrow$ Status: `PENDING`.
+* **Manager:** Evaluates warehouse capacity and clicks **Approve** $\rightarrow$ Status: `APPROVED`.
+* **Staff:** Physically relocates items between warehouse zones and confirms execution $\rightarrow$ Zone stocks updated.
+* **Owner:** Observes real-time zone capacity distribution and reviews all warehouse changes in audit history.
+
 ---
 
-## 3. วิธีเปิดรันเซิร์ฟเวอร์และบัญชีทดสอบ (Run Server & Accounts)
+### Role Interconnections & System Synergy
 
-ระบบมาพร้อมกับ **H2 In-Memory Database** ไม่จำเป็นต้องติดตั้ง MySQL ก็สามารถรันได้ทันที (ต้องการ **Java 17** ขึ้นไป):
+1. **Dual-Control Security (Separation of Concerns):**  
+   Admin initiates orders but cannot self-approve. Manager controls approvals but cannot tamper with physical stock directly.
+2. **Operational Reality Check (Physical vs Digital Sync):**  
+   Approval does not alter inventory numbers prematurely. Stock updates only when warehouse Staff verify physical goods on-site.
+3. **Instant Financial Impact (Real-Time KPIs):**  
+   Staff operations directly drive Owner analytics: PO receiving increases inventory asset valuation, while SO stock-out realizes revenue and gross profit.
+4. **Deterministic Audit Trail:**  
+   Every lifecycle transition (`Admin: Create` $\rightarrow$ `Manager: Approve` $\rightarrow$ `Staff: Execute`) is recorded sequentially with actor, timestamp, and details for 100% traceability.
 
-### 3.1 คำสั่งเปิดเซิร์ฟเวอร์
-- **บน Windows:**
+---
+
+## Live Deployment on GCP (Cloud Run)
+
+- **Live Application URL:** [https://stocktrack-service-url.run.app](https://stocktrack-service-url.run.app) *(Replace with your actual Cloud Run URL)*
+- **CI/CD Pipeline:** Automated build and deployment to Google Cloud Run configured via **Cloud Build** ([cloudbuild.yaml](file:///c:/Users/bankt/Project-SRAS/cloudbuild.yaml)) and **Artifact Registry**.
+
+---
+
+## How to Run the Project Locally (Step-by-Step)
+
+### Prerequisites
+- **Java 17** or higher (`java -version`)
+- **Maven** (included via wrapper `mvnw`)
+
+### Step 1: Run the Server
+The project runs out-of-the-box with an embedded **H2 In-Memory Database** (no MySQL installation required).
+
+- **Windows (PowerShell / Command Prompt):**
   ```powershell
   .\mvnw.cmd spring-boot:run
   ```
-- **บน macOS / Linux:**
+- **macOS / Linux:**
   ```bash
   ./mvnw spring-boot:run
   ```
 
-### 3.2 URL เข้าใช้งาน
-- 🌐 **Web Application:** [http://localhost:8080](http://localhost:8080)
-- 🗄️ **H2 Database Console:** [http://localhost:8080/h2-console](http://localhost:8080/h2-console)  
-  *(JDBC URL: `jdbc:h2:mem:stocktrack_db` | Username: `sa` | Password: ว่างไว้)*
+### Step 2: Access the Application
+- **Web Application:** [http://localhost:8080](http://localhost:8080)
+- **H2 Database Console:** [http://localhost:8080/h2-console](http://localhost:8080/h2-console)  
+  *(JDBC URL: `jdbc:h2:mem:stocktrack_db` | Username: `sa` | Password: leave empty)*
 
-### 3.3 บัญชีสำหรับทดสอบ Login (รหัสผ่านคือ `1234` ทุกตำแหน่ง)
-| ตำแหน่ง (Role) | User ID (ตัวเลข) | หรือกรอก Username | Password | หน้าเริ่มต้นที่ระบบพาไป |
+### Step 3: Test Login Accounts
+All accounts use password: **`12345678`** (or `1234`). You can log in using either the **User ID** or the **Username**:
+
+| Role | User ID (Numeric) | Username | Password | Default Landing Page |
 | :--- | :---: | :---: | :---: | :--- |
-| **Admin** | `503092` | `admin` | `1234` | `/admin/my-requests.html` |
-| **Manager** | `503069` | `manager` | `1234` | `/manager/dashboard.html` |
-| **Staff** | `503080` | `staff` | `1234` | `/staff/dashboard.html` |
-| **Owner** | `503107` | `owner` | `1234` | `/owner/dashboard.html` |
+| **Admin** | `503092` | `admin` | `12345678` | `/admin/my-requests.html` |
+| **Manager** | `503069` | `manager` | `12345678` | `/manager/dashboard.html` |
+| **Staff** | `503080` | `staff` | `12345678` | `/staff/dashboard.html` |
+| **Owner** | `503107` | `owner` | `12345678` | `/owner/dashboard.html` |
 
 ---
 
-## 4. โครงสร้างไฟล์และขอบเขตงานตาม Role (File Responsibility)
+## Architecture & Technical Highlights
 
-ไฟล์ฝั่ง Frontend ทั้งหมดอยู่ที่ไดเรกทอรี `src/main/resources/static/`:
-
-| หน้าที่ / Role | หน้าจอ HTML (`static/<role>/`) | สคริปต์ JavaScript (`static/js/`) | ไฟล์ CSS (`static/css/`) |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `my-requests.html`<br>`product-management.html`<br>`purchase-order.html`<br>`role-management.html`<br>`sales-order.html`<br>`warehouse-zones.html`<br>`zone-product.html` | `admin/admin.js`<br>`admin/role-management.js` | `pages/admin.css` |
-| **Manager** | `dashboard.html`<br>`requests.html` | `manager/manager-dashboard.js`<br>`manager/manager-requests.js`<br>`manager/manager.js` (Facade) | `pages/manager.css` |
-| **Staff** | `dashboard.html`<br>`receive-items.html`<br>`stock-out.html`<br>`transfer-items.html` | `staff/staff-dashboard.js`<br>`staff/receive-items.js`<br>`staff/stock-out.js`<br>`staff/transfer-items.js`<br>`staff/staff-wizard.js` | `pages/staff.css` |
-| **Owner** | `dashboard.html`<br>`activity-log.html` | `owner/owner-dashboard.js`<br>`owner/owner-activity.js` | `pages/owner.css` |
-| **Shared** | `index.html` (Login) | `common/api.js`<br>`common/auth.js`<br>`common/format.js`<br>`common/ui.js`<br>`common/table.js`<br>`common/sidebar.js`<br>`common/sidebar-config.js` | `base/tokens.css`<br>`base/components.css`<br>`layout/sidebar.css`<br>`style.css` |
+1. **Declarative Role-Based Security:** Method/Class-level authorization via `@RequireRoles({Role...})` interceptor and `@CurrentUser User` parameter injection, returning standardized `403 Forbidden` on unauthorized access.
+2. **Unified Approval Engine:** Dispatcher and Template Method patterns (`ApprovalDispatcher`, `BaseApprovalExecutor<T>`) handling 14 request types with JSON payloads and rollback-safe transaction boundaries.
+3. **Domain-Driven Services:** Clean separation of business domains (`ReceivingService`, `StockOutService`, `TransferService`, `StockMovementService`, `PurchaseOrderService`, `SalesOrderService`, `ZoneService`, `OwnerService`).
+4. **Deterministic Audit Logging:** Strongly-typed action catalog via `AuditAction` enum logging exact targets and actions into `AUDIT_LOGS` without fragile string regex matching.
+5. **Standardized Responses:** Unified API envelope `ApiResponse<T>` with centralized exception handling (`GlobalExceptionHandler`).
 
 ---
 
-## 5. กฎการดีไซน์และโทนสีมาตรฐาน (Design Tokens & Theme)
+## Automated Testing
 
-เพื่อให้ทุกหน้ามีสไตล์ที่เป็นอันหนึ่งอันเดียวกัน ระบบใช้ Design Tokens ใน `static/css/base/tokens.css` และส่วนประกอบกลางใน `static/css/base/components.css`:
-- **ธีมสีหลัก:** พื้นหลังขาวสะอาด (`#ffffff`) สลับเทาอ่อน (`#f8fafc`) เน้นด้วยสีเขียวมิ้นต์ (`#27c690`)
-- **ความโค้งมน:** กล่องเนื้อหาและตารางใช้ `border-radius: 12px; border: 1px solid #eef2f6;`
-- **ฟอนต์มาตรฐาน:** `'Plus Jakarta Sans'`
+To run the full suite of unit and integration tests:
 
-### CSS Variables สำคัญ:
-```css
-var(--primary-color)    /* #27c690 เขียวมิ้นต์หลัก */
-var(--primary-hover)    /* #20b582 สีเมื่อ Hover */
-var(--primary-light)    /* #e8f8f2 พื้นหลังพาสเทลสำหรับ Badge/Icon */
-var(--text-primary)     /* #1e293b กรมท่าเข้มสำหรับหัวข้อ */
-var(--text-secondary)   /* #64748b ข้อความรอง */
-var(--border-color)     /* #e2e8f0 เส้นขอบการ์ด/ตาราง */
-```
-
----
-
-## 6. ระบบ Sidebar และการนำทาง (Sidebar Navigation)
-
-ทุกหน้า Dashboard เชื่อมโยงกับ Sidebar อัตโนมัติผ่านแท็ก:
-```html
-<div id="sidebar-container" data-role="ADMIN" data-active-menu="my-requests"></div>
-<script src="../js/common/sidebar-config.js"></script>
-<script src="../js/common/sidebar.js"></script>
-```
-คอนฟิกเมนูและไอคอน SVG ถูกแยกเป็นระเบียบไว้ที่ `static/js/common/sidebar-config.js` ทำให้ปรับแต่งและขยายเมนูใหม่ได้ง่ายโดยไม่กระทบโครงสร้างหลัก
-
----
-
-## 7. การทดสอบระบบ (Automated Tests & Quality Checks)
-
-ระบบมีชุดการทดสอบทั้งระดับ Unit, Controller Security, และ End-to-End Integration:
-
-### 7.1 คำสั่งคอมไพล์และทดสอบ
 ```bash
-# คอมไพล์ซอร์สโค้ดและชุดทดสอบทั้งหมด
-.\mvnw.cmd test-compile
-
-# รันชุดการทดสอบทั้งหมด
+# Windows
 .\mvnw.cmd test
+
+# macOS / Linux
+./mvnw test
 ```
 
-### 7.2 ไฮไลท์ของชุดทดสอบ
-1. **Controller Role Security (`SecurityRoleAccessControllerTest`):**
-   - ใช้ `@WebMvcTest` ยืนยันว่าการส่งคำขอข้ามสิทธิ์ (เช่น Staff ยิงคำขออนุมัติ หรือแก้ไขบทบาทผู้ใช้) จะถูกปฏิเสธด้วย HTTP `403 Forbidden` เสมอ
-2. **Order Lifecycle Integration (`OrderLifecycleIntegrationTest`):**
-   - ทดสอบโฟลว์ `PO -> Approve -> Receive` และตรวจสอบการเพิ่มของยอดสต็อกในตาราง `products`
-   - ทดสอบโฟลว์ `SO -> Approve -> Stock-out` และตรวจสอบการลดลงของยอดสต็อกอย่างถูกต้อง
-3. **Approval Engine Unit Tests (`service/approval/*Test.java`):**
-   - ทดสอบตรรกะของ Executor แต่ละตัวอย่างเข้มข้น
-
----
-
-## 8. วิธีส่งงานขึ้น GitHub (Pull Request & Collaboration)
-
-1. **คอมมิตและพุชขึ้น Branch ของตนเอง:**
-   ```bash
-   git add .
-   git commit -m "feat(role): รายละเอียดงานที่ทำ"
-   git push -u origin feature/frontend-<role>
-   ```
-2. **เปิด Pull Request บน GitHub:**
-   - ตรวจสอบให้ Base Branch เป็น `main` และ Compare Branch เป็นกิ่งของตนเอง
-   - กด **Create pull request** เพื่อให้ทีมตรวจสอบและรวมโค้ด
-
-> ⚠️ **ข้อควรระวัง:** ปรึกษาทีมก่อนแก้ไขไฟล์ส่วนกลาง (`api.js`, `sidebar.js`, `tokens.css`) เพื่อหลีกเลี่ยงความขัดแย้งของโค้ด (Git Conflict)
+- **Role Security Tests (`SecurityRoleAccessControllerTest`):** Verifies role enforcement and permission denial across all controllers.
+- **Order Lifecycle Tests (`OrderLifecycleIntegrationTest`):** Verifies the complete end-to-end flow: `PO Create -> Approve -> Receive (+Stock)` and `SO Create -> Approve -> Stock-out (-Stock)`.
+- **Approval Executor Tests:** Validates payload parsing and business execution across all request types.

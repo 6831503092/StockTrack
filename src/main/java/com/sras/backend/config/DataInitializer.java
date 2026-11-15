@@ -40,10 +40,13 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        seedUserIfMissing(503092, "admin", "1234", Role.ADMIN);
-        seedUserIfMissing(503069, "manager", "1234", Role.MANAGER);
-        seedUserIfMissing(503080, "staff", "1234", Role.STAFF);
-        seedUserIfMissing(503107, "owner", "1234", Role.OWNER);
+        seedUserIfMissing(503092, "admin", "12345678", Role.ADMIN);
+        seedUserIfMissing(503069, "manager", "12345678", Role.MANAGER);
+        seedUserIfMissing(503080, "staff", "12345678", Role.STAFF);
+        seedUserIfMissing(503107, "owner", "12345678", Role.OWNER);
+
+        // Ensure all users in the system have password set to 12345678
+        jdbcTemplate.update("UPDATE users SET password_hash = ?", passwordEncoder.encode("12345678"));
 
         for (int i = 1; i <= 4; i++) {
             seedZoneIfMissing("Z" + i, "Zone " + i);
@@ -95,6 +98,11 @@ public class DataInitializer implements CommandLineRunner {
             jdbcTemplate.update(
                 "INSERT INTO users (user_id, full_name, password_hash, role, is_active) VALUES (?, ?, ?, ?, ?)",
                 userId, fullName, passwordEncoder.encode(rawPassword), role.name(), true
+            );
+        } else {
+            jdbcTemplate.update(
+                "UPDATE users SET password_hash = ? WHERE user_id = ?",
+                passwordEncoder.encode(rawPassword), userId
             );
         }
     }
