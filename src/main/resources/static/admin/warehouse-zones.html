@@ -334,7 +334,7 @@
                 <div>
                     <h2>Edit Zone Capacity</h2>
                     <p style="margin: 4px 0 0 0; font-size: 0.88rem; color: #64748b;">
-                        Expand or modify capacity limits for warehouse zones
+                        Set new total capacity limit for warehouse zones (replaces current capacity directly)
                     </p>
                 </div>
                 <button type="button" class="btn-close-modal" onclick="closeEditCapacityModal()">&times;</button>
@@ -348,12 +348,13 @@
                 </div>
 
                 <div class="po-wire-group">
-                    <label for="edit-capacity-val" class="po-wire-label">Capacity (Units) *</label>
+                    <label for="edit-capacity-val" class="po-wire-label">New Total Capacity (Units) *</label>
                     <input type="number" id="edit-capacity-val" class="po-wire-input" min="1" max="100000" required>
+                    <div style="font-size: 0.8rem; color: #64748b; margin-top: 5px;">* Sets the new total capacity directly (not an addition).</div>
                 </div>
 
                 <div id="edit-capacity-info" style="padding: 12px 16px; margin-bottom: 24px; background: #edf8f3; border: 1.5px solid #a7f3d0; border-radius: 10px; font-size: 0.92rem; color: #065f46; font-weight: 500;">
-                    Currently stored: <strong id="edit-capacity-stored-units" style="color: #059669; font-weight: 700;">0</strong> Units
+                    Current capacity: <strong id="edit-capacity-current-units" style="color: #059669; font-weight: 700;">500</strong> Units &nbsp;|&nbsp; Currently stored: <strong id="edit-capacity-stored-units" style="color: #059669; font-weight: 700;">0</strong> Units
                 </div>
 
                 <div class="po-wire-actions">
@@ -421,6 +422,7 @@
                         ${ALL_ZONES.map(z => `<option value="${escapeHtml(z.code)}">${escapeHtml(z.name)}</option>`).join('')}
                     `;
                     selectZone.value = (currentVal === 'ALL' || ALL_ZONES.some(z => z.code === currentVal)) ? currentVal : 'ALL';
+                    updateKPIs();
                 }
             } catch (err) {
                 console.warn('Failed to load zones from API, using defaults:', err);
@@ -859,11 +861,15 @@
             if (!found) return;
 
             const capInput = document.getElementById('edit-capacity-val');
+            const currentUnitsEl = document.getElementById('edit-capacity-current-units');
             const storedUnitsEl = document.getElementById('edit-capacity-stored-units');
 
+            const currentCap = found.capacity || 500;
+            if (currentUnitsEl) currentUnitsEl.textContent = currentCap.toLocaleString();
+
             if (capInput) {
-                capInput.value = '';
-                capInput.placeholder = `e.g. ${found.capacity || 500}`;
+                capInput.value = currentCap;
+                capInput.placeholder = `e.g. ${currentCap}`;
             }
 
             const stored = zoneProductsData
@@ -884,7 +890,8 @@
             }
 
             const found = ALL_ZONES.find(z => z.code === zoneCode);
-            if (found && Number(found.capacity || 500) === newCapacity) {
+            const currentCap = Number(found?.capacity || 500);
+            if (found && currentCap === newCapacity) {
                 return AdminApp.showCenterAlert({
                     title: 'No Changes Detected',
                     message: 'Please modify the capacity value before sending a request.',
@@ -901,7 +908,7 @@
                 closeEditCapacityModal();
                 AdminApp.showCenterAlert({
                     title: 'Request Sent!',
-                    message: `Request to update ${zoneCode} capacity to ${newCapacity.toLocaleString()} Units${reqId ? ` (#${reqId})` : ''} has been submitted to My Requests and Manager for approval.`,
+                    message: `Request to update ${zoneCode} capacity to ${newCapacity.toLocaleString()} Units (replaces previous ${currentCap.toLocaleString()} Units)${reqId ? ` (#${reqId})` : ''} has been submitted to My Requests and Manager for approval.`,
                     type: 'success'
                 });
             } catch (err) {

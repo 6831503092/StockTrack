@@ -113,7 +113,12 @@
             } else if (r.requestType === 'ZONE_CREATE' || r.requestType === 'ZONE_UPDATE') {
                 if (p.zoneCode) lines.push(`Zone Code: ${p.zoneCode}`);
                 if (p.zoneName) lines.push(`Zone Name: ${p.zoneName}`);
-                if (p.capacity !== undefined) lines.push(`Capacity: ${p.capacity}`);
+                if (p.capacity !== undefined) {
+                    const capText = r.requestType === 'ZONE_UPDATE'
+                        ? `New Capacity: ${Number(p.capacity).toLocaleString()} Units` + (p.oldCapacity ? ` (was ${Number(p.oldCapacity).toLocaleString()} Units)` : '')
+                        : `Capacity: ${Number(p.capacity).toLocaleString()} Units`;
+                    lines.push(capText);
+                }
                 if (p.reason) lines.push(`Reason: ${p.reason}`);
             } else if (r.requestType?.startsWith('SUPPLIER_')) {
                 if (p.companyName) lines.push(`Supplier: ${p.companyName}`);
