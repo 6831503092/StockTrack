@@ -73,8 +73,13 @@
 - **Maven** (included via wrapper `mvnw`)
 
 ### Step 1: Run the Server
-The project runs out-of-the-box with an embedded **H2 In-Memory Database** (no MySQL installation required).
+The project runs out-of-the-box with an embedded **H2 In-Memory Database** (no MySQL installation required). You can run it via Maven CLI or directly inside your IDE:
 
+#### Option A: Run via IDE (VS Code / IntelliJ IDEA / Eclipse)
+- Navigate to [BackendApplication.java](file:///c:/Users/bankt/Project-SRAS/src/main/java/com/sras/backend/BackendApplication.java) (`src/main/java/com/sras/backend/BackendApplication.java`).
+- Click **Run Java** or execute the `main()` method directly from your editor.
+
+#### Option B: Run via Maven Wrapper CLI
 - **Windows (PowerShell / Command Prompt):**
   ```powershell
   .\mvnw.cmd spring-boot:run
